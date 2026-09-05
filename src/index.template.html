@@ -1,0 +1,1903 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f5f5f2">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Test Data Generator</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2316624F'/%3E%3Crect x='15' y='14' width='34' height='36' rx='5' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M15 25h34M26 25v25' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M33 34h9M33 42h9' fill='none' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f6f3;
+      --surface: #ffffff;
+      --surface-muted: #f4f5f1;
+      --surface-hover: #eef0eb;
+      --surface-subtle: #fbfcfa;
+      --text: #1f2623;
+      --muted: #61706a;
+      --line: #d7ddd8;
+      --line-strong: #b8c3bc;
+      --accent: #16624f;
+      --accent-hover: #0e503f;
+      --accent-soft: #e7f2ee;
+      --danger: #b3261e;
+      --danger-soft: #fff0ee;
+      --focus: #4d8bc7;
+      --panel-edge: rgba(22,98,79,.08);
+      --shadow-sm: 0 6px 18px rgba(16,24,20,.05), 0 1px 3px rgba(16,24,20,.06);
+      --shadow-md: 0 24px 54px rgba(16,24,20,.14);
+      --header-height: 66px;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); scroll-behavior: smooth; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", "Yu Gothic UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 55%, transparent); outline-offset: 2px;
+    }
+    .app-header {
+      position: sticky; z-index: 30; top: 0; min-height: var(--header-height);
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+      background: color-mix(in srgb, var(--bg) 82%, white); backdrop-filter: blur(18px) saturate(1.2);
+    }
+    .header-inner {
+      width: min(1180px,100%); min-height: var(--header-height); margin: 0 auto;
+      padding: 10px clamp(14px,2.8vw,30px); display: flex; align-items: center; gap: 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-mark {
+      display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 auto;
+      border-radius: 11px; background: var(--accent); color: #fff; box-shadow: var(--shadow-sm);
+    }
+    .brand-mark svg { width: 21px; height: 21px; display: block; }
+    .brand-copy { min-width: 0; }
+    .brand-name { margin: 0; font-size: 17px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand-meta { margin: 2px 0 0; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .version-badge {
+      display: inline-flex; align-items: center; margin-left: 7px; padding: 1px 6px;
+      border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface-muted);
+      font-size: 10px; font-weight: 650; vertical-align: 2px;
+    }
+    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .language-button, .header-icon-button {
+      padding: 5px 1px; border: 0; background: transparent; color: var(--muted); cursor: pointer;
+      transition: color .16s ease, opacity .16s ease;
+    }
+    .language-button { font-size: 12px; font-weight: 750; letter-spacing: .02em; }
+    .language-button:hover, .header-icon-button:hover { color: var(--text); }
+    .header-icon-button { display: inline-grid; place-items: center; }
+    .header-icon-button svg { width: 20px; height: 20px; }
+    .main { width: min(1180px,100%); margin: 0 auto; padding: 24px clamp(14px,2.8vw,30px) 60px; }
+    .page-intro { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 2px 2px 20px; }
+    .page-intro h1 { margin: 0; font-size: clamp(24px,3vw,28px); line-height: 1.24; letter-spacing: -.03em; }
+    .page-intro p { margin: 6px 0 0; max-width: 760px; color: var(--muted); font-size: 13px; }
+    .local-badge {
+      display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; margin-top: 3px; padding: 7px 10px;
+      border: 1px solid color-mix(in srgb,var(--accent) 24%,var(--line)); border-radius: 999px;
+      color: var(--accent); background: var(--accent-soft); font-size: 12px; font-weight: 700; white-space: nowrap;
+    }
+    .local-badge svg { width: 15px; height: 15px; }
+    .app-grid { display: grid; gap: 18px; min-width: 0; }
+    .panel { min-width: 0; padding: 22px; border: 1px solid color-mix(in srgb, var(--line) 90%, var(--panel-edge)); border-radius: 18px; background: linear-gradient(180deg, #ffffff 0%, #fdfdfb 100%); box-shadow: var(--shadow-sm); }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .panel-title { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    .panel-description { margin: 4px 0 0; max-width: 720px; color: var(--muted); font-size: 13px; }
+    .settings-grid { display: grid; grid-template-columns: minmax(170px,220px) minmax(220px,1fr); gap: 14px; align-items: start; }
+    .test-preset-field { grid-column: 1 / -1; display: grid; gap: 6px; min-width: 0; }
+    .template-field { grid-column: 1 / -1; display: grid; gap: 6px; min-width: 0; }
+    .template-row { display: grid; grid-template-columns: minmax(190px,320px) max-content; gap: 10px; align-items: end; justify-content: start; }
+    .template-row .button { width: max-content; min-width: 0; min-height: 44px; padding-inline: 10px; gap: 5px; }
+    .template-row .button svg { width: 15px; height: 15px; }
+    .preset-buttons { display: flex; flex-wrap: wrap; gap: 7px; }
+    .preset-button {
+      min-height: 38px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+      color: var(--text); font: inherit; font-size: 12px; font-weight: 720; cursor: pointer;
+    }
+    .preset-button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
+    .preset-button[aria-pressed="true"] { border-color: color-mix(in srgb,var(--accent) 52%,var(--line)); background: var(--accent-soft); color: var(--accent); }
+    .seed-input-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; }
+    .generation-secondary-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .generation-secondary-actions .button { min-height: 38px; }
+    .settings-note { grid-column: 1 / -1; }
+    .hidden-file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+    .field { display: grid; gap: 7px; min-width: 0; align-content: start; }
+    .field-label { color: var(--muted); font-size: 11px; font-weight: 760; letter-spacing: .02em; }
+    .field-help { color: var(--muted); font-size: 11px; line-height: 1.45; }
+    input, select, textarea {
+      width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line);
+      border-radius: 12px; background: color-mix(in srgb, var(--surface) 92%, var(--surface-muted)); color: var(--text);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
+      transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+    }
+    input:hover, select:hover, textarea:hover { border-color: var(--line-strong); background: var(--surface); }
+    .summary-note { align-self: center; color: var(--muted); font-size: 12px; }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 9px 14px;
+      border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(180deg, #ffffff 0%, #f8f9f7 100%); color: var(--text);
+      box-shadow: 0 1px 0 rgba(255,255,255,.75);
+      font-weight: 720; cursor: pointer; transition: border-color .16s ease, background .16s ease, transform .16s ease, box-shadow .16s ease;
+    }
+    .button:hover { border-color: var(--line-strong); background: var(--surface-hover); box-shadow: 0 6px 16px rgba(16,24,20,.06); }
+    .button:active { transform: translateY(1px); }
+    .button.primary { border-color: var(--accent); background: linear-gradient(180deg, #1b715c 0%, var(--accent) 100%); color: #fff; box-shadow: 0 10px 20px rgba(22,98,79,.18); }
+    .button.primary:hover { border-color: var(--accent-hover); background: linear-gradient(180deg, #145d4b 0%, var(--accent-hover) 100%); }
+    .button.danger-quiet { color: var(--danger); }
+    .button svg { width: 17px; height: 17px; flex: 0 0 auto; }
+    .button.icon-only { width: 40px; padding: 0; }
+    .button[disabled] { opacity: .46; cursor: not-allowed; transform: none; }
+    .column-head {
+      display: grid; grid-template-columns: minmax(130px,.92fr) minmax(150px,.9fr) minmax(240px,1.42fr) minmax(220px,1.12fr) 148px;
+      gap: 12px; padding: 0 12px 10px; color: var(--muted); font-size: 11px; font-weight: 760;
+    }
+    .column-list { display: grid; gap: 10px; }
+    .column-row {
+      display: grid; grid-template-columns: minmax(130px,.92fr) minmax(150px,.9fr) minmax(240px,1.42fr) minmax(220px,1.12fr) 148px;
+      gap: 12px; align-items: start; padding: 14px; border: 1px solid color-mix(in srgb, var(--line) 92%, var(--panel-edge)); border-radius: 14px; background: linear-gradient(180deg, #ffffff 0%, var(--surface-subtle) 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78); transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+    .column-row:hover { border-color: color-mix(in srgb, var(--accent) 14%, var(--line)); box-shadow: 0 10px 18px rgba(16,24,20,.05); }
+    .column-row.invalid { border-color: color-mix(in srgb,var(--danger) 55%,var(--line)); background: linear-gradient(180deg, #fff7f6 0%, var(--danger-soft) 100%); }
+    .mobile-label { display: none; }
+    .type-settings, .test-settings { min-width: 0; align-self: start; }
+    .test-fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+    .test-field input { min-height: 38px; padding-inline: 7px; text-align: right; }
+    .test-field input:disabled { background: var(--surface-muted); color: var(--muted); }
+    .test-field .compact-label { white-space: nowrap; }
+    .test-cell-note { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .inline-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+    .inline-fields.one { grid-template-columns: minmax(0,1fr); }
+    .compact-field { display: grid; gap: 4px; }
+    .compact-label { display: flex; align-items: end; min-height: 15px; color: var(--muted); font-size: 10px; font-weight: 700; line-height: 1.2; }
+    .compact-field input, .compact-field select, .compact-field textarea { min-height: 40px; }
+    .compact-field textarea { min-height: 84px; resize: vertical; line-height: 1.45; }
+    .column-actions { display: grid; grid-template-columns: repeat(4,1fr); justify-content: end; gap: 6px; align-self: start; }
+    .column-actions .button { width: 100%; min-width: 0; min-height: 40px; padding: 0; }
+    .column-actions .button.danger-quiet { border-color: color-mix(in srgb, var(--danger) 18%, var(--line)); background: linear-gradient(180deg, #fff8f7 0%, #fff3f0 100%); }
+    @media (min-width: 1001px) {
+      .column-row > .field, .column-row > .column-actions { padding-top: 19px; }
+      .column-row > .type-settings > .field-help { display: inline-flex; align-items: center; min-height: 40px; margin-top: 19px; }
+    }
+    .empty-columns {
+      display: grid; justify-items: center; gap: 8px; padding: 28px 16px; border: 1px dashed var(--line-strong);
+      border-radius: 12px; color: var(--muted); text-align: center;
+    }
+    .empty-columns[hidden] { display: none !important; }
+    .empty-columns svg { width: 30px; height: 30px; color: var(--accent); }
+    .columns-toolbar { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; }
+    .generate-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 18px; margin-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+    .generate-status { color: var(--muted); font-size: 12px; }
+    .process-status { display: grid; gap: 7px; min-width: min(100%,420px); }
+    .process-progress { width: min(360px,100%); height: 6px; border: 0; border-radius: 999px; overflow: hidden; background: var(--surface-muted); accent-color: var(--accent); }
+    .process-progress::-webkit-progress-bar { background: var(--surface-muted); }
+    .process-progress::-webkit-progress-value { background: var(--accent); border-radius: 999px; }
+    .process-progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+    .process-progress[hidden] { display: none; }
+    .generate-actions, .export-button-group { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+    .button.cancel-process { color: var(--danger); }
+    .button.cancel-process[hidden] { display: none !important; }
+    .error-banner {
+      display: none; align-items: flex-start; gap: 9px; margin: 0 0 14px; padding: 11px 12px;
+      border: 1px solid color-mix(in srgb,var(--danger) 45%,var(--line)); border-radius: 11px;
+      background: var(--danger-soft); color: var(--danger); font-size: 12px;
+    }
+    .error-banner.show { display: flex; }
+    .error-banner svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 1px; }
+    .preview-empty {
+      display: grid; justify-items: center; gap: 8px; min-height: 190px; align-content: center;
+      border: 1px dashed var(--line); border-radius: 12px; background: #fbfbf9; text-align: center;
+    }
+    .preview-empty svg { width: 34px; height: 34px; color: var(--accent); }
+    .preview-empty strong { font-size: 14px; }
+    .preview-empty span { max-width: 520px; color: var(--muted); font-size: 12px; }
+    .preview-result[hidden], .preview-empty[hidden] { display: none !important; }
+    .preview-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+    .test-summary { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+    .value-with-status { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+    .value-status { display: inline-flex; align-items: center; min-height: 20px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-muted); color: var(--muted); font-size: 10px; font-weight: 760; white-space: nowrap; }
+    .value-status.missing { border-color: color-mix(in srgb,var(--accent) 24%,var(--line)); background: var(--accent-soft); color: var(--accent); }
+    .value-status.boundary { border-color: #d9c483; background: #fff9df; color: #6d5a14; }
+    .value-status.invalid { border-color: color-mix(in srgb,var(--danger) 28%,var(--line)); background: var(--danger-soft); color: var(--danger); }
+    .status-count { display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-muted); color: var(--muted); }
+    .count-chip { padding: 4px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 760; }
+    .table-wrap { max-width: 100%; overflow: auto; border: 1px solid color-mix(in srgb, var(--line) 90%, var(--panel-edge)); border-radius: 14px; background: var(--surface); }
+    table { width: 100%; border-collapse: collapse; min-width: 520px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; font-size: 12px; }
+    th { position: sticky; top: 0; background: var(--surface-muted); color: var(--muted); font-size: 11px; font-weight: 760; }
+    td { max-width: 260px; overflow: hidden; text-overflow: ellipsis; background: var(--surface); }
+    tbody tr:nth-child(even) td { background: #fcfcfb; }
+    tr:last-child td { border-bottom: 0; }
+    .future-note {
+      margin-top: 14px; padding: 11px 13px; border-radius: 12px; background: var(--surface-muted);
+      color: var(--muted); font-size: 11px;
+    }
+    .export-grid { display: grid; grid-template-columns: minmax(140px,.72fr) minmax(250px,1.45fr) minmax(150px,.82fr) minmax(150px,.82fr); gap: 14px; align-items: start; }
+    .filename-input-wrap { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: stretch; }
+    .filename-input-wrap input { border-radius: 12px 0 0 12px; }
+    .filename-extension { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-left: 0; border-radius: 0 12px 12px 0; background: var(--surface-muted); color: var(--muted); font-size: 12px; font-weight: 700; }
+    .export-note { margin: 10px 0 0; }
+    .export-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 18px; margin-top: 16px; border-top: 1px solid var(--line); }
+    .export-status { color: var(--muted); font-size: 12px; }
+    .export-field[hidden] { display: none !important; }
+    details.build-details { margin-top: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+    details.build-details summary { padding: 13px 15px; cursor: pointer; font-size: 12px; font-weight: 720; }
+    .build-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; padding: 0 15px 15px; }
+    .build-item { padding: 11px; border-radius: 11px; background: var(--surface-muted); }
+    .build-item span { display: block; color: var(--muted); font-size: 10px; }
+    .build-item strong { display: block; overflow-wrap: anywhere; font-size: 12px; }
+    footer { width: min(1180px,100%); margin: 0 auto; padding: 0 clamp(14px,2.8vw,30px) 34px; color: var(--muted); font-size: 12px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+    /* Reusable toast / Undo component. Canonical source: components/toast.html */
+    .app-toast {
+      position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 60;
+      display: flex; align-items: center; gap: 12px; max-width: min(420px,calc(100vw - 36px));
+      padding: 10px 12px 10px 14px; border: 1px solid var(--line); border-radius: 12px;
+      background: var(--surface); color: var(--text); box-shadow: var(--shadow-md); opacity: 0;
+      transform: translateY(12px); pointer-events: none; transition: opacity .18s ease, transform .18s ease;
+    }
+    .app-toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .app-toast[data-tone="success"] { border-color: color-mix(in srgb,var(--accent) 34%,var(--line)); }
+    .app-toast-message { min-width: 0; flex: 1 1 auto; font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
+    .app-toast-action { flex: 0 0 auto; min-height: 34px; padding: 5px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--accent); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .app-toast-action:hover { background: var(--surface-hover); }
+    .app-toast-action[hidden] { display: none; }
+
+    dialog {
+      width: min(640px,calc(100% - 28px)); max-height: min(760px,calc(100dvh - 28px)); padding: 0; overflow: hidden;
+      border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: var(--shadow-md);
+    }
+    dialog::backdrop { background: rgba(15,17,14,.52); backdrop-filter: blur(4px); }
+    .dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .dialog-header h2 { margin: 0; font-size: 17px; }
+    .dialog-body { padding: 20px 20px 28px; overflow: auto; max-height: calc(100dvh - 102px); }
+    .dialog-body h3 { margin: 25px 0 8px; padding-top: 19px; border-top: 1px solid var(--line); font-size: 14px; }
+    .dialog-body h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+    .dialog-body p, .dialog-body li { color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .dialog-body p { margin: 8px 0 0; }
+    .dialog-body ol, .dialog-body ul { margin: 8px 0 0; padding-left: 22px; }
+    .dialog-body li + li { margin-top: 7px; }
+    .dialog-note { margin-top: 12px; padding: 11px 12px; border: 1px solid color-mix(in srgb,var(--accent) 22%,var(--line)); border-radius: 10px; background: var(--accent-soft); color: var(--text) !important; }
+    .icon-button { display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; }
+    .icon-button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
+    .icon-button svg { width: 18px; height: 18px; }
+    .app-confirm-dialog { width: min(420px,calc(100% - 24px)); max-width: 100%; }
+    .app-confirm-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px 13px; border-bottom: 1px solid var(--line); }
+    .app-confirm-title { margin: 0; font-size: 17px; }
+    .app-confirm-close { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 10px; background: transparent; cursor: pointer; }
+    .app-confirm-close:hover { background: var(--surface-hover); }
+    .app-confirm-close svg { width: 19px; height: 19px; }
+    .app-confirm-body { padding: 18px; }
+    .app-confirm-message { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+    .app-confirm-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-top: 18px; }
+    .app-confirm-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); font: inherit; font-size: 12px; font-weight: 760; cursor: pointer; }
+    .app-confirm-button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
+    .app-confirm-button.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .app-confirm-button.danger { border-color: var(--danger); background: var(--danger); color: #fff; }
+
+    @media (max-width: 1000px) {
+      .column-head { display: none; }
+      .column-row { grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: start; gap: 10px 12px; padding: 14px; }
+      .type-settings, .test-settings, .column-actions { grid-column: 1 / -1; }
+      .mobile-label { display: block; }
+      .column-actions { justify-content: flex-start; }
+    }
+    @media (max-width: 820px) {
+      .page-intro { flex-direction: column; gap: 10px; }
+      .local-badge { align-self: flex-start; }
+      .settings-grid { grid-template-columns: 1fr; }
+      .export-grid { grid-template-columns: 1fr 1fr; }
+      .build-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      :root { --header-height: 58px; }
+      .header-inner { padding-block: 8px; }
+      .brand-mark { width: 34px; height: 34px; border-radius: 10px; }
+      .brand-name { font-size: 15px; }
+      .brand-meta { display: none; }
+      .header-actions { gap: 11px; }
+      .main { padding-top: 18px; padding-bottom: 42px; }
+      .page-intro { padding-bottom: 14px; }
+      .panel { padding: 15px; border-radius: 15px; }
+      .panel-head { flex-direction: column; gap: 8px; }
+      .column-row { grid-template-columns: 1fr; }
+      .column-row > * { grid-column: 1 !important; }
+      .inline-fields { grid-template-columns: 1fr 1fr; }
+      .inline-fields.date-time-fields { grid-template-columns: 1fr; }
+      .preset-buttons { display: grid; grid-template-columns: 1fr; }
+      .template-row { grid-template-columns: minmax(0,1fr) max-content; }
+      .template-row .button { width: max-content; min-width: 0; }
+      .preset-button { width: 100%; border-radius: 10px; }
+      .columns-toolbar, .generate-bar, .export-actions { flex-direction: column; align-items: stretch; }
+      .columns-toolbar .button, .generate-bar .button, .export-actions .button { width: 100%; }
+      .generate-actions, .export-button-group { width: 100%; }
+      .export-grid { grid-template-columns: 1fr; }
+      .export-note { margin-top: 8px; }
+      .column-actions { display: grid; grid-template-columns: repeat(4,1fr); }
+      .column-actions .button { width: 100%; min-height: 42px; }
+      .preview-meta { align-items: flex-start; }
+      .app-toast { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); max-width: none; }
+      .app-confirm-dialog { width: 100%; max-width: none; margin: auto 0 0; border-width: 1px 0 0; border-radius: 22px 22px 0 0; }
+      .app-confirm-body { padding: 12px 18px calc(env(safe-area-inset-bottom) + 18px); }
+      .app-confirm-actions { grid-template-columns: 1fr; gap: 10px; }
+      .app-confirm-button { min-height: 48px; font-size: 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M4 9h16M9 9v11.5M12.5 13h4M12.5 16.5h4"/>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <p class="brand-name"><span id="brandName">Test Data Generator</span><span class="version-badge" id="versionBadge">v1.0.0</span></p>
+          <p class="brand-meta" data-i18n="brandMeta">ブラウザーだけでテストデータを生成</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="language-button" id="languageButton" type="button" aria-label="Switch language">EN</button>
+        <button class="header-icon-button" id="helpButton" type="button" data-i18n-title="helpTitle" data-i18n-aria-label="helpTitle" title="使い方と注意事項" aria-label="使い方と注意事項">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.35 2.35 0 1 1 3.72 1.9c-.92.67-1.52 1.12-1.52 2.1"/><path d="M12 17h.01"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="page-intro" aria-labelledby="heroTitle">
+      <div>
+        <h1 id="heroTitle" data-i18n="introTitle">テストデータ生成</h1>
+        <p data-i18n="lead">列と件数を指定して、動作確認に使えるテストデータをブラウザー内で生成します。</p>
+      </div>
+      <div class="local-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg>
+        <span data-i18n="localBadge">完全ローカル処理</span>
+      </div>
+    </section>
+
+    <!-- APP:BEGIN -->
+    <div class="app-grid">
+      <section class="panel" aria-labelledby="generationSettingsTitle">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title" id="generationSettingsTitle" data-i18n="generationSettingsTitle">生成設定</h2>
+            <p class="panel-description" data-i18n="generationSettingsBody">件数、Seed、テスト配合を指定します。v1.0.0では最大1,000,000件です。</p>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <label class="field" for="rowCount">
+            <span class="field-label" data-i18n="rowCountLabel">生成件数</span>
+            <input id="rowCount" type="number" min="1" max="1000000" step="1" inputmode="numeric" value="100">
+            <span class="field-help" data-i18n="rowCountHelp">1〜1,000,000件（列数に応じて安全上限があります）</span>
+          </label>
+          <label class="field" for="seedInput">
+            <span class="field-label" data-i18n="seedLabel">Seed</span>
+            <span class="seed-input-row">
+              <input id="seedInput" type="text" maxlength="128" autocomplete="off" spellcheck="false" placeholder="42">
+              <button class="button" id="randomSeedButton" type="button" data-i18n-title="randomSeed" data-i18n-aria-label="randomSeed" title="Seedを変更" aria-label="Seedを変更">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="4.5" width="15" height="15" rx="3"/><circle cx="9" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/></svg>
+                <span data-i18n="randomSeedShort">変更</span>
+              </button>
+            </span>
+            <span class="field-help" id="seedHelp" data-i18n="seedHelp">空欄なら生成時にSeedを自動作成します。</span>
+          </label>
+          <div class="test-preset-field">
+            <span class="field-label" data-i18n="testPresetLabel">テスト配合</span>
+            <div class="preset-buttons" id="testPresetButtons" role="group" data-i18n-aria-label="testPresetLabel" aria-label="テスト配合">
+              <button class="preset-button" type="button" data-preset="normal" aria-pressed="true"><span data-i18n="presetNormal">通常</span></button>
+              <button class="preset-button" type="button" data-preset="light" aria-pressed="false"><span data-i18n="presetLight">軽くテスト</span></button>
+              <button class="preset-button" type="button" data-preset="strict" aria-pressed="false"><span data-i18n="presetStrict">厳しめテスト</span></button>
+            </div>
+            <span class="field-help" id="testPresetHelp" data-i18n="testPresetHelp">全列へまとめて適用します。列ごとに割合を調整できます。</span>
+          </div>
+          <div class="template-field">
+            <span class="field-label" data-i18n="templateLabel">テンプレート</span>
+            <div class="template-row">
+              <select id="templateSelect" aria-label="テンプレート" data-i18n-aria-label="templateLabel">
+                <option value="" data-i18n="templateChoose">テンプレートを選択</option>
+                <option value="user" data-i18n="templateUser">ユーザー</option>
+                <option value="customer" data-i18n="templateCustomer">顧客</option>
+                <option value="employee" data-i18n="templateEmployee">社員</option>
+                <option value="product" data-i18n="templateProduct">商品</option>
+                <option value="order" data-i18n="templateOrder">注文</option>
+                <option value="inquiry" data-i18n="templateInquiry">問い合わせ</option>
+                <option value="access_log" data-i18n="templateAccessLog">アクセスログ</option>
+              </select>
+              <button class="button" id="applyTemplateButton" type="button" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 10v9"/></svg>
+                <span data-i18n="applyTemplate">適用</span>
+              </button>
+            </div>
+            <span class="field-help" data-i18n="templateHelp">よく使う列構成をまとめて設定します。現在の列は置き換わります。</span>
+          </div>
+          <div class="generation-secondary-actions">
+            <button class="button" id="regenerateButton" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg>
+              <span data-i18n="regenerateSameSeed">同じSeedでもう一度生成</span>
+            </button>
+            <button class="button" id="saveSchemaButton" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6h8V4M8 16h8"/></svg>
+              <span data-i18n="saveSchema">設定ファイルを保存</span>
+            </button>
+            <button class="button" id="loadSchemaButton" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h6l2 2h8v11H4z"/><path d="M12 11v5M9.5 13.5 12 16l2.5-2.5"/></svg>
+              <span data-i18n="loadSchema">設定ファイルを読み込む</span>
+            </button>
+            <input class="hidden-file-input" id="schemaFileInput" type="file" accept=".json,application/json">
+          </div>
+          <p class="summary-note settings-note" data-i18n="settingsSavedNote">列設定とSeedは、このブラウザー内に保存されます。生成したデータ自体は自動保存しません。</p>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="columnsTitle">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title" id="columnsTitle" data-i18n="columnsTitle">列設定</h2>
+            <p class="panel-description" data-i18n="columnsBody">列名、データの種類、生成方法を設定します。</p>
+          </div>
+          <button class="button danger-quiet" id="resetButton" type="button" data-i18n="reset">初期状態に戻す</button>
+        </div>
+
+        <div class="error-banner" id="errorBanner" role="alert" aria-live="assertive">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg>
+          <span id="errorText"></span>
+        </div>
+
+        <div class="column-head" aria-hidden="true">
+          <span data-i18n="columnName">列名</span>
+          <span data-i18n="dataType">データの種類</span>
+          <span data-i18n="typeSettings">設定</span>
+          <span data-i18n="testValues">テスト値</span>
+          <span data-i18n="operations">操作</span>
+        </div>
+        <div class="column-list" id="columnList"></div>
+        <div class="empty-columns" id="emptyColumns" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+          <strong data-i18n="emptyColumnsTitle">列がありません</strong>
+          <span data-i18n="emptyColumnsBody">生成したいデータの列を追加してください。</span>
+          <button class="button" id="emptyAddColumnButton" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span data-i18n="addColumn">列を追加</span>
+          </button>
+        </div>
+        <div class="columns-toolbar">
+          <button class="button" id="addColumnButton" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <span data-i18n="addColumn">列を追加</span>
+          </button>
+          <span class="summary-note" id="columnCountText"></span>
+        </div>
+
+        <div class="generate-bar">
+          <div class="process-status">
+            <span class="generate-status" id="generateStatus" aria-live="polite" data-i18n="readyToGenerate">設定後に「データを生成」を押してください。</span>
+            <progress class="process-progress" id="generateProgress" max="100" value="0" hidden aria-label="生成の進捗" data-i18n-aria-label="generationProgressLabel"></progress>
+          </div>
+          <div class="generate-actions">
+            <button class="button cancel-process" id="cancelGenerateButton" type="button" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
+              <span data-i18n="cancelGeneration">生成を中止</span>
+            </button>
+            <button class="button primary" id="generateButton" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/><path d="m17 15 3 3-3 3"/></svg>
+              <span data-i18n="generate">データを生成</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="previewTitle">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title" id="previewTitle" data-i18n="previewTitle">プレビュー</h2>
+            <p class="panel-description" data-i18n="previewBody">生成結果の先頭20件を確認できます。</p>
+          </div>
+        </div>
+        <div class="preview-empty" id="previewEmpty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 9v11"/></svg>
+          <strong data-i18n="previewEmptyTitle">まだデータを生成していません</strong>
+          <span data-i18n="previewEmptyBody">列を設定して「データを生成」を押すと、ここに結果が表示されます。</span>
+        </div>
+        <div class="preview-result" id="previewResult" hidden>
+          <div class="preview-meta">
+            <span class="count-chip" id="generatedCountText"></span>
+            <span id="previewLimitText"></span>
+            <span class="test-summary" id="testSummary" hidden></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead id="previewHead"></thead>
+              <tbody id="previewBodyRows"></tbody>
+            </table>
+          </div>
+        </div>
+        <p class="future-note" data-i18n="futureNote">Seedで再現できるテストデータに、欠損・境界・異常値を混ぜてCSV / TSV / JSON / JSONLとして保存できます。</p>
+      </section>
+
+      <section class="panel" aria-labelledby="outputTitle">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title" id="outputTitle" data-i18n="outputTitle">保存</h2>
+            <p class="panel-description" data-i18n="outputBody">生成したデータをファイルとして保存します。</p>
+          </div>
+        </div>
+        <div class="export-grid">
+          <label class="field">
+            <span class="field-label" data-i18n="outputFormatLabel">形式</span>
+            <select id="exportFormat">
+              <option value="csv">CSV</option>
+              <option value="tsv">TSV</option>
+              <option value="json">JSON</option>
+              <option value="jsonl">JSONL</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label" data-i18n="outputFilenameLabel">ファイル名</span>
+            <span class="filename-input-wrap">
+              <input id="outputNameInput" type="text" value="test-data" maxlength="120" autocomplete="off" spellcheck="false" aria-describedby="outputFilenameHelp">
+              <span class="filename-extension" id="outputExtension">.csv</span>
+            </span>
+          </label>
+          <label class="field export-field" id="encodingField">
+            <span class="field-label" data-i18n="encodingLabel">文字コード</span>
+            <select id="encodingSelect">
+              <option value="utf8">UTF-8</option>
+              <option value="utf8bom">UTF-8 BOM</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label" data-i18n="newlineLabel">改行</span>
+            <select id="newlineSelect">
+              <option value="lf">LF</option>
+              <option value="crlf">CRLF</option>
+            </select>
+          </label>
+        </div>
+        <p class="summary-note export-note" id="outputFilenameHelp" data-i18n="outputFilenameHelp">拡張子は自動で付きます。</p>
+        <div class="export-actions">
+          <div class="process-status">
+            <span class="export-status" id="exportStatus" aria-live="polite" data-i18n="exportReadyAfterGenerate">データを生成すると保存できます。</span>
+            <progress class="process-progress" id="exportProgress" max="100" value="0" hidden aria-label="保存の進捗" data-i18n-aria-label="exportProgressLabel"></progress>
+          </div>
+          <div class="export-button-group">
+            <button class="button cancel-process" id="cancelExportButton" type="button" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
+              <span data-i18n="cancelExport">保存を中止</span>
+            </button>
+            <button class="button primary" id="saveOutputButton" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+              <span id="saveOutputText">CSVを保存</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- APP:END -->
+
+    <details class="build-details">
+      <summary data-i18n="buildInfo">ビルド情報</summary>
+      <div class="build-grid">
+        <div class="build-item"><span data-i18n="appVersion">アプリバージョン</span><strong id="buildVersion">—</strong></div>
+        <div class="build-item"><span data-i18n="builtAt">生成日時</span><strong id="builtAt">—</strong></div>
+        <div class="build-item"><span data-i18n="dependencies">内包依存数</span><strong id="dependencyCount">0</strong></div>
+      </div>
+    </details>
+  </main>
+
+  <footer><span id="footerName">Test Data Generator</span> · MIT License · <span data-i18n="footer">完全内包HTMLとして生成</span></footer>
+
+  <div class="app-toast" id="appToast" role="status" aria-live="polite" data-tone="default">
+    <span class="app-toast-message" id="appToastMessage"></span>
+    <button class="app-toast-action" id="appToastAction" type="button" hidden></button>
+  </div>
+
+  <dialog class="app-confirm-dialog" id="appConfirmDialog" aria-labelledby="appConfirmTitle">
+    <div class="app-confirm-header">
+      <h2 class="app-confirm-title" id="appConfirmTitle">確認</h2>
+      <button class="app-confirm-close" id="appConfirmClose" type="button" data-i18n-aria-label="close" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="app-confirm-body">
+      <p class="app-confirm-message" id="appConfirmMessage"></p>
+      <div class="app-confirm-actions">
+        <button class="app-confirm-button" id="appConfirmCancel" type="button">キャンセル</button>
+        <button class="app-confirm-button primary" id="appConfirmOk" type="button">実行する</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="helpDialog" aria-labelledby="helpDialogTitle">
+    <div class="dialog-header">
+      <h2 id="helpDialogTitle" data-i18n="helpTitle">使い方と注意事項</h2>
+      <button class="icon-button" id="closeHelpButton" type="button" data-i18n-aria-label="close" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <!-- APP:HELP:BEGIN -->
+      <h3 data-i18n="helpBasicsTitle">基本操作</h3>
+      <ol>
+        <li data-i18n="helpStep1">生成件数を指定します。</li>
+        <li data-i18n="helpStep2">列名とデータの種類を設定します。列は追加・複製・削除・並べ替えでき、テンプレートからまとめて設定できます。</li>
+        <li data-i18n="helpStep3">「データを生成」を押し、先頭20件のプレビューを確認します。</li>
+        <li data-i18n="helpStep4">保存形式とファイル名を選び、CSV / TSV / JSON / JSONLとして保存します。</li>
+      </ol>
+      <h3 data-i18n="helpTypesTitle">v1.0.0で使える種類</h3>
+      <p data-i18n="helpTypesBody">連番、整数、小数、真偽値、UUID、ランダム文字列、選択肢、固定値、日付、日時、金額、パーセント、URL、IPv4に対応しています。</p>
+      <h3 data-i18n="helpPrivacyTitle">プライバシー</h3>
+      <p data-i18n="helpPrivacyBody">設定と生成処理はブラウザー内で完結します。このアプリから入力内容や生成結果を外部へ送信しません。</p>
+      <h3 data-i18n="helpNotesTitle">注意事項</h3>
+      <ul>
+        <li data-i18n="helpNoteStorage">列設定はブラウザー内に保存されます。ブラウザーのサイトデータを削除すると設定も消える場合があります。</li>
+        <li data-i18n="helpNotePreview">v1.0.0のプレビューは先頭20件です。最大1,000,000件まで指定できます。大量処理はバックグラウンドで進み、生成・保存を途中で中止できます。端末保護のため、生成件数 × 列数は10,000,000セル以下に制限しています。</li>
+        <li data-i18n="helpNoteRoadmap">列ごとに欠損・境界・異常値の割合を設定できます。プリセットで全列へまとめて適用することもできます。</li>
+      </ul>
+      <p class="dialog-note" data-i18n="helpOffline">必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。</p>
+      <!-- APP:HELP:END -->
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const APP_CONFIG = __APP_CONFIG_JSON__;
+      const BUILD_MANIFEST = __BUILD_MANIFEST_JSON__;
+      // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
+      const assetBundle = __EMBEDDED_ASSET_BUNDLE_JSON__;
+      const blobUrls = new Set();
+      const assetByteCache = new Map();
+
+      function decodeBase64Bytes(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+        return bytes;
+      }
+      function getAsset(dependencyId, assetKey) {
+        const asset = assetBundle.dependencies?.[dependencyId]?.assets?.[assetKey];
+        if (!asset) throw new Error(`Embedded asset not found: ${dependencyId}/${assetKey}`);
+        return asset;
+      }
+      async function inflateAsset(asset) {
+        const stored = decodeBase64Bytes(asset.base64);
+        if (!asset.compression || asset.compression === 'none') return stored;
+        if (asset.compression !== 'gzip') throw new Error(`Unsupported embedded asset compression: ${asset.compression}`);
+        if (typeof DecompressionStream !== 'function') throw new Error('This browser cannot expand gzip-compressed embedded assets.');
+        const stream = new Blob([stored]).stream().pipeThrough(new DecompressionStream('gzip'));
+        const expanded = new Uint8Array(await new Response(stream).arrayBuffer());
+        if (Number.isFinite(asset.originalBytes) && expanded.byteLength !== asset.originalBytes) throw new Error('Embedded gzip asset size mismatch.');
+        return expanded;
+      }
+      window.StandaloneAssets = Object.freeze({
+        manifest: BUILD_MANIFEST,
+        list() { return Object.entries(assetBundle.dependencies || {}).flatMap(([dependencyId, dependency]) => Object.keys(dependency.assets || {}).map(assetKey => `${dependencyId}/${assetKey}`)); },
+        has(dependencyId, assetKey) { return Boolean(assetBundle.dependencies?.[dependencyId]?.assets?.[assetKey]); },
+        bytes(dependencyId, assetKey) {
+          const asset = getAsset(dependencyId, assetKey);
+          if (asset.compression && asset.compression !== 'none') throw new Error(`Embedded asset ${dependencyId}/${assetKey} is gzip-compressed; use await StandaloneAssets.bytesAsync().`);
+          return decodeBase64Bytes(asset.base64);
+        },
+        async bytesAsync(dependencyId, assetKey) {
+          const cacheKey = `${dependencyId}/${assetKey}`;
+          if (!assetByteCache.has(cacheKey)) assetByteCache.set(cacheKey, inflateAsset(getAsset(dependencyId, assetKey)));
+          return new Uint8Array(await assetByteCache.get(cacheKey));
+        },
+        text(dependencyId, assetKey) { return new TextDecoder().decode(this.bytes(dependencyId, assetKey)); },
+        async textAsync(dependencyId, assetKey) { return new TextDecoder().decode(await this.bytesAsync(dependencyId, assetKey)); },
+        blobUrl(dependencyId, assetKey) {
+          const asset = getAsset(dependencyId, assetKey);
+          const url = URL.createObjectURL(new Blob([this.bytes(dependencyId, assetKey)], { type: asset.mime || 'application/octet-stream' }));
+          blobUrls.add(url); return url;
+        },
+        async blobUrlAsync(dependencyId, assetKey) {
+          const asset = getAsset(dependencyId, assetKey);
+          const url = URL.createObjectURL(new Blob([await this.bytesAsync(dependencyId, assetKey)], { type: asset.mime || 'application/octet-stream' }));
+          blobUrls.add(url); return url;
+        },
+        async loadClassicScript(dependencyId, assetKey, globalName = '') {
+          const sourceUrl = await this.blobUrlAsync(dependencyId, assetKey);
+          try {
+            await new Promise((resolve, reject) => {
+              const script = document.createElement('script'); script.src = sourceUrl; script.onload = resolve;
+              script.onerror = () => reject(new Error(`Failed to load embedded script: ${dependencyId}/${assetKey}`)); document.head.append(script);
+            });
+            return globalName ? window[globalName] : true;
+          } finally { URL.revokeObjectURL(sourceUrl); blobUrls.delete(sourceUrl); }
+        },
+        async importModule(dependencyId, assetKey) {
+          const sourceUrl = await this.blobUrlAsync(dependencyId, assetKey);
+          try { return await import(sourceUrl); } finally { URL.revokeObjectURL(sourceUrl); blobUrls.delete(sourceUrl); }
+        }
+      });
+      window.addEventListener('pagehide', () => { blobUrls.forEach(url => URL.revokeObjectURL(url)); blobUrls.clear(); });
+
+      const translations = {
+        ja: {
+          brandMeta: 'ブラウザーだけでテストデータを生成', helpTitle: '使い方と注意事項', close: '閉じる',
+          introTitle: 'テストデータ生成', lead: '列と件数を指定して、動作確認に使えるテストデータをブラウザー内で生成します。', localBadge: '完全ローカル処理',
+          generationSettingsTitle: '生成設定', generationSettingsBody: '件数、Seed、テスト配合を指定します。v1.0.0では最大1,000,000件です。', rowCountLabel: '生成件数', rowCountHelp: '1〜1,000,000件（列数に応じて安全上限があります）', seedLabel: 'Seed', seedHelp: '空欄なら生成時にSeedを自動作成します。', randomSeed: 'Seedを変更', randomSeedShort: '変更', regenerateSameSeed: '同じSeedでもう一度生成', usedSeedLabel: '今回のSeed:', saveSchema: '設定ファイルを保存', loadSchema: '設定ファイルを読み込む', schemaSaved: '設定ファイルを作成しました：{name}', schemaLoaded: '設定ファイルを読み込みました。', schemaLoadTitle: '設定ファイルを読み込みますか？', schemaLoadBody: '現在の列設定・件数・Seedを、読み込んだ設定で置き換えます。生成結果は消去されます。', schemaLoadAction: '読み込む', schemaInvalid: 'この設定ファイルは読み込めません。Test Data Generatorの設定ファイルか確認してください。', schemaTooLarge: '設定ファイルが大きすぎます。1 MB以下のJSONファイルを選んでください。', settingsSavedNote: '列設定とSeedは、このブラウザー内に保存されます。生成したデータ自体は自動保存しません。', testPresetLabel: 'テスト配合', presetNormal: '通常', presetLight: '軽くテスト', presetStrict: '厳しめテスト', presetCustom: '現在：カスタム', testPresetHelp: '全列へまとめて適用します。列ごとに割合を調整できます。', presetApplied: '「{name}」を全列に適用しました。', templateLabel: 'テンプレート', templateChoose: 'テンプレートを選択', templateUser: 'ユーザー', templateCustomer: '顧客', templateEmployee: '社員', templateProduct: '商品', templateOrder: '注文', templateInquiry: '問い合わせ', templateAccessLog: 'アクセスログ', applyTemplate: '適用', templateHelp: 'よく使う列構成をまとめて設定します。現在の列は置き換わります。', templateConfirmTitle: 'テンプレートを適用しますか？', templateConfirmBody: '現在の列設定を「{name}」テンプレートで置き換えます。生成結果も消去されます。', templateConfirmAction: 'テンプレートを適用', templateApplied: '「{name}」テンプレートを適用しました。',
+          columnsTitle: '列設定', columnsBody: '列名、データの種類、生成方法を設定します。', reset: '初期状態に戻す', columnName: '列名', dataType: 'データの種類', typeSettings: '設定', testValues: 'テスト値', operations: '操作', addColumn: '列を追加',
+          emptyColumnsTitle: '列がありません', emptyColumnsBody: '生成したいデータの列を追加してください。', readyToGenerate: '設定後に「データを生成」を押してください。', generate: 'データを生成', generationProgressLabel: '生成の進捗', cancelGeneration: '生成を中止', generationPreparing: '生成の準備をしています…', generatingProgress: '{done} / {total}件（{percent}%）', generationCancelled: '生成を中止しました。',
+          previewTitle: 'プレビュー', previewBody: '生成結果の先頭20件を確認できます。', previewEmptyTitle: 'まだデータを生成していません', previewEmptyBody: '列を設定して「データを生成」を押すと、ここに結果が表示されます。', outputTitle: '保存', outputBody: '生成したデータをファイルとして保存します。', outputFormatLabel: '形式', outputFilenameLabel: 'ファイル名', outputFilenameHelp: '拡張子は自動で付きます。', encodingLabel: '文字コード', newlineLabel: '改行', exportReadyAfterGenerate: 'データを生成すると保存できます。', exportReady: '{count}件を{format}で保存できます。', saveFormat: '{format}を保存', savedFile: '{format}を作成しました：{name}', errorFilename: 'ファイル名を入力してください。', exportProgressLabel: '保存の進捗', cancelExport: '保存を中止', exportPreparing: '{format}を準備しています…', exportProgress: '{format}を作成中：{done} / {total}件（{percent}%）', exportCancelled: '保存を中止しました。', exportFailed: 'ファイルを作成できませんでした。もう一度お試しください。', futureNote: 'テンプレートから列を始めたり、Seed・欠損・境界・異常値を組み合わせてCSV / TSV / JSON / JSONLとして保存できます。',
+          typeGroupBasic: '基本', typeGroupJapanese: '日本語データ', typeSequence: '連番', typeInteger: '整数', typeDecimal: '小数', typeBoolean: '真偽値', typeUuid: 'UUID', typeString: 'ランダム文字列', typeChoice: '選択肢', typeFixed: '固定値', typeDate: '日付', typeDatetime: '日時', typeMoney: '金額', typePercent: 'パーセント', typeUrl: 'URL', typeIpv4: 'IPv4', typeJaName: '日本人氏名', typeJaKana: 'ふりがな', typeEmail: 'メールアドレス', typePhone: '電話番号', typePostal: '郵便番号', typePrefecture: '都道府県', typeCity: '市区町村', typeJaAddress: '日本風住所', typeCompany: '会社名', namePart: '氏名の範囲', nameFull: '姓名', nameSurname: '姓のみ', nameGiven: '名のみ', kanaScript: '表記', kanaHiragana: 'ひらがな', kanaKatakana: 'カタカナ', emailDomain: 'ドメイン', phoneKind: '種類', phoneMixed: '混在', phoneMobile: '携帯電話', phoneLandline: '固定電話', start: '開始値', step: '増分', min: '最小値', max: '最大値', decimals: '小数桁数', length: '文字数', fixedValue: '値', booleanFormat: '出力形式', booleanTrueFalse: 'true / false', booleanOneZero: '1 / 0', booleanYesNo: 'YES / NO', choices: '候補（1行1項目）', startDate: '開始日', endDate: '終了日', dateFormat: '日付形式', dateDash: 'YYYY-MM-DD', dateSlash: 'YYYY/MM/DD', startDatetime: '開始日時', endDatetime: '終了日時', datetimeFormat: '日時形式', datetimeIso: 'ISO 8601', datetimeSpace: 'YYYY-MM-DD HH:mm:ss', moneyStep: '刻み', percentRange: '範囲', percent100: '0〜100', percent1: '0〜1', urlBase: 'ベースURL',
+          moveUp: '上へ移動', moveDown: '下へ移動', duplicateColumn: '列を複製', deleteColumn: '列を削除', columnsCount: '{count}列', generatedCount: '{count}件生成', previewLimit: '先頭{count}件を表示', missingRate: '欠損 %', boundaryRate: '境界 %', invalidRate: '異常 %', boundaryUnavailable: 'この種類は境界値なし', statusMissing: '欠損', statusBoundary: '境界', statusInvalid: '異常', missingDisplay: '(空)', testSummary: '欠損 {missing} / 境界 {boundary} / 異常 {invalid}',
+          generating: '生成しています…', generated: '{count}件生成しました。', workerUnavailable: 'このブラウザーでは大量生成用の処理を開始できませんでした。', settingsChanged: '設定を変更しました。もう一度生成してください。', seedChanged: 'Seedを変更しました。もう一度生成してください。',
+          errorRows: '生成件数は1〜1,000,000の整数で入力してください。', errorCells: '生成件数 × 列数は10,000,000セル以下にしてください。列数か生成件数を減らしてください。', errorNoColumns: '列を1つ以上追加してください。', errorEmptyName: '列名が空の列があります。', errorDuplicateName: '同じ列名が使用されています。列名は重複しないようにしてください。', errorSequence: '連番の開始値と増分は整数で入力してください。', errorInteger: '整数の最小値と最大値を確認してください。最小値は最大値以下にしてください。', errorDecimal: '小数の範囲と小数桁数を確認してください。小数桁数は0〜10です。', errorString: 'ランダム文字列の文字数は1〜128の整数で入力してください。', errorChoice: '選択肢を1つ以上入力してください。1行を1項目として扱います。', errorDate: '日付の開始日と終了日を確認してください。開始日は終了日以前にしてください。', errorDatetime: '日時の開始日時と終了日時を確認してください。開始日時は終了日時以前にしてください。', errorMoney: '金額の最小値・最大値・刻みを確認してください。刻みは0より大きくしてください。', errorPercent: 'パーセントの小数桁数は0〜6の整数で入力してください。', errorUrl: 'ベースURLは http:// または https:// で始まる有効なURLを入力してください。', errorEmail: 'メールアドレスのドメインを確認してください。例: example.com', errorTestRates: 'テスト値の割合は0〜100の整数で、合計が100%以下になるようにしてください。',
+          deleted: '「{name}」を削除しました。', undo: '元に戻す', undone: '元に戻しました。', added: '列を追加しました。', duplicated: '「{name}」を複製しました。', resetDone: '初期状態に戻しました。',
+          confirmTitle: '確認', confirmAction: '実行する', cancel: 'キャンセル', resetConfirmTitle: '列設定を初期状態に戻しますか？', resetConfirmBody: '現在の列設定と生成結果を消して、最初の設定に戻します。', resetConfirmAction: '初期状態に戻す',
+          helpBasicsTitle: '基本操作', helpStep1: '生成件数を指定します。', helpStep2: '列名とデータの種類を設定します。列は追加・複製・削除・並べ替えでき、テンプレートからまとめて設定できます。', helpStep3: '「データを生成」を押し、先頭20件のプレビューを確認します。', helpStep4: '保存形式とファイル名を選び、CSV / TSV / JSON / JSONLとして保存します。', helpTypesTitle: 'v1.0.0で使える種類', helpTypesBody: '基本型に加え、日本人氏名、ふりがな、メールアドレス、電話番号、郵便番号、都道府県、市区町村、日本風住所、会社名に対応しています。日本語の各列はv1.0.0でも独立生成です。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: '設定と生成処理はブラウザー内で完結します。このアプリから入力内容や生成結果を外部へ送信しません。', helpNotesTitle: '注意事項', helpNoteStorage: '列設定はブラウザー内に保存されます。ブラウザーのサイトデータを削除すると設定も消える場合があります。', helpNotePreview: 'v1.0.0のプレビューは先頭20件です。最大1,000,000件まで指定できます。大量処理はバックグラウンドで進み、生成・保存を途中で中止できます。端末保護のため、生成件数 × 列数は10,000,000セル以下に制限しています。', helpNoteRoadmap: '同じ設定・件数・Seedでは同じ結果を再生成できます。列ごとに欠損・境界・異常値の割合を設定でき、プリセットで全列へまとめて適用できます。7種類のテンプレートから列構成を始めることもできます。設定ファイルには生成済みデータは含まれません。', helpOffline: '必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。',
+          buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数', footer: '完全内包HTMLとして生成'
+        },
+        en: {
+          brandMeta: 'Generate test data in your browser', helpTitle: 'How to use & notes', close: 'Close',
+          introTitle: 'Test Data Generator', lead: 'Choose columns and a row count, then generate test data entirely in your browser.', localBadge: 'Fully local processing',
+          generationSettingsTitle: 'Generation settings', generationSettingsBody: 'Choose the row count, Seed, and test mix. v1.0.0 supports up to 1,000,000 rows.', rowCountLabel: 'Rows', rowCountHelp: '1 to 1,000,000 rows (a safe cell limit also applies)', seedLabel: 'Seed', seedHelp: 'Leave blank to create a Seed automatically when generating.', randomSeed: 'Change Seed', randomSeedShort: 'Change', regenerateSameSeed: 'Generate again with same Seed', usedSeedLabel: 'Seed used:', saveSchema: 'Save settings file', loadSchema: 'Load settings file', schemaSaved: 'Created settings file: {name}', schemaLoaded: 'Loaded the settings file.', schemaLoadTitle: 'Load this settings file?', schemaLoadBody: 'This replaces the current columns, row count, and Seed. The generated result will be cleared.', schemaLoadAction: 'Load settings', schemaInvalid: 'This settings file could not be loaded. Check that it was created by Test Data Generator.', schemaTooLarge: 'The settings file is too large. Choose a JSON file no larger than 1 MB.', settingsSavedNote: 'Column settings and Seed are saved in this browser. Generated rows are not saved automatically.', testPresetLabel: 'Test mix', presetNormal: 'Normal', presetLight: 'Light test', presetStrict: 'Stricter test', presetCustom: 'Current: Custom', testPresetHelp: 'Apply a mix to all columns, then fine-tune each column if needed.', presetApplied: 'Applied “{name}” to all columns.', templateLabel: 'Template', templateChoose: 'Choose a template', templateUser: 'User', templateCustomer: 'Customer', templateEmployee: 'Employee', templateProduct: 'Product', templateOrder: 'Order', templateInquiry: 'Inquiry', templateAccessLog: 'Access log', applyTemplate: 'Apply', templateHelp: 'Set up a common column layout at once. This replaces the current columns.', templateConfirmTitle: 'Apply this template?', templateConfirmBody: 'This replaces the current columns with the “{name}” template and clears the generated result.', templateConfirmAction: 'Apply template', templateApplied: 'Applied the “{name}” template.',
+          columnsTitle: 'Columns', columnsBody: 'Set each column name, data type, and generation settings.', reset: 'Reset settings', columnName: 'Column name', dataType: 'Data type', typeSettings: 'Settings', testValues: 'Test values', operations: 'Actions', addColumn: 'Add column',
+          emptyColumnsTitle: 'No columns', emptyColumnsBody: 'Add at least one column to generate data.', readyToGenerate: 'Configure the columns, then select Generate data.', generate: 'Generate data', generationProgressLabel: 'Generation progress', cancelGeneration: 'Cancel generation', generationPreparing: 'Preparing generation…', generatingProgress: '{done} / {total} rows ({percent}%)', generationCancelled: 'Generation cancelled.',
+          previewTitle: 'Preview', previewBody: 'Review the first 20 generated rows.', previewEmptyTitle: 'No data generated yet', previewEmptyBody: 'Configure the columns and select Generate data to see the result here.', outputTitle: 'Save', outputBody: 'Save the generated data as a file.', outputFormatLabel: 'Format', outputFilenameLabel: 'Filename', outputFilenameHelp: 'The extension is added automatically.', encodingLabel: 'Encoding', newlineLabel: 'Line endings', exportReadyAfterGenerate: 'Generate data before saving.', exportReady: '{count} rows are ready to save as {format}.', saveFormat: 'Save {format}', savedFile: 'Created {format}: {name}', errorFilename: 'Enter a filename.', exportProgressLabel: 'Save progress', cancelExport: 'Cancel save', exportPreparing: 'Preparing {format}…', exportProgress: 'Creating {format}: {done} / {total} rows ({percent}%)', exportCancelled: 'Save cancelled.', exportFailed: 'Could not create the file. Please try again.', futureNote: 'Start from a template, combine deterministic Seed data with missing, boundary, and invalid values, then save as CSV, TSV, JSON, or JSONL.',
+          typeGroupBasic: 'Basic', typeGroupJapanese: 'Japanese data', typeSequence: 'Sequence', typeInteger: 'Integer', typeDecimal: 'Decimal', typeBoolean: 'Boolean', typeUuid: 'UUID', typeString: 'Random string', typeChoice: 'Choice', typeFixed: 'Fixed value', typeDate: 'Date', typeDatetime: 'Date & time', typeMoney: 'Money', typePercent: 'Percent', typeUrl: 'URL', typeIpv4: 'IPv4', typeJaName: 'Japanese name', typeJaKana: 'Japanese kana name', typeEmail: 'Email address', typePhone: 'Phone number', typePostal: 'Postal code', typePrefecture: 'Prefecture', typeCity: 'City / ward', typeJaAddress: 'Japanese-style address', typeCompany: 'Company name', namePart: 'Name part', nameFull: 'Full name', nameSurname: 'Surname only', nameGiven: 'Given name only', kanaScript: 'Script', kanaHiragana: 'Hiragana', kanaKatakana: 'Katakana', emailDomain: 'Domain', phoneKind: 'Type', phoneMixed: 'Mixed', phoneMobile: 'Mobile', phoneLandline: 'Landline', start: 'Start', step: 'Step', min: 'Min', max: 'Max', decimals: 'Decimal places', length: 'Length', fixedValue: 'Value', booleanFormat: 'Output format', booleanTrueFalse: 'true / false', booleanOneZero: '1 / 0', booleanYesNo: 'YES / NO', choices: 'Choices (one per line)', startDate: 'Start date', endDate: 'End date', dateFormat: 'Date format', dateDash: 'YYYY-MM-DD', dateSlash: 'YYYY/MM/DD', startDatetime: 'Start date/time', endDatetime: 'End date/time', datetimeFormat: 'Date/time format', datetimeIso: 'ISO 8601', datetimeSpace: 'YYYY-MM-DD HH:mm:ss', moneyStep: 'Step', percentRange: 'Range', percent100: '0–100', percent1: '0–1', urlBase: 'Base URL',
+          moveUp: 'Move up', moveDown: 'Move down', duplicateColumn: 'Duplicate column', deleteColumn: 'Delete column', columnsCount: '{count} columns', generatedCount: '{count} rows generated', previewLimit: 'Showing first {count}', missingRate: 'Missing %', boundaryRate: 'Boundary %', invalidRate: 'Invalid %', boundaryUnavailable: 'No boundary values for this type', statusMissing: 'Missing', statusBoundary: 'Boundary', statusInvalid: 'Invalid', missingDisplay: '(empty)', testSummary: 'Missing {missing} / Boundary {boundary} / Invalid {invalid}',
+          generating: 'Generating…', generated: 'Generated {count} rows.', workerUnavailable: 'This browser could not start the background generator.', settingsChanged: 'Settings changed. Generate again to refresh the preview.', seedChanged: 'Seed changed. Generate again to refresh the preview.',
+          errorRows: 'Enter a whole-number row count from 1 to 1,000,000.', errorCells: 'Rows × columns must be 10,000,000 cells or fewer. Reduce the row count or number of columns.', errorNoColumns: 'Add at least one column.', errorEmptyName: 'A column name is empty.', errorDuplicateName: 'Column names must be unique.', errorSequence: 'Sequence start and step must be whole numbers.', errorInteger: 'Check the integer range. Min must be less than or equal to max.', errorDecimal: 'Check the decimal range and decimal places. Decimal places must be from 0 to 10.', errorString: 'Random string length must be a whole number from 1 to 128.', errorChoice: 'Enter at least one choice. Each non-empty line is treated as one value.', errorDate: 'Check the start and end dates. Start must be on or before end.', errorDatetime: 'Check the start and end date/times. Start must be on or before end.', errorMoney: 'Check money min, max, and step. Step must be greater than zero.', errorPercent: 'Percent decimal places must be a whole number from 0 to 6.', errorUrl: 'Enter a valid base URL beginning with http:// or https://.', errorEmail: 'Check the email domain. Example: example.com', errorTestRates: 'Test-value rates must be whole numbers from 0 to 100 and total no more than 100%.',
+          deleted: 'Deleted “{name}”.', undo: 'Undo', undone: 'Restored.', added: 'Column added.', duplicated: 'Duplicated “{name}”.', resetDone: 'Settings reset.',
+          confirmTitle: 'Confirm', confirmAction: 'Continue', cancel: 'Cancel', resetConfirmTitle: 'Reset the column settings?', resetConfirmBody: 'This clears the current column settings and generated result, then restores the initial setup.', resetConfirmAction: 'Reset settings',
+          helpBasicsTitle: 'Basics', helpStep1: 'Choose how many rows to generate.', helpStep2: 'Set column names and data types. You can add, duplicate, delete, and reorder columns, or start from a template.', helpStep3: 'Select Generate data and review the first 20 rows.', helpStep4: 'Choose a format and filename, then save as CSV, TSV, JSON, or JSONL.', helpTypesTitle: 'Types in v1.0.0', helpTypesBody: 'In addition to the basic types, Japanese name, kana name, email, phone, postal code, prefecture, city/ward, Japanese-style address, and company name are available. Japanese columns are generated independently in v1.0.0.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Settings and generation stay in your browser. This app does not send your input or generated data outside the page.', helpNotesTitle: 'Notes', helpNoteStorage: 'Column settings are saved in browser storage. Clearing site data may remove them.', helpNotePreview: 'v1.0.0 previews the first 20 rows and accepts up to 1,000,000 rows. Large jobs run in the background and generation or saving can be cancelled. To protect the device, rows × columns is limited to 10,000,000 cells.', helpNoteRoadmap: 'The same settings, row count, and Seed reproduce the same result. Set missing, boundary, and invalid rates per column or apply a preset across all columns. You can also start from one of seven column templates. Settings files do not contain generated rows.', helpOffline: 'Required code is embedded in the distributable HTML and the app makes no runtime network request.',
+          buildInfo: 'Build information', appVersion: 'App version', builtAt: 'Built at', dependencies: 'Embedded dependencies', footer: 'Generated as one self-contained HTML file'
+        }
+      };
+
+      const $ = selector => document.querySelector(selector);
+      const storageKeys = { language: `${APP_CONFIG.slug}:language`, settings: `${APP_CONFIG.slug}:settings-v1`, export: `${APP_CONFIG.slug}:export-v1` };
+      const supportedTypes = ['sequence','integer','decimal','boolean','uuid','string','choice','fixed','date','datetime','money','percent','url','ipv4','ja_name','ja_kana','email','phone','postal','prefecture','city','ja_address','company'];
+      const japaneseSurnames = [
+        ['佐藤','サトウ'],['鈴木','スズキ'],['高橋','タカハシ'],['田中','タナカ'],['伊藤','イトウ'],['渡辺','ワタナベ'],['山本','ヤマモト'],['中村','ナカムラ'],['小林','コバヤシ'],['加藤','カトウ'],['吉田','ヨシダ'],['山田','ヤマダ'],['佐々木','ササキ'],['山口','ヤマグチ'],['松本','マツモト'],['井上','イノウエ'],['木村','キムラ'],['林','ハヤシ'],['斎藤','サイトウ'],['清水','シミズ'],['山崎','ヤマザキ'],['森','モリ'],['池田','イケダ'],['橋本','ハシモト'],['阿部','アベ'],['石川','イシカワ'],['山下','ヤマシタ'],['中島','ナカジマ'],['石井','イシイ'],['小川','オガワ'],['前田','マエダ'],['岡田','オカダ'],['長谷川','ハセガワ'],['藤田','フジタ'],['後藤','ゴトウ'],['近藤','コンドウ'],['村上','ムラカミ'],['遠藤','エンドウ'],['青木','アオキ'],['坂本','サカモト'],['藤井','フジイ'],['西村','ニシムラ'],['福田','フクダ'],['太田','オオタ'],['三浦','ミウラ'],['藤原','フジワラ'],['岡本','オカモト'],['松田','マツダ'],['中川','ナカガワ'],['中野','ナカノ'],['原田','ハラダ'],['小野','オノ'],['田村','タムラ'],['竹内','タケウチ'],['金子','カネコ'],['和田','ワダ'],['中山','ナカヤマ'],['石田','イシダ'],['上田','ウエダ'],['森田','モリタ']
+      ];
+      const japaneseGivenNames = [
+        ['太郎','タロウ'],['健太','ケンタ'],['翔太','ショウタ'],['大輔','ダイスケ'],['直樹','ナオキ'],['拓也','タクヤ'],['悠斗','ユウト'],['蓮','レン'],['湊','ミナト'],['陽翔','ハルト'],['颯太','ソウタ'],['大和','ヤマト'],['悠真','ユウマ'],['陸','リク'],['健','ケン'],['誠','マコト'],['浩二','コウジ'],['一郎','イチロウ'],['智也','トモヤ'],['達也','タツヤ'],['花子','ハナコ'],['美咲','ミサキ'],['陽菜','ヒナ'],['結衣','ユイ'],['葵','アオイ'],['さくら','サクラ'],['美月','ミヅキ'],['彩乃','アヤノ'],['七海','ナナミ'],['凛','リン'],['優奈','ユウナ'],['愛','アイ'],['麻衣','マイ'],['由美','ユミ'],['恵','メグミ'],['千尋','チヒロ'],['真由','マユ'],['奈緒','ナオ'],['香織','カオリ'],['明日香','アスカ'],['春香','ハルカ'],['里奈','リナ'],['楓','カエデ'],['琴音','コトネ'],['莉子','リコ'],['紬','ツムギ'],['咲良','サクラ'],['心春','コハル'],['芽依','メイ'],['結菜','ユナ']
+      ];
+      const japaneseLocations = [
+        ['北海道','札幌市'],['北海道','函館市'],['青森県','青森市'],['岩手県','盛岡市'],['宮城県','仙台市'],['秋田県','秋田市'],['山形県','山形市'],['福島県','福島市'],['茨城県','水戸市'],['栃木県','宇都宮市'],['群馬県','前橋市'],['埼玉県','さいたま市'],['埼玉県','川越市'],['千葉県','千葉市'],['千葉県','船橋市'],['東京都','新宿区'],['東京都','渋谷区'],['東京都','世田谷区'],['東京都','八王子市'],['神奈川県','横浜市'],['神奈川県','川崎市'],['新潟県','新潟市'],['富山県','富山市'],['石川県','金沢市'],['福井県','福井市'],['山梨県','甲府市'],['長野県','長野市'],['岐阜県','岐阜市'],['静岡県','静岡市'],['愛知県','名古屋市'],['三重県','津市'],['滋賀県','大津市'],['京都府','京都市'],['大阪府','大阪市'],['大阪府','堺市'],['兵庫県','神戸市'],['奈良県','奈良市'],['和歌山県','和歌山市'],['鳥取県','鳥取市'],['島根県','松江市'],['岡山県','岡山市'],['広島県','広島市'],['山口県','山口市'],['徳島県','徳島市'],['香川県','高松市'],['愛媛県','松山市'],['高知県','高知市'],['福岡県','福岡市'],['福岡県','北九州市'],['佐賀県','佐賀市'],['長崎県','長崎市'],['熊本県','熊本市'],['大分県','大分市'],['宮崎県','宮崎市'],['鹿児島県','鹿児島市'],['沖縄県','那覇市']
+      ];
+      const japanesePrefectures = [...new Set(japaneseLocations.map(([prefecture]) => prefecture))];
+      const companyWordsA = ['青葉','朝日','未来','ひかり','さくら','北斗','東雲','若葉','白波','青空','みなと','つばさ','山吹','銀河','瑞穂','かえで'];
+      const companyWordsB = ['データラボ','システムズ','テック','ソリューション','サービス','企画','工房','ネットワーク','デザイン','開発','サポート','ワークス'];
+      const testPresets = Object.freeze({
+        normal: Object.freeze({ missing: 0, boundary: 0, invalid: 0 }),
+        light: Object.freeze({ missing: 2, boundary: 5, invalid: 1 }),
+        strict: Object.freeze({ missing: 10, boundary: 15, invalid: 10 })
+      });
+      const columnTemplates = Object.freeze({
+        user: Object.freeze([
+          ['id','sequence',{ start: 1, step: 1 }], ['name','ja_name',{ part: 'full' }], ['email','email',{ domain: 'example.com' }],
+          ['phone','phone',{ kind: 'mixed' }], ['prefecture','prefecture',{}], ['created_at','datetime',{ start: '2026-01-01T00:00', end: '2026-12-31T23:59', format: 'iso' }]
+        ]),
+        customer: Object.freeze([
+          ['customer_id','sequence',{ start: 1001, step: 1 }], ['name','ja_name',{ part: 'full' }], ['email','email',{ domain: 'example.com' }],
+          ['phone','phone',{ kind: 'mixed' }], ['postal_code','postal',{}], ['address','ja_address',{}], ['registered_at','datetime',{ start: '2025-01-01T00:00', end: '2026-12-31T23:59', format: 'iso' }]
+        ]),
+        employee: Object.freeze([
+          ['employee_id','sequence',{ start: 1, step: 1 }], ['name','ja_name',{ part: 'full' }], ['email','email',{ domain: 'example.com' }],
+          ['department','choice',{ values: `営業\n開発\n企画\n管理\nサポート` }], ['joined_at','date',{ start: '2018-01-01', end: '2026-08-31', format: 'dash' }], ['status','choice',{ values: `active\nleave\nretired` }]
+        ]),
+        product: Object.freeze([
+          ['product_id','sequence',{ start: 1, step: 1 }], ['name','choice',{ values: `ノートPC\nワイヤレスマウス\nキーボード\nモニター\nUSBハブ\nヘッドセット` }],
+          ['price','money',{ min: 500, max: 200000, step: 100 }], ['stock','integer',{ min: 0, max: 500 }], ['category','choice',{ values: `PC\n周辺機器\nアクセサリ` }],
+          ['created_at','datetime',{ start: '2025-01-01T00:00', end: '2026-12-31T23:59', format: 'iso' }]
+        ]),
+        order: Object.freeze([
+          ['order_id','sequence',{ start: 10001, step: 1 }], ['customer_id','integer',{ min: 1001, max: 5000 }], ['product_id','integer',{ min: 1, max: 500 }],
+          ['quantity','integer',{ min: 1, max: 10 }], ['price','money',{ min: 500, max: 200000, step: 100 }], ['status','choice',{ values: `pending\npaid\nshipped\ncompleted\ncancelled` }],
+          ['ordered_at','datetime',{ start: '2026-01-01T00:00', end: '2026-12-31T23:59', format: 'iso' }]
+        ]),
+        inquiry: Object.freeze([
+          ['id','sequence',{ start: 1, step: 1 }], ['name','ja_name',{ part: 'full' }], ['email','email',{ domain: 'example.com' }],
+          ['category','choice',{ values: `製品について\n料金について\n不具合報告\nその他` }], ['message','choice',{ values: `詳しい使い方を教えてください。\n料金について確認したいです。\n画面が正しく表示されません。\nその他の問い合わせです。` }],
+          ['created_at','datetime',{ start: '2026-01-01T00:00', end: '2026-12-31T23:59', format: 'iso' }]
+        ]),
+        access_log: Object.freeze([
+          ['timestamp','datetime',{ start: '2026-09-01T00:00', end: '2026-09-30T23:59', format: 'iso' }], ['ip','ipv4',{}],
+          ['method','choice',{ values: `GET\nPOST\nPUT\nDELETE` }], ['path','choice',{ values: `/\n/login\n/api/users\n/api/items\n/health` }],
+          ['status','choice',{ values: `200\n201\n204\n400\n401\n403\n404\n500` }]
+        ])
+      });
+      const boundaryTypes = new Set(['sequence','integer','decimal','date','datetime','money','percent']);
+      const MAX_ROWS = 1000000;
+      const MAX_CELLS = 10000000;
+      const PREVIEW_LIMIT = 20;
+      let outputFilename = 'test-data';
+      let exportPrefs = loadExportPrefs();
+      let language = readStorage(storageKeys.language) || detectLanguage();
+      let generatedPreviewRows = [];
+      let generatedPreviewMeta = [];
+      let generatedRowCount = 0;
+      let generatedSnapshot = null;
+      let generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 };
+      let lastGeneratedSeed = '';
+      let randomSource = () => 0.5;
+      let generationWorker = null;
+      let exportWorker = null;
+      let exportParts = [];
+      let generationBusy = false;
+      let exportBusy = false;
+      let nextColumnId = 1;
+      let state = loadSettings() || createInitialState();
+
+      const AppConfirm = (() => {
+        const dialog = $('#appConfirmDialog'); const title = $('#appConfirmTitle'); const message = $('#appConfirmMessage');
+        const closeButton = $('#appConfirmClose'); const cancelButton = $('#appConfirmCancel'); const okButton = $('#appConfirmOk');
+        let resolver = null; let restoreFocus = null;
+        function finish(result) {
+          if (!dialog.open) return; const currentResolver = resolver; resolver = null; dialog.close();
+          if (restoreFocus instanceof HTMLElement && restoreFocus.isConnected) restoreFocus.focus({ preventScroll: true });
+          restoreFocus = null; if (currentResolver) currentResolver(result);
+        }
+        function ask({ title: heading, message: body, confirmLabel, cancelLabel, tone = 'default' } = {}) {
+          if (dialog.open) finish(false); title.textContent = heading || translate('confirmTitle'); message.textContent = body || '';
+          cancelButton.textContent = cancelLabel || translate('cancel'); okButton.textContent = confirmLabel || translate('confirmAction');
+          okButton.classList.toggle('danger', tone === 'danger'); okButton.classList.toggle('primary', tone !== 'danger'); restoreFocus = document.activeElement;
+          return new Promise(resolve => { resolver = resolve; dialog.showModal(); requestAnimationFrame(() => cancelButton.focus({ preventScroll: true })); });
+        }
+        closeButton.addEventListener('click', () => finish(false)); cancelButton.addEventListener('click', () => finish(false)); okButton.addEventListener('click', () => finish(true));
+        dialog.addEventListener('cancel', event => { event.preventDefault(); finish(false); });
+        dialog.addEventListener('click', event => { const rect = dialog.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outside) finish(false); });
+        return Object.freeze({ ask });
+      })();
+      window.AppConfirm = AppConfirm;
+
+      const AppToast = (() => {
+        const root = $('#appToast'); const message = $('#appToastMessage'); const action = $('#appToastAction');
+        let timer = 0; let actionHandler = null;
+        function dismiss() { clearTimeout(timer); timer = 0; root.classList.remove('show'); actionHandler = null; }
+        function show({ message: text = '', actionLabel = '', onAction = null, duration = 3200, tone = 'default' } = {}) {
+          clearTimeout(timer); message.textContent = String(text); root.dataset.tone = tone; actionHandler = typeof onAction === 'function' ? onAction : null;
+          action.textContent = actionLabel || ''; action.hidden = !actionHandler || !actionLabel; root.classList.add('show');
+          if (duration > 0) timer = window.setTimeout(dismiss, duration); return Object.freeze({ dismiss });
+        }
+        action.addEventListener('click', () => { const handler = actionHandler; dismiss(); if (handler) handler(); });
+        return Object.freeze({ show, dismiss });
+      })();
+      window.AppToast = AppToast;
+
+      function readStorage(key) { try { return localStorage.getItem(key); } catch { return null; } }
+      function writeStorage(key, value) { try { localStorage.setItem(key, value); } catch { /* Storage may be unavailable. */ } }
+      function loadExportPrefs() {
+        const fallback = { format: 'csv', filename: 'test-data', encoding: 'utf8', newline: 'lf' };
+        const raw = readStorage(storageKeys.export); if (!raw) return fallback;
+        try {
+          const parsed = JSON.parse(raw);
+          return {
+            format: ['csv','tsv','json','jsonl'].includes(parsed.format) ? parsed.format : fallback.format,
+            filename: typeof parsed.filename === 'string' && parsed.filename.trim() ? parsed.filename.trim().slice(0,120) : fallback.filename,
+            encoding: ['utf8','utf8bom'].includes(parsed.encoding) ? parsed.encoding : fallback.encoding,
+            newline: ['lf','crlf'].includes(parsed.newline) ? parsed.newline : fallback.newline
+          };
+        } catch { return fallback; }
+      }
+      function saveExportPrefs() {
+        exportPrefs = { format: $('#exportFormat').value, filename: $('#outputNameInput').value, encoding: $('#encodingSelect').value, newline: $('#newlineSelect').value };
+        outputFilename = exportPrefs.filename.trim();
+        writeStorage(storageKeys.export, JSON.stringify(exportPrefs));
+      }
+      function detectLanguage() {
+        if (APP_CONFIG.defaultLanguage === 'ja' || APP_CONFIG.defaultLanguage === 'en') return APP_CONFIG.defaultLanguage;
+        return (navigator.language || '').toLowerCase().startsWith('ja') ? 'ja' : 'en';
+      }
+      function translate(key) { return translations[language]?.[key] ?? translations.en[key] ?? key; }
+      function format(key, values = {}) { return Object.entries(values).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), translate(key)); }
+      function settingsForType(type) {
+        if (type === 'sequence') return { start: 1, step: 1 };
+        if (type === 'integer') return { min: 0, max: 100 };
+        if (type === 'decimal') return { min: 0, max: 100, decimals: 2 };
+        if (type === 'boolean') return { format: 'true_false' };
+        if (type === 'choice') return { values: 'active\ninactive\npending' };
+        if (type === 'fixed') return { value: 'active' };
+        if (type === 'date') return { start: '2026-01-01', end: '2026-12-31', format: 'dash' };
+        if (type === 'datetime') return { start: '2026-01-01T00:00', end: '2026-12-31T23:59', format: 'iso' };
+        if (type === 'money') return { min: 0, max: 10000, step: 100 };
+        if (type === 'percent') return { range: '100', decimals: 0 };
+        if (type === 'url') return { base: 'https://example.com/items' };
+        if (type === 'ja_name') return { part: 'full' };
+        if (type === 'ja_kana') return { part: 'full', script: 'hiragana' };
+        if (type === 'email') return { domain: 'example.com' };
+        if (type === 'phone') return { kind: 'mixed' };
+        if (type === 'string') return { length: 8 };
+        return {};
+      }
+      function supportsBoundary(type) { return boundaryTypes.has(type); }
+      function normalizedRate(value) { if (value === undefined || value === null) return 0; if (String(value).trim() === '') return NaN; return Number(value); }
+      function normalizeTestSettings(type, raw = {}) {
+        return {
+          missing: normalizedRate(raw.missing),
+          boundary: supportsBoundary(type) ? normalizedRate(raw.boundary) : 0,
+          invalid: normalizedRate(raw.invalid)
+        };
+      }
+      function presetTestSettings(type, presetName = 'normal') {
+        const preset = testPresets[presetName] || testPresets.normal;
+        return { missing: preset.missing, boundary: supportsBoundary(type) ? preset.boundary : 0, invalid: preset.invalid };
+      }
+      function newColumn(type = 'string', name = '', presetName = 'normal') {
+        const safeType = supportedTypes.includes(type) ? type : 'string';
+        return { id: nextColumnId++, name, type: safeType, settings: settingsForType(safeType), test: presetTestSettings(safeType, presetName) };
+      }
+      function templateColumns(templateName, presetName = 'normal') {
+        const definition = columnTemplates[templateName];
+        if (!definition) return [];
+        return definition.map(([name, type, settings]) => {
+          const column = newColumn(type, name, presetName);
+          column.settings = { ...column.settings, ...(settings || {}) };
+          return column;
+        });
+      }
+      function templateTranslationKey(name) {
+        return ({ user: 'templateUser', customer: 'templateCustomer', employee: 'templateEmployee', product: 'templateProduct', order: 'templateOrder', inquiry: 'templateInquiry', access_log: 'templateAccessLog' })[name] || 'templateChoose';
+      }
+      function createInitialState() {
+        return { rowCount: 100, seed: '', columns: [newColumn('sequence', 'id'), newColumn('ja_name', 'name'), newColumn('email', 'email'), newColumn('fixed', 'status')] };
+      }
+      function normalizeLoadedColumn(raw) {
+        const type = supportedTypes.includes(raw?.type) ? raw.type : 'string';
+        const column = newColumn(type, typeof raw?.name === 'string' ? raw.name : 'column');
+        if (raw?.settings && typeof raw.settings === 'object') column.settings = { ...column.settings, ...raw.settings };
+        column.test = normalizeTestSettings(type, raw?.test);
+        return column;
+      }
+      function loadSettings() {
+        const raw = readStorage(storageKeys.settings); if (!raw) return null;
+        try {
+          const parsed = JSON.parse(raw); if (!Array.isArray(parsed.columns)) return null;
+          return { rowCount: Number.isInteger(parsed.rowCount) ? parsed.rowCount : 100, seed: typeof parsed.seed === 'string' ? parsed.seed.slice(0,128) : '', columns: parsed.columns.map(normalizeLoadedColumn) };
+        } catch { return null; }
+      }
+      function saveSettings() {
+        const serializable = { rowCount: Number(state.rowCount), seed: String(state.seed ?? ''), columns: state.columns.map(({ name, type, settings, test }) => ({ name, type, settings, test: normalizeTestSettings(type, test) })) };
+        writeStorage(storageKeys.settings, JSON.stringify(serializable));
+      }
+      function clearGenerated(messageKey = '') {
+        generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 };
+        $('#previewEmpty').hidden = false; $('#previewResult').hidden = true; $('#regenerateButton').disabled = !lastGeneratedSeed;
+        if (messageKey) $('#generateStatus').textContent = translate(messageKey);
+        $('#generateProgress').hidden = true; $('#generateProgress').value = 0; updateExportUI();
+      }
+      function setError(message = '') { $('#errorText').textContent = message; $('#errorBanner').classList.toggle('show', Boolean(message)); }
+      function invalidateAfterChange() { cancelGeneration(true); cancelExport(true); saveSettings(); setError(''); if (generatedRowCount) clearGenerated('settingsChanged'); }
+
+      function typeOptions(selected) {
+        const option = ([value,key]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${escapeHtml(translate(key))}</option>`;
+        const basic = [
+          ['sequence','typeSequence'], ['integer','typeInteger'], ['decimal','typeDecimal'], ['boolean','typeBoolean'], ['uuid','typeUuid'],
+          ['string','typeString'], ['choice','typeChoice'], ['fixed','typeFixed'], ['date','typeDate'], ['datetime','typeDatetime'],
+          ['money','typeMoney'], ['percent','typePercent'], ['url','typeUrl'], ['ipv4','typeIpv4']
+        ];
+        const japanese = [
+          ['ja_name','typeJaName'], ['ja_kana','typeJaKana'], ['email','typeEmail'], ['phone','typePhone'], ['postal','typePostal'],
+          ['prefecture','typePrefecture'], ['city','typeCity'], ['ja_address','typeJaAddress'], ['company','typeCompany']
+        ];
+        return `<optgroup label="${escapeHtml(translate('typeGroupBasic'))}">${basic.map(option).join('')}</optgroup><optgroup label="${escapeHtml(translate('typeGroupJapanese'))}">${japanese.map(option).join('')}</optgroup>`;
+      }
+      function escapeHtml(value) { return String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[char])); }
+      function selectMarkup(setting, labelKey, options, selected) {
+        return `<label class="compact-field"><span class="compact-label">${escapeHtml(translate(labelKey))}</span><select data-setting="${setting}">${options.map(([value,key]) => `<option value="${value}"${String(value) === String(selected) ? ' selected' : ''}>${escapeHtml(translate(key))}</option>`).join('')}</select></label>`;
+      }
+      function settingsMarkup(column) {
+        const s = column.settings || {};
+        if (column.type === 'sequence') return `<div class="inline-fields"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('start'))}</span><input data-setting="start" type="number" step="1" value="${escapeHtml(s.start ?? 1)}"></label><label class="compact-field"><span class="compact-label">${escapeHtml(translate('step'))}</span><input data-setting="step" type="number" step="1" value="${escapeHtml(s.step ?? 1)}"></label></div>`;
+        if (column.type === 'integer') return `<div class="inline-fields"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('min'))}</span><input data-setting="min" type="number" step="1" value="${escapeHtml(s.min ?? 0)}"></label><label class="compact-field"><span class="compact-label">${escapeHtml(translate('max'))}</span><input data-setting="max" type="number" step="1" value="${escapeHtml(s.max ?? 100)}"></label></div>`;
+        if (column.type === 'decimal') return `<div class="inline-fields"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('min'))}</span><input data-setting="min" type="number" step="any" value="${escapeHtml(s.min ?? 0)}"></label><label class="compact-field"><span class="compact-label">${escapeHtml(translate('max'))}</span><input data-setting="max" type="number" step="any" value="${escapeHtml(s.max ?? 100)}"></label><label class="compact-field"><span class="compact-label">${escapeHtml(translate('decimals'))}</span><input data-setting="decimals" type="number" min="0" max="10" step="1" value="${escapeHtml(s.decimals ?? 2)}"></label></div>`;
+        if (column.type === 'boolean') return `<div class="inline-fields one">${selectMarkup('format','booleanFormat',[['true_false','booleanTrueFalse'],['one_zero','booleanOneZero'],['yes_no','booleanYesNo']],s.format ?? 'true_false')}</div>`;
+        if (column.type === 'uuid' || column.type === 'ipv4') return `<span class="field-help">—</span>`;
+        if (column.type === 'choice') return `<div class="inline-fields one"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('choices'))}</span><textarea data-setting="values" maxlength="4000">${escapeHtml(s.values ?? '')}</textarea></label></div>`;
+        if (column.type === 'fixed') return `<div class="inline-fields one"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('fixedValue'))}</span><input data-setting="value" type="text" maxlength="500" value="${escapeHtml(s.value ?? '')}"></label></div>`;
+        if (column.type === 'date') return `<div class="inline-fields date-time-fields"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('startDate'))}</span><input data-setting="start" type="date" value="${escapeHtml(s.start ?? '2026-01-01')}"></label><label class="compact-field"><span class="compact-label">${escapeHtml(translate('endDate'))}</span><input data-setting="end" type="date" value="${escapeHtml(s.end ?? '2026-12-31')}"></label>${selectMarkup('format','dateFormat',[['dash','dateDash'],['slash','dateSlash']],s.format ?? 'dash')}</div>`;
+        if (column.type === 'datetime') return `<div class="inline-fields date-time-fields"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('startDatetime'))}</span><input data-setting="start" type="datetime-local" step="1" value="${escapeHtml(s.start ?? '2026-01-01T00:00')}"></label><label class="compact-field"><span class="compact-label">${escapeHtml(translate('endDatetime'))}</span><input data-setting="end" type="datetime-local" step="1" value="${escapeHtml(s.end ?? '2026-12-31T23:59')}"></label>${selectMarkup('format','datetimeFormat',[['iso','datetimeIso'],['space','datetimeSpace']],s.format ?? 'iso')}</div>`;
+        if (column.type === 'money') return `<div class="inline-fields"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('min'))}</span><input data-setting="min" type="number" step="any" value="${escapeHtml(s.min ?? 0)}"></label><label class="compact-field"><span class="compact-label">${escapeHtml(translate('max'))}</span><input data-setting="max" type="number" step="any" value="${escapeHtml(s.max ?? 10000)}"></label><label class="compact-field"><span class="compact-label">${escapeHtml(translate('moneyStep'))}</span><input data-setting="step" type="number" min="0.000001" step="any" value="${escapeHtml(s.step ?? 100)}"></label></div>`;
+        if (column.type === 'percent') return `<div class="inline-fields">${selectMarkup('range','percentRange',[['100','percent100'],['1','percent1']],s.range ?? '100')}<label class="compact-field"><span class="compact-label">${escapeHtml(translate('decimals'))}</span><input data-setting="decimals" type="number" min="0" max="6" step="1" value="${escapeHtml(s.decimals ?? 0)}"></label></div>`;
+        if (column.type === 'url') return `<div class="inline-fields one"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('urlBase'))}</span><input data-setting="base" type="url" maxlength="500" value="${escapeHtml(s.base ?? 'https://example.com/items')}"></label></div>`;
+        if (column.type === 'ja_name') return `<div class="inline-fields one">${selectMarkup('part','namePart',[['full','nameFull'],['surname','nameSurname'],['given','nameGiven']],s.part ?? 'full')}</div>`;
+        if (column.type === 'ja_kana') return `<div class="inline-fields">${selectMarkup('part','namePart',[['full','nameFull'],['surname','nameSurname'],['given','nameGiven']],s.part ?? 'full')}${selectMarkup('script','kanaScript',[['hiragana','kanaHiragana'],['katakana','kanaKatakana']],s.script ?? 'hiragana')}</div>`;
+        if (column.type === 'email') return `<div class="inline-fields one"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('emailDomain'))}</span><input data-setting="domain" type="text" inputmode="url" maxlength="253" value="${escapeHtml(s.domain ?? 'example.com')}"></label></div>`;
+        if (column.type === 'phone') return `<div class="inline-fields one">${selectMarkup('kind','phoneKind',[['mixed','phoneMixed'],['mobile','phoneMobile'],['landline','phoneLandline']],s.kind ?? 'mixed')}</div>`;
+        if (['postal','prefecture','city','ja_address','company'].includes(column.type)) return `<span class="field-help">—</span>`;
+        return `<div class="inline-fields one"><label class="compact-field"><span class="compact-label">${escapeHtml(translate('length'))}</span><input data-setting="length" type="number" min="1" max="128" step="1" value="${escapeHtml(s.length ?? 8)}"></label></div>`;
+      }
+      function testSettingsMarkup(column) {
+        const test = normalizeTestSettings(column.type, column.test);
+        const boundaryDisabled = !supportsBoundary(column.type);
+        return `<div class="test-fields">
+          <label class="compact-field test-field"><span class="compact-label">${escapeHtml(translate('missingRate'))}</span><input data-test-setting="missing" type="number" min="0" max="100" step="1" inputmode="numeric" value="${Number.isFinite(test.missing) ? test.missing : ''}"></label>
+          <label class="compact-field test-field"><span class="compact-label">${escapeHtml(translate('boundaryRate'))}</span><input data-test-setting="boundary" type="number" min="0" max="100" step="1" inputmode="numeric" value="${Number.isFinite(test.boundary) ? test.boundary : ''}"${boundaryDisabled ? ' disabled' : ''}></label>
+          <label class="compact-field test-field"><span class="compact-label">${escapeHtml(translate('invalidRate'))}</span><input data-test-setting="invalid" type="number" min="0" max="100" step="1" inputmode="numeric" value="${Number.isFinite(test.invalid) ? test.invalid : ''}"></label>
+        </div>${boundaryDisabled ? `<span class="test-cell-note">${escapeHtml(translate('boundaryUnavailable'))}</span>` : ''}`;
+      }
+      function icon(name) {
+        const paths = {
+          up: '<path d="m6 15 6-6 6 6"/>', down: '<path d="m6 9 6 6 6-6"/>', duplicate: '<rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V5H5v11h3"/>', trash: '<path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/>'
+        };
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
+      }
+      function parseChoices(value) { return String(value ?? '').split(/\r?\n/).map(item => item.trim()).filter(Boolean); }
+      function parseDateOnly(value) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return NaN;
+        const time = Date.parse(`${value}T00:00:00Z`); return Number.isFinite(time) ? time : NaN;
+      }
+      function parseDateTime(value) { const text = String(value); const time = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/.test(text) ? Date.parse(`${text}Z`) : Date.parse(text); return Number.isFinite(time) ? time : NaN; }
+      function isValidHttpUrl(value) {
+        try { const url = new URL(String(value)); return url.protocol === 'http:' || url.protocol === 'https:'; } catch { return false; }
+      }
+      function isValidEmailDomain(value) {
+        const domain = String(value ?? '').trim().toLowerCase();
+        if (domain.length < 3 || domain.length > 253 || domain.includes('..')) return false;
+        return /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(domain);
+      }
+      function columnErrorKey(column) {
+        if (!column.name.trim()) return 'errorEmptyName';
+        if (column.type === 'sequence') {
+          if (!Number.isInteger(Number(column.settings.start)) || !Number.isInteger(Number(column.settings.step))) return 'errorSequence';
+        } else if (column.type === 'integer') {
+          const min = Number(column.settings.min); const max = Number(column.settings.max);
+          if (!Number.isInteger(min) || !Number.isInteger(max) || min > max) return 'errorInteger';
+        } else if (column.type === 'decimal') {
+          const min = Number(column.settings.min); const max = Number(column.settings.max); const decimals = Number(column.settings.decimals);
+          if (!Number.isFinite(min) || !Number.isFinite(max) || min > max || !Number.isInteger(decimals) || decimals < 0 || decimals > 10) return 'errorDecimal';
+        } else if (column.type === 'string') {
+          const length = Number(column.settings.length);
+          if (!Number.isInteger(length) || length < 1 || length > 128) return 'errorString';
+        } else if (column.type === 'choice') {
+          if (!parseChoices(column.settings.values).length) return 'errorChoice';
+        } else if (column.type === 'date') {
+          const start = parseDateOnly(column.settings.start); const end = parseDateOnly(column.settings.end);
+          if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) return 'errorDate';
+        } else if (column.type === 'datetime') {
+          const start = parseDateTime(column.settings.start); const end = parseDateTime(column.settings.end);
+          if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) return 'errorDatetime';
+        } else if (column.type === 'money') {
+          const min = Number(column.settings.min); const max = Number(column.settings.max); const step = Number(column.settings.step);
+          if (!Number.isFinite(min) || !Number.isFinite(max) || !Number.isFinite(step) || min > max || step <= 0) return 'errorMoney';
+        } else if (column.type === 'percent') {
+          const decimals = Number(column.settings.decimals);
+          if (!Number.isInteger(decimals) || decimals < 0 || decimals > 6) return 'errorPercent';
+        } else if (column.type === 'url') {
+          if (!isValidHttpUrl(column.settings.base)) return 'errorUrl';
+        } else if (column.type === 'email') {
+          if (!isValidEmailDomain(column.settings.domain)) return 'errorEmail';
+        }
+        return '';
+      }
+      function renderColumns() {
+        const list = $('#columnList'); list.textContent = '';
+        const names = state.columns.map(column => column.name.trim());
+        state.columns.forEach((column, index) => {
+          const row = document.createElement('div'); row.className = 'column-row'; row.dataset.columnId = String(column.id);
+          const duplicateName = Boolean(column.name.trim()) && names.indexOf(column.name.trim()) !== names.lastIndexOf(column.name.trim());
+          if (duplicateName || columnErrorKey(column)) row.classList.add('invalid');
+          row.innerHTML = `
+            <label class="field"><span class="field-label mobile-label">${escapeHtml(translate('columnName'))}</span><input data-role="name" type="text" maxlength="80" value="${escapeHtml(column.name)}"></label>
+            <label class="field"><span class="field-label mobile-label">${escapeHtml(translate('dataType'))}</span><select data-role="type">${typeOptions(column.type)}</select></label>
+            <div class="type-settings"><span class="field-label mobile-label">${escapeHtml(translate('typeSettings'))}</span>${settingsMarkup(column)}</div>
+            <div class="test-settings"><span class="field-label mobile-label">${escapeHtml(translate('testValues'))}</span>${testSettingsMarkup(column)}</div>
+            <div class="column-actions">
+              <button class="button icon-only" data-action="up" type="button" ${index === 0 ? 'disabled' : ''} aria-label="${escapeHtml(translate('moveUp'))}" title="${escapeHtml(translate('moveUp'))}">${icon('up')}</button>
+              <button class="button icon-only" data-action="down" type="button" ${index === state.columns.length - 1 ? 'disabled' : ''} aria-label="${escapeHtml(translate('moveDown'))}" title="${escapeHtml(translate('moveDown'))}">${icon('down')}</button>
+              <button class="button icon-only" data-action="duplicate" type="button" aria-label="${escapeHtml(translate('duplicateColumn'))}" title="${escapeHtml(translate('duplicateColumn'))}">${icon('duplicate')}</button>
+              <button class="button icon-only danger-quiet" data-action="delete" type="button" aria-label="${escapeHtml(translate('deleteColumn'))}" title="${escapeHtml(translate('deleteColumn'))}">${icon('trash')}</button>
+            </div>`;
+          list.append(row);
+        });
+        $('#emptyColumns').hidden = state.columns.length > 0;
+        $('#columnCountText').textContent = format('columnsCount', { count: new Intl.NumberFormat(language).format(state.columns.length) });
+      }
+      function columnById(id) { return state.columns.find(column => column.id === Number(id)); }
+      function updateColumnFromElement(row, target) {
+        const column = columnById(row.dataset.columnId); if (!column) return;
+        const presetBefore = detectPreset();
+        if (target.matches('[data-role="name"]')) column.name = target.value;
+        if (target.matches('[data-role="type"]')) {
+          column.type = target.value; column.settings = settingsForType(column.type);
+          column.test = presetBefore !== 'custom' ? presetTestSettings(column.type, presetBefore) : normalizeTestSettings(column.type, column.test);
+          renderColumns();
+        } else if (target.matches('[data-setting]')) {
+          column.settings[target.dataset.setting] = target.value;
+        } else if (target.matches('[data-test-setting]')) {
+          column.test = { ...column.test, [target.dataset.testSetting]: target.value }; if (!supportsBoundary(column.type)) column.test.boundary = 0;
+        }
+        invalidateAfterChange(); updatePresetUI();
+      }
+      function moveColumn(index, delta) {
+        const target = index + delta; if (target < 0 || target >= state.columns.length) return;
+        [state.columns[index], state.columns[target]] = [state.columns[target], state.columns[index]]; invalidateAfterChange(); renderColumns();
+      }
+      function duplicateColumn(index) {
+        if (index < 0 || index >= state.columns.length || state.columns.length >= 200) return;
+        const source = state.columns[index];
+        const baseName = `${source.name || 'column'}_copy`;
+        const existingNames = new Set(state.columns.map(column => column.name));
+        let copyName = baseName; let suffix = 2;
+        while (existingNames.has(copyName)) copyName = `${baseName}_${suffix++}`;
+        const copy = newColumn(source.type, copyName, 'normal');
+        copy.settings = { ...(source.settings || {}) };
+        copy.test = normalizeTestSettings(source.type, source.test);
+        state.columns.splice(index + 1, 0, copy);
+        invalidateAfterChange(); renderColumns(); updatePresetUI();
+        AppToast.show({ message: format('duplicated', { name: source.name || translate('columnName') }), tone: 'success' });
+      }
+      async function applySelectedTemplate() {
+        const templateName = $('#templateSelect').value;
+        if (!columnTemplates[templateName]) return;
+        const label = translate(templateTranslationKey(templateName));
+        if (state.columns.length) {
+          const ok = await AppConfirm.ask({ title: translate('templateConfirmTitle'), message: format('templateConfirmBody', { name: label }), confirmLabel: translate('templateConfirmAction'), cancelLabel: translate('cancel') });
+          if (!ok) return;
+        }
+        const currentPreset = detectPreset();
+        state.columns = templateColumns(templateName, currentPreset === 'custom' ? 'normal' : currentPreset);
+        lastGeneratedSeed = ''; generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 };
+        $('#regenerateButton').disabled = true; $('#seedHelp').textContent = translate('seedHelp');
+        invalidateAfterChange(); renderColumns(); updatePresetUI(); clearGenerated();
+        $('#generateStatus').textContent = translate('readyToGenerate');
+        AppToast.show({ message: format('templateApplied', { name: label }), tone: 'success' });
+      }
+      function deleteColumn(index) {
+        if (index < 0 || index >= state.columns.length) return;
+        const [removed] = state.columns.splice(index, 1); invalidateAfterChange(); renderColumns();
+        AppToast.show({ message: format('deleted', { name: removed.name || translate('columnName') }), actionLabel: translate('undo'), duration: 5000, onAction: () => {
+          state.columns.splice(Math.min(index, state.columns.length), 0, removed); invalidateAfterChange(); renderColumns(); AppToast.show({ message: translate('undone') });
+        }});
+      }
+      function validate() {
+        const rows = Number(state.rowCount);
+        if (!Number.isInteger(rows) || rows < 1 || rows > MAX_ROWS) return translate('errorRows');
+        if (rows * state.columns.length > MAX_CELLS) return translate('errorCells');
+        if (!state.columns.length) return translate('errorNoColumns');
+        const names = state.columns.map(column => column.name.trim());
+        if (names.some(name => !name)) return translate('errorEmptyName');
+        if (new Set(names).size !== names.length) return translate('errorDuplicateName');
+        for (const column of state.columns) {
+          const key = columnErrorKey(column); if (key) return translate(key);
+          const test = normalizeTestSettings(column.type, column.test);
+          if ([test.missing,test.boundary,test.invalid].some(rate => !Number.isInteger(rate) || rate < 0 || rate > 100) || test.missing + test.boundary + test.invalid > 100) return translate('errorTestRates');
+          if (Number(column.test?.missing) !== test.missing || Number(column.test?.invalid) !== test.invalid || (supportsBoundary(column.type) && Number(column.test?.boundary) !== test.boundary)) return translate('errorTestRates');
+        }
+        return '';
+      }
+      function testsMatchPreset(column, presetName) {
+        const actual = normalizeTestSettings(column.type, column.test); const expected = presetTestSettings(column.type, presetName);
+        return actual.missing === expected.missing && actual.boundary === expected.boundary && actual.invalid === expected.invalid;
+      }
+      function detectPreset() {
+        for (const name of ['normal','light','strict']) if (state.columns.every(column => testsMatchPreset(column, name))) return name;
+        return 'custom';
+      }
+      function updatePresetUI() {
+        const current = detectPreset();
+        document.querySelectorAll('[data-preset]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.preset === current)));
+        $('#testPresetHelp').textContent = current === 'custom' ? `${translate('testPresetHelp')} ${translate('presetCustom')}` : translate('testPresetHelp');
+      }
+      function applyPreset(name) {
+        if (!testPresets[name]) return;
+        for (const column of state.columns) column.test = presetTestSettings(column.type, name);
+        invalidateAfterChange(); renderColumns(); updatePresetUI();
+        AppToast.show({ message: format('presetApplied', { name: translate(name === 'normal' ? 'presetNormal' : name === 'light' ? 'presetLight' : 'presetStrict') }), tone: 'success' });
+      }
+      function seedHash(value) {
+        let hash = 1779033703 ^ String(value).length;
+        for (let index = 0; index < String(value).length; index += 1) { hash = Math.imul(hash ^ String(value).charCodeAt(index), 3432918353); hash = hash << 13 | hash >>> 19; }
+        return () => { hash = Math.imul(hash ^ hash >>> 16, 2246822507); hash = Math.imul(hash ^ hash >>> 13, 3266489909); return (hash ^= hash >>> 16) >>> 0; };
+      }
+      function createSeededRandom(seed) {
+        const hash = seedHash(`test-data-generator:v1:${seed}`); let value = hash();
+        return () => { value += 0x6D2B79F5; let t = value; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+      }
+      function createAutomaticSeed() {
+        const values = new Uint32Array(2);
+        if (globalThis.crypto?.getRandomValues) crypto.getRandomValues(values);
+        else { values[0] = Date.now() >>> 0; values[1] = Math.floor((performance.now?.() || 0) * 1000) >>> 0; }
+        return `${values[0].toString(36)}-${values[1].toString(36)}`;
+      }
+      function nextRandom() { return randomSource(); }
+      function randomInteger(min, max) { return Math.floor(nextRandom() * (max - min + 1)) + min; }
+      function randomFloat(min, max, decimals) {
+        const scale = 10 ** decimals; const scaledMin = Math.ceil(min * scale); const scaledMax = Math.floor(max * scale);
+        if (scaledMin <= scaledMax) return randomInteger(scaledMin, scaledMax) / scale;
+        return Number((min + nextRandom() * (max - min)).toFixed(decimals));
+      }
+      function randomString(length) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; let result = '';
+        for (let i = 0; i < length; i += 1) result += chars[Math.floor(nextRandom() * chars.length)];
+        return result;
+      }
+      function uuidV4() {
+        const bytes = new Uint8Array(16);
+        for (let i = 0; i < bytes.length; i += 1) bytes[i] = randomInteger(0,255);
+        bytes[6] = (bytes[6] & 0x0f) | 0x40; bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        const hex = [...bytes].map(value => value.toString(16).padStart(2,'0'));
+        return `${hex.slice(0,4).join('')}-${hex.slice(4,6).join('')}-${hex.slice(6,8).join('')}-${hex.slice(8,10).join('')}-${hex.slice(10).join('')}`;
+      }
+      function randomTimestamp(start, end) { return start === end ? start : start + Math.floor(nextRandom() * (end - start + 1)); }
+      function formatDateValue(timestamp, format) {
+        const date = new Date(timestamp); const y = date.getUTCFullYear(); const m = String(date.getUTCMonth()+1).padStart(2,'0'); const d = String(date.getUTCDate()).padStart(2,'0');
+        return format === 'slash' ? `${y}/${m}/${d}` : `${y}-${m}-${d}`;
+      }
+      function formatDateTimeValue(timestamp, format) {
+        const date = new Date(timestamp); const iso = date.toISOString();
+        return format === 'space' ? iso.slice(0,19).replace('T',' ') : iso;
+      }
+      function steppedMoney(min, max, step) {
+        const count = Math.floor((max - min) / step); const value = min + randomInteger(0, Math.max(0,count)) * step;
+        const precision = Math.min(8, Math.max(decimalPlaces(min), decimalPlaces(max), decimalPlaces(step)));
+        return Number(value.toFixed(precision));
+      }
+      function decimalPlaces(value) {
+        const text = String(value); if (/e-/i.test(text)) return Math.min(8, Number(text.split(/e-/i)[1]) || 0);
+        return (text.split('.')[1] || '').length;
+      }
+      function pick(items) { return items[randomInteger(0, items.length - 1)]; }
+      function katakanaToHiragana(value) { return String(value).replace(/[ァ-ヶ]/g, char => String.fromCharCode(char.charCodeAt(0) - 0x60)); }
+      function randomJapanesePerson() { return { surname: pick(japaneseSurnames), given: pick(japaneseGivenNames) }; }
+      function japaneseNameValue(settings, kana = false) {
+        const person = randomJapanesePerson(); const part = settings?.part || 'full';
+        const surname = kana ? person.surname[1] : person.surname[0]; const given = kana ? person.given[1] : person.given[0];
+        let value = part === 'surname' ? surname : part === 'given' ? given : `${surname} ${given}`;
+        if (kana && settings?.script !== 'katakana') value = katakanaToHiragana(value);
+        return value;
+      }
+      function randomEmail(domain) {
+        const first = ['taro','hanako','yuki','haru','sora','ren','mei','aoi','nao','kenta','mika','riku'];
+        const last = ['sato','suzuki','takahashi','tanaka','ito','watanabe','yamada','nakamura','kobayashi','kato'];
+        return `${pick(first)}.${pick(last)}${randomInteger(1,999)}@${String(domain).trim().toLowerCase()}`;
+      }
+      function randomPhone(kind) {
+        const resolved = kind === 'mixed' ? (nextRandom() < 0.65 ? 'mobile' : 'landline') : kind;
+        if (resolved === 'mobile') return `${pick(['070','080','090'])}-${String(randomInteger(0,9999)).padStart(4,'0')}-${String(randomInteger(0,9999)).padStart(4,'0')}`;
+        const area = pick([['03',4],['06',4],['011',3],['052',3],['075',3],['092',3]]); const middle = String(randomInteger(0,10 ** area[1] - 1)).padStart(area[1],'0');
+        return `${area[0]}-${middle}-${String(randomInteger(0,9999)).padStart(4,'0')}`;
+      }
+      function randomPostalCode() { return `${String(randomInteger(1,999)).padStart(3,'0')}-${String(randomInteger(0,9999)).padStart(4,'0')}`; }
+      function randomJapaneseAddress() {
+        const [prefecture, city] = pick(japaneseLocations); return `${prefecture}${city}テスト町${randomInteger(1,9)}-${randomInteger(1,30)}-${randomInteger(1,20)}`;
+      }
+      function randomCompany() { return `株式会社${pick(companyWordsA)}${pick(companyWordsB)}${String(randomInteger(1,999)).padStart(3,'0')}`; }
+      function allocateTestModes(column, rowCount) {
+        const test = normalizeTestSettings(column.type, column.test); const totalRate = test.missing + test.boundary + test.invalid;
+        if (!totalRate) return new Array(rowCount).fill('normal');
+        const entries = [['missing',test.missing],['boundary',test.boundary],['invalid',test.invalid]];
+        const raw = entries.map(([name,rate]) => ({ name, rate, raw: rowCount * rate / 100, count: Math.floor(rowCount * rate / 100) }));
+        const target = Math.min(rowCount, Math.round(rowCount * totalRate / 100)); let assigned = raw.reduce((sum,item) => sum + item.count, 0);
+        raw.sort((a,b) => (b.raw - b.count) - (a.raw - a.count) || b.rate - a.rate);
+        for (let index = 0; assigned < target && raw.length; index = (index + 1) % raw.length) { if (raw[index].rate > 0) { raw[index].count += 1; assigned += 1; } }
+        const modes = []; for (const item of raw) for (let i = 0; i < item.count; i += 1) modes.push(item.name);
+        while (modes.length < rowCount) modes.push('normal');
+        for (let index = modes.length - 1; index > 0; index -= 1) { const swap = randomInteger(0,index); [modes[index],modes[swap]] = [modes[swap],modes[index]]; }
+        return modes;
+      }
+      function uniqueValues(values) { return [...new Set(values.filter(value => value !== undefined && value !== null).map(value => typeof value === 'number' && Object.is(value,-0) ? 0 : value))]; }
+      function dateBoundaryValues(column, includeTime = false) {
+        const start = includeTime ? parseDateTime(column.settings.start) : parseDateOnly(column.settings.start);
+        const end = includeTime ? parseDateTime(column.settings.end) : parseDateOnly(column.settings.end) + 86399999;
+        const candidates = [start,end]; const startDate = new Date(start); const endDate = new Date(end);
+        const monthEnd = Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth() + 1, 0, includeTime ? 23 : 0, includeTime ? 59 : 0, includeTime ? 59 : 0);
+        if (monthEnd >= start && monthEnd <= end) candidates.push(monthEnd);
+        const yearEnd = Date.UTC(startDate.getUTCFullYear(),11,31, includeTime ? 23 : 0, includeTime ? 59 : 0, includeTime ? 59 : 0);
+        if (yearEnd >= start && yearEnd <= end) candidates.push(yearEnd);
+        for (let year = startDate.getUTCFullYear(); year <= Math.min(endDate.getUTCFullYear(), startDate.getUTCFullYear() + 8); year += 1) {
+          const leap = Date.UTC(year,1,29, includeTime ? 12 : 0,0,0); const d = new Date(leap);
+          if (d.getUTCMonth() === 1 && d.getUTCDate() === 29 && leap >= start && leap <= end) { candidates.push(leap); break; }
+        }
+        return uniqueValues(candidates);
+      }
+      function boundaryValueFor(column, rowIndex, rowCount) {
+        if (column.type === 'sequence') { const start = Number(column.settings.start); const step = Number(column.settings.step); return pick(uniqueValues([start, start + step * Math.max(0,rowCount - 1)])); }
+        if (column.type === 'integer') { const min = Number(column.settings.min); const max = Number(column.settings.max); return pick(uniqueValues([min, min + 1 <= max ? min + 1 : min, min <= 0 && max >= 0 ? 0 : undefined, max - 1 >= min ? max - 1 : max, max])); }
+        if (column.type === 'decimal') { const min = Number(column.settings.min); const max = Number(column.settings.max); const unit = 10 ** -Number(column.settings.decimals); return pick(uniqueValues([min, min + unit <= max ? Number((min + unit).toFixed(Number(column.settings.decimals))) : min, min <= 0 && max >= 0 ? 0 : undefined, max - unit >= min ? Number((max - unit).toFixed(Number(column.settings.decimals))) : max, max])); }
+        if (column.type === 'money') { const min = Number(column.settings.min); const max = Number(column.settings.max); const step = Number(column.settings.step); return pick(uniqueValues([min, min + step <= max ? min + step : min, min <= 0 && max >= 0 ? 0 : undefined, max - step >= min ? max - step : max, max])); }
+        if (column.type === 'percent') { const max = column.settings.range === '1' ? 1 : 100; const unit = 10 ** -Number(column.settings.decimals); return pick(uniqueValues([0, Math.min(max,unit), Math.max(0,max-unit), max])); }
+        if (column.type === 'date') return formatDateValue(pick(dateBoundaryValues(column,false)), column.settings.format);
+        if (column.type === 'datetime') return formatDateTimeValue(pick(dateBoundaryValues(column,true)), column.settings.format);
+        return valueFor(column,rowIndex);
+      }
+      function invalidValueFor(column, rowCount) {
+        if (column.type === 'sequence') { const first = Number(column.settings.start); const step = Number(column.settings.step); const last = first + step * Math.max(0,rowCount - 1); const min = Math.min(first,last); const max = Math.max(first,last); const delta = Math.max(1,Math.abs(step)); return nextRandom() < .5 ? min - delta : max + delta; }
+        if (column.type === 'integer') { const min = Number(column.settings.min); const max = Number(column.settings.max); return nextRandom() < .5 ? min - 1 : max + 1; }
+        if (column.type === 'decimal') { const unit = 10 ** -Number(column.settings.decimals); return nextRandom() < .5 ? Number((Number(column.settings.min) - unit).toFixed(Number(column.settings.decimals))) : Number((Number(column.settings.max) + unit).toFixed(Number(column.settings.decimals))); }
+        if (column.type === 'boolean') return pick(['maybe','TRUE?']);
+        if (column.type === 'uuid') return pick(['not-a-uuid','00000000-0000-0000-0000-000000000000']);
+        if (column.type === 'string') return pick(['', '   ', 'line1\nline2', '\t', '😀', '<scr' + 'ipt>alert(1)</scr' + 'ipt>', 'ＡＢＣ１２３', 'x'.repeat(Math.min(512, Number(column.settings.length || 8) + 128))]);
+        if (column.type === 'choice') return '__invalid__';
+        if (column.type === 'fixed') return `${String(column.settings.value ?? '')}__invalid__`;
+        if (column.type === 'date') { const start = parseDateOnly(column.settings.start); const end = parseDateOnly(column.settings.end); return nextRandom() < .5 ? formatDateValue(start - 86400000,column.settings.format) : (nextRandom() < .5 ? formatDateValue(end + 86400000,column.settings.format) : 'not-a-date'); }
+        if (column.type === 'datetime') { const start = parseDateTime(column.settings.start); const end = parseDateTime(column.settings.end); return nextRandom() < .5 ? formatDateTimeValue(start - 1000,column.settings.format) : (nextRandom() < .5 ? formatDateTimeValue(end + 1000,column.settings.format) : 'not-a-datetime'); }
+        if (column.type === 'money') { const step = Number(column.settings.step); return nextRandom() < .5 ? Number(column.settings.min) - step : Number(column.settings.max) + step; }
+        if (column.type === 'percent') { const max = column.settings.range === '1' ? 1 : 100; return nextRandom() < .5 ? -1 : max + 1; }
+        if (column.type === 'url') return pick(['not-a-url','https://example.invalid/ bad path']);
+        if (column.type === 'ipv4') return pick(['999.999.999.999','192.0.2.999']);
+        if (column.type === 'ja_name') return pick(['😀','山田\n太郎','名前不明'.repeat(20)]);
+        if (column.type === 'ja_kana') return pick(['ﾔﾏﾀﾞ ﾀﾛｳ','12345','かな?カナ']);
+        if (column.type === 'email') return pick(['invalid-email','user@@example.com','user example.com']);
+        if (column.type === 'phone') return pick(['090123','電話番号不明','000-0000-0000']);
+        if (column.type === 'postal') return pick(['1234567','12-3456','999-99999']);
+        if (column.type === 'prefecture') return 'テスト県';
+        if (column.type === 'city') return '存在しない市';
+        if (column.type === 'ja_address') return pick(['住所不明','東京都\n新宿区','12345']);
+        if (column.type === 'company') return pick(['株式会社','会社名不明','株式会社'.repeat(40)]);
+        return '__invalid__';
+      }
+      function specialValueFor(column, rowIndex, rowCount, mode) {
+        if (mode === 'missing') return null;
+        if (mode === 'boundary') return boundaryValueFor(column,rowIndex,rowCount);
+        if (mode === 'invalid') return invalidValueFor(column,rowCount);
+        return valueFor(column,rowIndex);
+      }
+      function valueFor(column, rowIndex) {
+        if (column.type === 'sequence') return Number(column.settings.start) + Number(column.settings.step) * rowIndex;
+        if (column.type === 'integer') return randomInteger(Number(column.settings.min), Number(column.settings.max));
+        if (column.type === 'decimal') return randomFloat(Number(column.settings.min), Number(column.settings.max), Number(column.settings.decimals));
+        if (column.type === 'boolean') {
+          const value = nextRandom() < 0.5;
+          if (column.settings.format === 'one_zero') return value ? 1 : 0;
+          if (column.settings.format === 'yes_no') return value ? 'YES' : 'NO';
+          return value;
+        }
+        if (column.type === 'uuid') return uuidV4();
+        if (column.type === 'choice') { const items = parseChoices(column.settings.values); return items[randomInteger(0, items.length - 1)]; }
+        if (column.type === 'fixed') return String(column.settings.value ?? '');
+        if (column.type === 'date') return formatDateValue(randomTimestamp(parseDateOnly(column.settings.start), parseDateOnly(column.settings.end) + 86399999), column.settings.format);
+        if (column.type === 'datetime') return formatDateTimeValue(randomTimestamp(parseDateTime(column.settings.start), parseDateTime(column.settings.end)), column.settings.format);
+        if (column.type === 'money') return steppedMoney(Number(column.settings.min), Number(column.settings.max), Number(column.settings.step));
+        if (column.type === 'percent') return randomFloat(0, column.settings.range === '1' ? 1 : 100, Number(column.settings.decimals));
+        if (column.type === 'url') { const url = new URL(String(column.settings.base)); url.pathname = `${url.pathname.replace(/\/+$/,'')}/${randomInteger(1,999999)}`; return url.toString(); }
+        if (column.type === 'ipv4') {
+          const blocks = ['192.0.2','198.51.100','203.0.113']; return `${blocks[randomInteger(0,blocks.length-1)]}.${randomInteger(1,254)}`;
+        }
+        if (column.type === 'ja_name') return japaneseNameValue(column.settings, false);
+        if (column.type === 'ja_kana') return japaneseNameValue(column.settings, true);
+        if (column.type === 'email') return randomEmail(column.settings.domain);
+        if (column.type === 'phone') return randomPhone(column.settings.kind || 'mixed');
+        if (column.type === 'postal') return randomPostalCode();
+        if (column.type === 'prefecture') return pick(japanesePrefectures);
+        if (column.type === 'city') return pick(japaneseLocations)[1];
+        if (column.type === 'ja_address') return randomJapaneseAddress();
+        if (column.type === 'company') return randomCompany();
+        return randomString(Number(column.settings.length));
+      }
+      function generatorWorkerMain() {
+        let randomSource = () => 0.5;
+        let generatorData = null;
+        const modeCodes = Object.freeze({ normal: 0, missing: 1, boundary: 2, invalid: 3 });
+        const modeNames = Object.freeze(['normal','missing','boundary','invalid']);
+
+        function seedHash(value) {
+          let hash = 1779033703 ^ String(value).length;
+          for (let index = 0; index < String(value).length; index += 1) { hash = Math.imul(hash ^ String(value).charCodeAt(index), 3432918353); hash = hash << 13 | hash >>> 19; }
+          return () => { hash = Math.imul(hash ^ hash >>> 16, 2246822507); hash = Math.imul(hash ^ hash >>> 13, 3266489909); return (hash ^= hash >>> 16) >>> 0; };
+        }
+        function createSeededRandom(seed) {
+          const hash = seedHash(`test-data-generator:v1:${seed}`); let value = hash();
+          return () => { value += 0x6D2B79F5; let t = value; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+        }
+        function nextRandom() { return randomSource(); }
+        function randomInteger(min, max) { return Math.floor(nextRandom() * (max - min + 1)) + min; }
+        function randomFloat(min, max, decimals) {
+          const scale = 10 ** decimals; const scaledMin = Math.ceil(min * scale); const scaledMax = Math.floor(max * scale);
+          if (scaledMin <= scaledMax) return randomInteger(scaledMin, scaledMax) / scale;
+          return Number((min + nextRandom() * (max - min)).toFixed(decimals));
+        }
+        function randomString(length) {
+          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; let result = '';
+          for (let i = 0; i < length; i += 1) result += chars[Math.floor(nextRandom() * chars.length)];
+          return result;
+        }
+        function uuidV4() {
+          const bytes = new Uint8Array(16);
+          for (let i = 0; i < bytes.length; i += 1) bytes[i] = randomInteger(0,255);
+          bytes[6] = (bytes[6] & 0x0f) | 0x40; bytes[8] = (bytes[8] & 0x3f) | 0x80;
+          const hex = [...bytes].map(value => value.toString(16).padStart(2,'0'));
+          return `${hex.slice(0,4).join('')}-${hex.slice(4,6).join('')}-${hex.slice(6,8).join('')}-${hex.slice(8,10).join('')}-${hex.slice(10).join('')}`;
+        }
+        function randomTimestamp(start, end) { return start === end ? start : start + Math.floor(nextRandom() * (end - start + 1)); }
+        function parseChoices(value) { return String(value ?? '').split(/\r?\n/).map(item => item.trim()).filter(Boolean); }
+        function parseDateOnly(value) {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return NaN;
+          const time = Date.parse(`${value}T00:00:00Z`); return Number.isFinite(time) ? time : NaN;
+        }
+        function parseDateTime(value) { const text = String(value); const time = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/.test(text) ? Date.parse(`${text}Z`) : Date.parse(text); return Number.isFinite(time) ? time : NaN; }
+        function formatDateValue(timestamp, format) {
+          const date = new Date(timestamp); const y = date.getUTCFullYear(); const m = String(date.getUTCMonth()+1).padStart(2,'0'); const d = String(date.getUTCDate()).padStart(2,'0');
+          return format === 'slash' ? `${y}/${m}/${d}` : `${y}-${m}-${d}`;
+        }
+        function formatDateTimeValue(timestamp, format) {
+          const date = new Date(timestamp); const iso = date.toISOString();
+          return format === 'space' ? iso.slice(0,19).replace('T',' ') : iso;
+        }
+        function decimalPlaces(value) {
+          const text = String(value); if (/e-/i.test(text)) return Math.min(8, Number(text.split(/e-/i)[1]) || 0);
+          return (text.split('.')[1] || '').length;
+        }
+        function steppedMoney(min, max, step) {
+          const count = Math.floor((max - min) / step); const value = min + randomInteger(0, Math.max(0,count)) * step;
+          const precision = Math.min(8, Math.max(decimalPlaces(min), decimalPlaces(max), decimalPlaces(step)));
+          return Number(value.toFixed(precision));
+        }
+        function pick(items) { return items[randomInteger(0, items.length - 1)]; }
+        function katakanaToHiragana(value) { return String(value).replace(/[ァ-ヶ]/g, char => String.fromCharCode(char.charCodeAt(0) - 0x60)); }
+        function randomJapanesePerson() { return { surname: pick(generatorData.japaneseSurnames), given: pick(generatorData.japaneseGivenNames) }; }
+        function japaneseNameValue(settings, kana = false) {
+          const person = randomJapanesePerson(); const part = settings?.part || 'full';
+          const surname = kana ? person.surname[1] : person.surname[0]; const given = kana ? person.given[1] : person.given[0];
+          let value = part === 'surname' ? surname : part === 'given' ? given : `${surname} ${given}`;
+          if (kana && settings?.script !== 'katakana') value = katakanaToHiragana(value);
+          return value;
+        }
+        function randomEmail(domain) {
+          const first = ['taro','hanako','yuki','haru','sora','ren','mei','aoi','nao','kenta','mika','riku'];
+          const last = ['sato','suzuki','takahashi','tanaka','ito','watanabe','yamada','nakamura','kobayashi','kato'];
+          return `${pick(first)}.${pick(last)}${randomInteger(1,999)}@${String(domain).trim().toLowerCase()}`;
+        }
+        function randomPhone(kind) {
+          const resolved = kind === 'mixed' ? (nextRandom() < 0.65 ? 'mobile' : 'landline') : kind;
+          if (resolved === 'mobile') return `${pick(['070','080','090'])}-${String(randomInteger(0,9999)).padStart(4,'0')}-${String(randomInteger(0,9999)).padStart(4,'0')}`;
+          const area = pick([['03',4],['06',4],['011',3],['052',3],['075',3],['092',3]]); const middle = String(randomInteger(0,10 ** area[1] - 1)).padStart(area[1],'0');
+          return `${area[0]}-${middle}-${String(randomInteger(0,9999)).padStart(4,'0')}`;
+        }
+        function randomPostalCode() { return `${String(randomInteger(1,999)).padStart(3,'0')}-${String(randomInteger(0,9999)).padStart(4,'0')}`; }
+        function randomJapaneseAddress() {
+          const [prefecture, city] = pick(generatorData.japaneseLocations); return `${prefecture}${city}テスト町${randomInteger(1,9)}-${randomInteger(1,30)}-${randomInteger(1,20)}`;
+        }
+        function randomCompany() { return `株式会社${pick(generatorData.companyWordsA)}${pick(generatorData.companyWordsB)}${String(randomInteger(1,999)).padStart(3,'0')}`; }
+        function uniqueValues(values) { return [...new Set(values.filter(value => value !== undefined && value !== null).map(value => typeof value === 'number' && Object.is(value,-0) ? 0 : value))]; }
+        function dateBoundaryValues(column, includeTime = false) {
+          const start = includeTime ? parseDateTime(column.settings.start) : parseDateOnly(column.settings.start);
+          const end = includeTime ? parseDateTime(column.settings.end) : parseDateOnly(column.settings.end) + 86399999;
+          const candidates = [start,end]; const startDate = new Date(start); const endDate = new Date(end);
+          const monthEnd = Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth() + 1, 0, includeTime ? 23 : 0, includeTime ? 59 : 0, includeTime ? 59 : 0);
+          if (monthEnd >= start && monthEnd <= end) candidates.push(monthEnd);
+          const yearEnd = Date.UTC(startDate.getUTCFullYear(),11,31, includeTime ? 23 : 0, includeTime ? 59 : 0, includeTime ? 59 : 0);
+          if (yearEnd >= start && yearEnd <= end) candidates.push(yearEnd);
+          for (let year = startDate.getUTCFullYear(); year <= Math.min(endDate.getUTCFullYear(), startDate.getUTCFullYear() + 8); year += 1) {
+            const leap = Date.UTC(year,1,29, includeTime ? 12 : 0,0,0); const d = new Date(leap);
+            if (d.getUTCMonth() === 1 && d.getUTCDate() === 29 && leap >= start && leap <= end) { candidates.push(leap); break; }
+          }
+          return uniqueValues(candidates);
+        }
+        function boundaryValueFor(column, rowIndex, rowCount) {
+          if (column.type === 'sequence') { const start = Number(column.settings.start); const step = Number(column.settings.step); return pick(uniqueValues([start, start + step * Math.max(0,rowCount - 1)])); }
+          if (column.type === 'integer') { const min = Number(column.settings.min); const max = Number(column.settings.max); return pick(uniqueValues([min, min + 1 <= max ? min + 1 : min, min <= 0 && max >= 0 ? 0 : undefined, max - 1 >= min ? max - 1 : max, max])); }
+          if (column.type === 'decimal') { const min = Number(column.settings.min); const max = Number(column.settings.max); const unit = 10 ** -Number(column.settings.decimals); return pick(uniqueValues([min, min + unit <= max ? Number((min + unit).toFixed(Number(column.settings.decimals))) : min, min <= 0 && max >= 0 ? 0 : undefined, max - unit >= min ? Number((max - unit).toFixed(Number(column.settings.decimals))) : max, max])); }
+          if (column.type === 'money') { const min = Number(column.settings.min); const max = Number(column.settings.max); const step = Number(column.settings.step); return pick(uniqueValues([min, min + step <= max ? min + step : min, min <= 0 && max >= 0 ? 0 : undefined, max - step >= min ? max - step : max, max])); }
+          if (column.type === 'percent') { const max = column.settings.range === '1' ? 1 : 100; const unit = 10 ** -Number(column.settings.decimals); return pick(uniqueValues([0, Math.min(max,unit), Math.max(0,max-unit), max])); }
+          if (column.type === 'date') return formatDateValue(pick(dateBoundaryValues(column,false)), column.settings.format);
+          if (column.type === 'datetime') return formatDateTimeValue(pick(dateBoundaryValues(column,true)), column.settings.format);
+          return valueFor(column,rowIndex);
+        }
+        function invalidValueFor(column, rowCount) {
+          if (column.type === 'sequence') { const first = Number(column.settings.start); const step = Number(column.settings.step); const last = first + step * Math.max(0,rowCount - 1); const min = Math.min(first,last); const max = Math.max(first,last); const delta = Math.max(1,Math.abs(step)); return nextRandom() < .5 ? min - delta : max + delta; }
+          if (column.type === 'integer') { const min = Number(column.settings.min); const max = Number(column.settings.max); return nextRandom() < .5 ? min - 1 : max + 1; }
+          if (column.type === 'decimal') { const unit = 10 ** -Number(column.settings.decimals); return nextRandom() < .5 ? Number((Number(column.settings.min) - unit).toFixed(Number(column.settings.decimals))) : Number((Number(column.settings.max) + unit).toFixed(Number(column.settings.decimals))); }
+          if (column.type === 'boolean') return pick(['maybe','TRUE?']);
+          if (column.type === 'uuid') return pick(['not-a-uuid','00000000-0000-0000-0000-000000000000']);
+          if (column.type === 'string') return pick(['', '   ', 'line1\nline2', '\t', '😀', '<scr' + 'ipt>alert(1)</scr' + 'ipt>', 'ＡＢＣ１２３', 'x'.repeat(Math.min(512, Number(column.settings.length || 8) + 128))]);
+          if (column.type === 'choice') return '__invalid__';
+          if (column.type === 'fixed') return `${String(column.settings.value ?? '')}__invalid__`;
+          if (column.type === 'date') { const start = parseDateOnly(column.settings.start); const end = parseDateOnly(column.settings.end); return nextRandom() < .5 ? formatDateValue(start - 86400000,column.settings.format) : (nextRandom() < .5 ? formatDateValue(end + 86400000,column.settings.format) : 'not-a-date'); }
+          if (column.type === 'datetime') { const start = parseDateTime(column.settings.start); const end = parseDateTime(column.settings.end); return nextRandom() < .5 ? formatDateTimeValue(start - 1000,column.settings.format) : (nextRandom() < .5 ? formatDateTimeValue(end + 1000,column.settings.format) : 'not-a-datetime'); }
+          if (column.type === 'money') { const step = Number(column.settings.step); return nextRandom() < .5 ? Number(column.settings.min) - step : Number(column.settings.max) + step; }
+          if (column.type === 'percent') { const max = column.settings.range === '1' ? 1 : 100; return nextRandom() < .5 ? -1 : max + 1; }
+          if (column.type === 'url') return pick(['not-a-url','https://example.invalid/ bad path']);
+          if (column.type === 'ipv4') return pick(['999.999.999.999','192.0.2.999']);
+          if (column.type === 'ja_name') return pick(['😀','山田\n太郎','名前不明'.repeat(20)]);
+          if (column.type === 'ja_kana') return pick(['ﾔﾏﾀﾞ ﾀﾛｳ','12345','かな?カナ']);
+          if (column.type === 'email') return pick(['invalid-email','user@@example.com','user example.com']);
+          if (column.type === 'phone') return pick(['090123','電話番号不明','000-0000-0000']);
+          if (column.type === 'postal') return pick(['1234567','12-3456','999-99999']);
+          if (column.type === 'prefecture') return 'テスト県';
+          if (column.type === 'city') return '存在しない市';
+          if (column.type === 'ja_address') return pick(['住所不明','東京都\n新宿区','12345']);
+          if (column.type === 'company') return pick(['株式会社','会社名不明','株式会社'.repeat(40)]);
+          return '__invalid__';
+        }
+        function valueFor(column, rowIndex) {
+          if (column.type === 'sequence') return Number(column.settings.start) + Number(column.settings.step) * rowIndex;
+          if (column.type === 'integer') return randomInteger(Number(column.settings.min), Number(column.settings.max));
+          if (column.type === 'decimal') return randomFloat(Number(column.settings.min), Number(column.settings.max), Number(column.settings.decimals));
+          if (column.type === 'boolean') {
+            const value = nextRandom() < 0.5;
+            if (column.settings.format === 'one_zero') return value ? 1 : 0;
+            if (column.settings.format === 'yes_no') return value ? 'YES' : 'NO';
+            return value;
+          }
+          if (column.type === 'uuid') return uuidV4();
+          if (column.type === 'choice') { const items = parseChoices(column.settings.values); return items[randomInteger(0, items.length - 1)]; }
+          if (column.type === 'fixed') return String(column.settings.value ?? '');
+          if (column.type === 'date') return formatDateValue(randomTimestamp(parseDateOnly(column.settings.start), parseDateOnly(column.settings.end) + 86399999), column.settings.format);
+          if (column.type === 'datetime') return formatDateTimeValue(randomTimestamp(parseDateTime(column.settings.start), parseDateTime(column.settings.end)), column.settings.format);
+          if (column.type === 'money') return steppedMoney(Number(column.settings.min), Number(column.settings.max), Number(column.settings.step));
+          if (column.type === 'percent') return randomFloat(0, column.settings.range === '1' ? 1 : 100, Number(column.settings.decimals));
+          if (column.type === 'url') { const url = new URL(String(column.settings.base)); url.pathname = `${url.pathname.replace(/\/+$/,'')}/${randomInteger(1,999999)}`; return url.toString(); }
+          if (column.type === 'ipv4') { const blocks = ['192.0.2','198.51.100','203.0.113']; return `${blocks[randomInteger(0,blocks.length-1)]}.${randomInteger(1,254)}`; }
+          if (column.type === 'ja_name') return japaneseNameValue(column.settings, false);
+          if (column.type === 'ja_kana') return japaneseNameValue(column.settings, true);
+          if (column.type === 'email') return randomEmail(column.settings.domain);
+          if (column.type === 'phone') return randomPhone(column.settings.kind || 'mixed');
+          if (column.type === 'postal') return randomPostalCode();
+          if (column.type === 'prefecture') return pick(generatorData.japanesePrefectures);
+          if (column.type === 'city') return pick(generatorData.japaneseLocations)[1];
+          if (column.type === 'ja_address') return randomJapaneseAddress();
+          if (column.type === 'company') return randomCompany();
+          return randomString(Number(column.settings.length));
+        }
+        function specialValueFor(column, rowIndex, rowCount, modeCode) {
+          if (modeCode === modeCodes.missing) return null;
+          if (modeCode === modeCodes.boundary) return boundaryValueFor(column,rowIndex,rowCount);
+          if (modeCode === modeCodes.invalid) return invalidValueFor(column,rowCount);
+          return valueFor(column,rowIndex);
+        }
+        function normalizeTest(column) {
+          const raw = column.test || {}; return { missing: Number(raw.missing) || 0, boundary: Number(raw.boundary) || 0, invalid: Number(raw.invalid) || 0 };
+        }
+        function allocateTestModes(column, rowCount) {
+          const test = normalizeTest(column); const totalRate = test.missing + test.boundary + test.invalid;
+          if (!totalRate) return null;
+          const entries = [['missing',test.missing],['boundary',test.boundary],['invalid',test.invalid]];
+          const raw = entries.map(([name,rate]) => ({ name, rate, raw: rowCount * rate / 100, count: Math.floor(rowCount * rate / 100) }));
+          const target = Math.min(rowCount, Math.round(rowCount * totalRate / 100)); let assigned = raw.reduce((sum,item) => sum + item.count, 0);
+          raw.sort((a,b) => (b.raw - b.count) - (a.raw - a.count) || b.rate - a.rate);
+          for (let index = 0; assigned < target && raw.length; index = (index + 1) % raw.length) { if (raw[index].rate > 0) { raw[index].count += 1; assigned += 1; } }
+          const modes = new Uint8Array(rowCount); let cursor = 0;
+          for (const item of raw) { const code = modeCodes[item.name]; modes.fill(code, cursor, cursor + item.count); cursor += item.count; }
+          for (let index = modes.length - 1; index > 0; index -= 1) { const swap = randomInteger(0,index); const value = modes[index]; modes[index] = modes[swap]; modes[swap] = value; }
+          return modes;
+        }
+        function prepare(snapshot) {
+          randomSource = createSeededRandom(snapshot.seed);
+          const modes = new Array(snapshot.columns.length);
+          for (let index = 0; index < snapshot.columns.length; index += 1) modes[index] = allocateTestModes(snapshot.columns[index], snapshot.rowCount);
+          return modes;
+        }
+        function modeAt(modeArray, rowIndex) { return modeArray ? modeArray[rowIndex] : 0; }
+        function progressInterval(total) { return Math.max(1000, Math.floor(total / 100)); }
+        function postProgress(done, total, phase = 'rows') { self.postMessage({ type: 'progress', done, total, percent: total ? Math.min(100, Math.floor(done * 100 / total)) : 100, phase }); }
+
+        function generatePreview(snapshot, previewLimit) {
+          const startedAt = performance.now(); postProgress(0, snapshot.rowCount, 'prepare'); const modesByColumn = prepare(snapshot);
+          const previewRows = []; const previewMeta = []; const counts = { missing: 0, boundary: 0, invalid: 0 }; const interval = progressInterval(snapshot.rowCount);
+          for (let rowIndex = 0; rowIndex < snapshot.rowCount; rowIndex += 1) {
+            const row = rowIndex < previewLimit ? {} : null; const meta = rowIndex < previewLimit ? {} : null;
+            for (let columnIndex = 0; columnIndex < snapshot.columns.length; columnIndex += 1) {
+              const column = snapshot.columns[columnIndex]; const modeCode = modeAt(modesByColumn[columnIndex], rowIndex); const value = specialValueFor(column,rowIndex,snapshot.rowCount,modeCode);
+              if (modeCode) counts[modeNames[modeCode]] += 1;
+              if (row) { row[column.name] = value; if (modeCode) meta[column.name] = modeNames[modeCode]; }
+            }
+            if (row) { previewRows.push(row); previewMeta.push(meta); }
+            if ((rowIndex + 1) % interval === 0 || rowIndex + 1 === snapshot.rowCount) postProgress(rowIndex + 1, snapshot.rowCount);
+          }
+          self.postMessage({ type: 'complete', task: 'preview', previewRows, previewMeta, counts, rowCount: snapshot.rowCount, elapsedMs: Math.round(performance.now() - startedAt) });
+        }
+        function delimitedCell(value, delimiter) {
+          const text = value == null ? '' : String(value); const shouldQuote = text.includes(delimiter) || /["\r\n]/.test(text) || /^\s|\s$/.test(text);
+          return shouldQuote ? `"${text.replaceAll('"','""')}"` : text;
+        }
+        function serializeRow(row, names, formatName, newline, rowIndex) {
+          if (formatName === 'csv' || formatName === 'tsv') {
+            const delimiter = formatName === 'csv' ? ',' : '\t'; return `${newline}${names.map(name => delimitedCell(row[name], delimiter)).join(delimiter)}`;
+          }
+          if (formatName === 'jsonl') return `${rowIndex ? newline : ''}${JSON.stringify(row)}`;
+          const pretty = JSON.stringify(row, null, 2).split('\n').map(line => `  ${line}`).join(newline);
+          return `${rowIndex ? ',' : ''}${newline}${pretty}`;
+        }
+        function exportRows(snapshot, options) {
+          postProgress(0, snapshot.rowCount, 'prepare'); const modesByColumn = prepare(snapshot); const names = snapshot.columns.map(column => column.name); const formatName = options.format; const newline = options.newline;
+          if (formatName === 'csv' || formatName === 'tsv') { const delimiter = formatName === 'csv' ? ',' : '\t'; self.postMessage({ type: 'chunk', text: names.map(name => delimitedCell(name, delimiter)).join(delimiter) }); }
+          else if (formatName === 'json') self.postMessage({ type: 'chunk', text: '[' });
+          let buffer = ''; const interval = progressInterval(snapshot.rowCount); const flushThreshold = 512 * 1024;
+          for (let rowIndex = 0; rowIndex < snapshot.rowCount; rowIndex += 1) {
+            const row = {};
+            for (let columnIndex = 0; columnIndex < snapshot.columns.length; columnIndex += 1) {
+              const column = snapshot.columns[columnIndex]; row[column.name] = specialValueFor(column,rowIndex,snapshot.rowCount,modeAt(modesByColumn[columnIndex], rowIndex));
+            }
+            buffer += serializeRow(row,names,formatName,newline,rowIndex);
+            if (buffer.length >= flushThreshold) { self.postMessage({ type: 'chunk', text: buffer }); buffer = ''; }
+            if ((rowIndex + 1) % interval === 0 || rowIndex + 1 === snapshot.rowCount) postProgress(rowIndex + 1, snapshot.rowCount);
+          }
+          if (buffer) self.postMessage({ type: 'chunk', text: buffer });
+          if (formatName === 'json') self.postMessage({ type: 'chunk', text: `${newline}]` });
+          self.postMessage({ type: 'complete', task: 'export', rowCount: snapshot.rowCount });
+        }
+        self.onmessage = event => {
+          const message = event.data || {}; generatorData = message.generatorData || generatorData;
+          try {
+            if (!generatorData || !message.snapshot) throw new Error('Missing generator data.');
+            if (message.task === 'preview') generatePreview(message.snapshot, message.previewLimit || 20);
+            else if (message.task === 'export') exportRows(message.snapshot, message.options || {});
+          } catch (error) { self.postMessage({ type: 'error', message: error instanceof Error ? error.message : String(error) }); }
+        };
+      }
+
+      function workerGeneratorData() {
+        return { japaneseSurnames, japaneseGivenNames, japaneseLocations, japanesePrefectures, companyWordsA, companyWordsB };
+      }
+      function createGeneratorWorker() {
+        if (typeof Worker !== 'function' || typeof Blob !== 'function' || !URL?.createObjectURL) throw new Error('worker');
+        const source = `(${generatorWorkerMain.toString()})();`; const blob = new Blob([source], { type: 'text/javascript' }); const url = URL.createObjectURL(blob);
+        const worker = new Worker(url); window.setTimeout(() => URL.revokeObjectURL(url), 0); return worker;
+      }
+      function generationSnapshot(seed = state.seed) {
+        return {
+          rowCount: Number(state.rowCount), seed: String(seed ?? ''),
+          columns: state.columns.map(({ name, type, settings, test }) => ({ name: name.trim(), type, settings: { ...(settings || {}) }, test: normalizeTestSettings(type, test) }))
+        };
+      }
+
+      function setGenerationBusy(busy) {
+        generationBusy = busy;
+        $('#generateButton').disabled = busy || exportBusy;
+        $('#cancelGenerateButton').hidden = !busy;
+        $('#regenerateButton').disabled = busy || exportBusy || !lastGeneratedSeed;
+        $('#saveOutputButton').disabled = busy || exportBusy || !generatedRowCount;
+      }
+      function setExportBusy(busy) {
+        exportBusy = busy;
+        $('#saveOutputButton').disabled = busy || generationBusy || !generatedRowCount;
+        $('#cancelExportButton').hidden = !busy;
+        $('#generateButton').disabled = busy || generationBusy;
+        $('#regenerateButton').disabled = busy || generationBusy || !lastGeneratedSeed;
+      }
+      function cancelGeneration(silent = false) {
+        if (!generationWorker) return;
+        generationWorker.terminate(); generationWorker = null; setGenerationBusy(false);
+        $('#generateProgress').hidden = true; $('#generateProgress').value = 0;
+        if (!silent) $('#generateStatus').textContent = translate('generationCancelled');
+      }
+      function cancelExport(silent = false) {
+        if (!exportWorker) return;
+        exportWorker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false);
+        $('#exportProgress').hidden = true; $('#exportProgress').value = 0;
+        if (!silent) $('#exportStatus').textContent = translate('exportCancelled'); else updateExportUI();
+      }
+      function handleGenerationProgress(message) {
+        const done = Number(message.done) || 0; const total = Number(message.total) || Number(state.rowCount) || 0; const percent = Number(message.percent) || 0;
+        $('#generateProgress').hidden = false; $('#generateProgress').value = percent;
+        $('#generateStatus').textContent = message.phase === 'prepare' ? translate('generationPreparing') : format('generatingProgress', { done: new Intl.NumberFormat(language).format(done), total: new Intl.NumberFormat(language).format(total), percent });
+      }
+      function generate() {
+        if (generationBusy || exportBusy) return;
+        state.rowCount = Number($('#rowCount').value);
+        let seed = String($('#seedInput').value ?? '').trim();
+        if (!seed) { seed = createAutomaticSeed(); $('#seedInput').value = seed; }
+        state.seed = seed; saveSettings();
+        const error = validate(); setError(error); renderColumns(); if (error) return;
+        cancelGeneration(true); clearGenerated();
+        const snapshot = generationSnapshot(seed); setGenerationBusy(true); $('#generateProgress').hidden = false; $('#generateProgress').value = 0; $('#generateStatus').textContent = translate('generationPreparing');
+        let worker;
+        try { worker = createGeneratorWorker(); } catch { setGenerationBusy(false); $('#generateProgress').hidden = true; setError(translate('workerUnavailable')); return; }
+        generationWorker = worker;
+        worker.onmessage = event => {
+          if (worker !== generationWorker) return;
+          const message = event.data || {};
+          if (message.type === 'progress') { handleGenerationProgress(message); return; }
+          if (message.type === 'error') {
+            worker.terminate(); generationWorker = null; setGenerationBusy(false); $('#generateProgress').hidden = true; setError(translate('workerUnavailable')); return;
+          }
+          if (message.type !== 'complete' || message.task !== 'preview') return;
+          worker.terminate(); generationWorker = null;
+          generatedPreviewRows = Array.isArray(message.previewRows) ? message.previewRows : [];
+          generatedPreviewMeta = Array.isArray(message.previewMeta) ? message.previewMeta : [];
+          generatedRowCount = Number(message.rowCount) || snapshot.rowCount;
+          generatedSnapshot = snapshot;
+          generatedTestCounts = message.counts || { missing: 0, boundary: 0, invalid: 0 };
+          lastGeneratedSeed = seed; setGenerationBusy(false); $('#generateProgress').hidden = true; $('#generateProgress').value = 100;
+          renderPreview(); updateExportUI(); $('#seedHelp').textContent = `${translate('usedSeedLabel')} ${seed}`;
+          $('#generateStatus').textContent = format('generated', { count: new Intl.NumberFormat(language).format(generatedRowCount) });
+        };
+        worker.onerror = () => {
+          if (worker !== generationWorker) return; worker.terminate(); generationWorker = null; setGenerationBusy(false); $('#generateProgress').hidden = true; setError(translate('workerUnavailable'));
+        };
+        worker.postMessage({ task: 'preview', snapshot, previewLimit: PREVIEW_LIMIT, generatorData: workerGeneratorData() });
+      }
+      function renderPreview() {
+        const previewRows = generatedPreviewRows.slice(0, PREVIEW_LIMIT); $('#previewEmpty').hidden = true; $('#previewResult').hidden = false;
+        const headRow = document.createElement('tr');
+        for (const column of state.columns) { const th = document.createElement('th'); th.scope = 'col'; th.textContent = column.name.trim(); headRow.append(th); }
+        $('#previewHead').replaceChildren(headRow);
+        const body = $('#previewBodyRows'); body.textContent = '';
+        previewRows.forEach((row,rowIndex) => {
+          const tr = document.createElement('tr');
+          for (const column of state.columns) {
+            const name = column.name.trim(); const td = document.createElement('td'); const mode = generatedPreviewMeta[rowIndex]?.[name] || 'normal';
+            const value = row[name]; td.title = value == null ? translate('missingDisplay') : String(value);
+            if (mode === 'normal') td.textContent = value == null ? '' : String(value);
+            else {
+              const wrap = document.createElement('span'); wrap.className = 'value-with-status';
+              const badge = document.createElement('span'); badge.className = `value-status ${mode}`; badge.textContent = translate(mode === 'missing' ? 'statusMissing' : mode === 'boundary' ? 'statusBoundary' : 'statusInvalid');
+              const text = document.createElement('span'); text.textContent = value == null ? translate('missingDisplay') : String(value);
+              wrap.append(badge,text); td.append(wrap);
+            }
+            tr.append(td);
+          }
+          body.append(tr);
+        });
+        $('#generatedCountText').textContent = format('generatedCount', { count: new Intl.NumberFormat(language).format(generatedRowCount) });
+        $('#previewLimitText').textContent = format('previewLimit', { count: new Intl.NumberFormat(language).format(previewRows.length) });
+        const summary = $('#testSummary'); const totalSpecial = generatedTestCounts.missing + generatedTestCounts.boundary + generatedTestCounts.invalid;
+        summary.hidden = totalSpecial === 0;
+        summary.textContent = totalSpecial ? format('testSummary', { missing: new Intl.NumberFormat(language).format(generatedTestCounts.missing), boundary: new Intl.NumberFormat(language).format(generatedTestCounts.boundary), invalid: new Intl.NumberFormat(language).format(generatedTestCounts.invalid) }) : '';
+      }
+      function formatLabel(formatName) { return String(formatName || '').toUpperCase(); }
+      function exportExtension(formatName) { return ({ csv: '.csv', tsv: '.tsv', json: '.json', jsonl: '.jsonl' })[formatName] || '.txt'; }
+      function exportMime(formatName) { return ({ csv: 'text/csv;charset=utf-8', tsv: 'text/tab-separated-values;charset=utf-8', json: 'application/json;charset=utf-8', jsonl: 'application/x-ndjson;charset=utf-8' })[formatName] || 'text/plain;charset=utf-8'; }
+      function sanitizeFilenameBase(value) {
+        return String(value || '').trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-').replace(/[. ]+$/g, '').slice(0,120);
+      }
+      function updateExportUI() {
+        const formatName = $('#exportFormat').value; const label = formatLabel(formatName); const count = new Intl.NumberFormat(language).format(generatedRowCount);
+        $('#outputExtension').textContent = exportExtension(formatName); $('#encodingField').hidden = !['csv','tsv'].includes(formatName); $('#saveOutputText').textContent = format('saveFormat', { format: label });
+        if (!exportBusy) $('#exportStatus').textContent = generatedRowCount ? format('exportReady', { count, format: label }) : translate('exportReadyAfterGenerate');
+        $('#saveOutputButton').disabled = exportBusy || generationBusy || !generatedRowCount;
+      }
+      function handleExportProgress(message, formatName) {
+        const done = Number(message.done) || 0; const total = Number(message.total) || generatedRowCount; const percent = Number(message.percent) || 0;
+        $('#exportProgress').hidden = false; $('#exportProgress').value = percent;
+        $('#exportStatus').textContent = message.phase === 'prepare' ? format('exportPreparing', { format: formatLabel(formatName) }) : format('exportProgress', { format: formatLabel(formatName), done: new Intl.NumberFormat(language).format(done), total: new Intl.NumberFormat(language).format(total), percent });
+      }
+      function saveGeneratedOutput() {
+        if (!generatedRowCount || !generatedSnapshot || generationBusy || exportBusy) return;
+        saveExportPrefs(); const base = sanitizeFilenameBase(outputFilename);
+        if (!base) { AppToast.show({ message: translate('errorFilename') }); $('#outputNameInput').focus(); return; }
+        if (base !== $('#outputNameInput').value.trim()) $('#outputNameInput').value = base;
+        outputFilename = base; exportPrefs.filename = base; writeStorage(storageKeys.export, JSON.stringify(exportPrefs));
+        const formatName = $('#exportFormat').value; const newline = $('#newlineSelect').value === 'crlf' ? '\r\n' : '\n';
+        const bom = ['csv','tsv'].includes(formatName) && $('#encodingSelect').value === 'utf8bom' ? '\ufeff' : '';
+        exportParts = bom ? [bom] : []; setExportBusy(true); $('#exportProgress').hidden = false; $('#exportProgress').value = 0; $('#exportStatus').textContent = format('exportPreparing', { format: formatLabel(formatName) });
+        let worker;
+        try { worker = createGeneratorWorker(); } catch { exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); return; }
+        exportWorker = worker;
+        worker.onmessage = event => {
+          if (worker !== exportWorker) return; const message = event.data || {};
+          if (message.type === 'chunk') { exportParts.push(String(message.text || '')); return; }
+          if (message.type === 'progress') { handleExportProgress(message, formatName); return; }
+          if (message.type === 'error') {
+            worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); updateExportUI(); return;
+          }
+          if (message.type !== 'complete' || message.task !== 'export') return;
+          worker.terminate(); exportWorker = null;
+          try {
+            const blob = new Blob(exportParts, { type: exportMime(formatName) }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); const filename = `${base}${exportExtension(formatName)}`;
+            link.href = url; link.download = filename; link.hidden = true; document.body.append(link); link.click(); link.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+            AppToast.show({ message: format('savedFile', { format: formatLabel(formatName), name: filename }), tone: 'success' });
+          } catch { AppToast.show({ message: translate('exportFailed') }); }
+          exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; $('#exportProgress').value = 100; updateExportUI();
+        };
+        worker.onerror = () => {
+          if (worker !== exportWorker) return; worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); updateExportUI();
+        };
+        worker.postMessage({ task: 'export', snapshot: generatedSnapshot, options: { format: formatName, newline }, generatorData: workerGeneratorData() });
+      }
+
+      function schemaPayload() {
+        return {
+          version: 1,
+          app: 'test-data-generator',
+          generator: 'xmur3-mulberry32-v1',
+          rows: Number(state.rowCount),
+          seed: String(state.seed ?? ''),
+          columns: state.columns.map(({ name, type, settings, test }) => ({ name, type, settings: { ...(settings || {}) }, test: normalizeTestSettings(type, test) }))
+        };
+      }
+      function saveSchemaFile() {
+        state.rowCount = Number($('#rowCount').value); state.seed = String($('#seedInput').value ?? '').trim(); saveSettings();
+        const error = validate(); if (error) { setError(error); return; }
+        const text = JSON.stringify(schemaPayload(), null, 2);
+        const blob = new Blob([text], { type: 'application/json;charset=utf-8' }); const url = URL.createObjectURL(blob);
+        const link = document.createElement('a'); const filename = 'test-data-schema.json'; link.href = url; link.download = filename; link.hidden = true; document.body.append(link); link.click(); link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 0);
+        AppToast.show({ message: format('schemaSaved', { name: filename }), tone: 'success' });
+      }
+      function parseSchemaFile(text) {
+        const parsed = JSON.parse(text);
+        if (!parsed || parsed.version !== 1 || parsed.app !== 'test-data-generator' || parsed.generator !== 'xmur3-mulberry32-v1' || !Array.isArray(parsed.columns)) throw new Error('schema');
+        const rows = Number(parsed.rows); if (!Number.isInteger(rows) || rows < 1 || rows > MAX_ROWS) throw new Error('rows');
+        if (typeof parsed.seed !== 'string' || parsed.seed.length > 128) throw new Error('seed');
+        if (parsed.columns.length < 1 || parsed.columns.length > 200) throw new Error('columns');
+        const columns = parsed.columns.map(raw => {
+          if (!raw || typeof raw.name !== 'string' || !raw.name.trim() || raw.name.length > 80 || !supportedTypes.includes(raw.type) || !raw.settings || typeof raw.settings !== 'object' || Array.isArray(raw.settings)) throw new Error('column');
+          const column = newColumn(raw.type, raw.name); column.settings = { ...column.settings, ...raw.settings }; column.test = normalizeTestSettings(column.type, raw.test); return column;
+        });
+        const candidate = { rowCount: rows, seed: parsed.seed, columns };
+        const previous = state; state = candidate; const error = validate(); state = previous; if (error) throw new Error('validation');
+        return candidate;
+      }
+      async function loadSchemaFile(file) {
+        if (!file) return;
+        if (file.size > 1024 * 1024) { AppToast.show({ message: translate('schemaTooLarge') }); return; }
+        let candidate;
+        try { candidate = parseSchemaFile(await file.text()); } catch { AppToast.show({ message: translate('schemaInvalid') }); return; }
+        const ok = await AppConfirm.ask({ title: translate('schemaLoadTitle'), message: translate('schemaLoadBody'), confirmLabel: translate('schemaLoadAction'), cancelLabel: translate('cancel') });
+        if (!ok) return;
+        state = candidate; lastGeneratedSeed = ''; generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 }; $('#rowCount').value = String(state.rowCount); $('#seedInput').value = state.seed;
+        $('#seedHelp').textContent = translate('seedHelp'); $('#regenerateButton').disabled = true;
+        saveSettings(); setError(''); renderColumns(); updatePresetUI(); clearGenerated(); $('#generateStatus').textContent = translate('readyToGenerate');
+        AppToast.show({ message: translate('schemaLoaded'), tone: 'success' });
+      }
+
+      function applyLanguage() {
+        document.documentElement.lang = language;
+        document.querySelectorAll('[data-i18n]').forEach(element => { element.textContent = translate(element.dataset.i18n); });
+        document.querySelectorAll('[data-i18n-title]').forEach(element => { element.title = translate(element.dataset.i18nTitle); });
+        document.querySelectorAll('[data-i18n-aria-label]').forEach(element => { element.setAttribute('aria-label', translate(element.dataset.i18nAriaLabel)); });
+        $('#languageButton').textContent = language === 'ja' ? 'EN' : '日本語';
+        $('#languageButton').setAttribute('aria-label', language === 'ja' ? '英語に切り替え' : 'Switch to Japanese');
+        document.title = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name; $('#brandName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name; $('#footerName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;
+        renderColumns(); updatePresetUI();
+        if (generatedRowCount) {
+          renderPreview();
+          $('#generateStatus').textContent = format('generated', { count: new Intl.NumberFormat(language).format(generatedRowCount) });
+        }
+        if (lastGeneratedSeed) $('#seedHelp').textContent = `${translate('usedSeedLabel')} ${lastGeneratedSeed}`; else $('#seedHelp').textContent = translate('seedHelp');
+        updateExportUI();
+      }
+
+      $('#languageButton').addEventListener('click', () => { language = language === 'ja' ? 'en' : 'ja'; writeStorage(storageKeys.language, language); applyLanguage(); });
+      const helpDialog = $('#helpDialog'); $('#helpButton').addEventListener('click', () => helpDialog.showModal()); $('#closeHelpButton').addEventListener('click', () => helpDialog.close());
+      helpDialog.addEventListener('click', event => { const rect = helpDialog.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outside) helpDialog.close(); });
+      $('#rowCount').addEventListener('input', event => { state.rowCount = Number(event.target.value); invalidateAfterChange(); });
+      $('#seedInput').addEventListener('input', event => { state.seed = event.target.value; saveSettings(); setError(''); if (generatedRowCount) clearGenerated('seedChanged'); });
+      $('#randomSeedButton').addEventListener('click', () => { const seed = createAutomaticSeed(); state.seed = seed; $('#seedInput').value = seed; saveSettings(); setError(''); if (generatedRowCount) clearGenerated('seedChanged'); $('#seedHelp').textContent = translate('seedHelp'); });
+      $('#regenerateButton').addEventListener('click', () => { if (!lastGeneratedSeed) return; state.seed = lastGeneratedSeed; $('#seedInput').value = lastGeneratedSeed; generate(); });
+      $('#saveSchemaButton').addEventListener('click', saveSchemaFile);
+      $('#loadSchemaButton').addEventListener('click', () => $('#schemaFileInput').click());
+      $('#schemaFileInput').addEventListener('change', async event => { const file = event.target.files?.[0]; event.target.value = ''; await loadSchemaFile(file); });
+      $('#testPresetButtons').addEventListener('click', event => { const button = event.target.closest('[data-preset]'); if (button) applyPreset(button.dataset.preset); });
+      $('#columnList').addEventListener('input', event => { const row = event.target.closest('.column-row'); if (row) updateColumnFromElement(row, event.target); });
+      $('#columnList').addEventListener('change', event => { const row = event.target.closest('.column-row'); if (row) updateColumnFromElement(row, event.target); });
+      $('#columnList').addEventListener('click', event => {
+        const button = event.target.closest('[data-action]'); if (!button) return; const row = button.closest('.column-row');
+        const index = state.columns.findIndex(column => column.id === Number(row.dataset.columnId));
+        if (button.dataset.action === 'up') moveColumn(index, -1); else if (button.dataset.action === 'down') moveColumn(index, 1); else if (button.dataset.action === 'duplicate') duplicateColumn(index); else if (button.dataset.action === 'delete') deleteColumn(index);
+      });
+      function addColumn() {
+        if (state.columns.length >= 200) return;
+        const base = `column_${state.columns.length + 1}`; state.columns.push(newColumn('string', base, detectPreset() === 'custom' ? 'normal' : detectPreset())); invalidateAfterChange(); renderColumns(); updatePresetUI(); AppToast.show({ message: translate('added') });
+      }
+      $('#addColumnButton').addEventListener('click', addColumn);
+      $('#emptyAddColumnButton').addEventListener('click', addColumn);
+      $('#templateSelect').addEventListener('change', event => { $('#applyTemplateButton').disabled = !columnTemplates[event.target.value]; });
+      $('#applyTemplateButton').addEventListener('click', applySelectedTemplate);
+      $('#generateButton').addEventListener('click', generate);
+      $('#cancelGenerateButton').addEventListener('click', () => cancelGeneration(false));
+      $('#exportFormat').addEventListener('change', () => { saveExportPrefs(); updateExportUI(); });
+      $('#encodingSelect').addEventListener('change', saveExportPrefs);
+      $('#newlineSelect').addEventListener('change', saveExportPrefs);
+      $('#outputNameInput').addEventListener('input', saveExportPrefs);
+      $('#outputNameInput').addEventListener('blur', () => { const cleaned = sanitizeFilenameBase($('#outputNameInput').value); if (cleaned) { $('#outputNameInput').value = cleaned; saveExportPrefs(); } });
+      $('#saveOutputButton').addEventListener('click', saveGeneratedOutput);
+      $('#cancelExportButton').addEventListener('click', () => cancelExport(false));
+      $('#resetButton').addEventListener('click', async () => {
+        const ok = await AppConfirm.ask({ title: translate('resetConfirmTitle'), message: translate('resetConfirmBody'), confirmLabel: translate('resetConfirmAction'), cancelLabel: translate('cancel'), tone: 'danger' });
+        if (!ok) return; state = createInitialState(); lastGeneratedSeed = ''; generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 }; $('#rowCount').value = String(state.rowCount); $('#seedInput').value = state.seed; $('#seedHelp').textContent = translate('seedHelp'); $('#regenerateButton').disabled = true; saveSettings(); setError(''); renderColumns(); updatePresetUI(); clearGenerated(); $('#generateStatus').textContent = translate('readyToGenerate'); AppToast.show({ message: translate('resetDone') });
+      });
+
+      window.addEventListener('pagehide', () => { cancelGeneration(true); cancelExport(true); });
+
+      $('#rowCount').value = String(state.rowCount); $('#seedInput').value = String(state.seed ?? '');
+      $('#versionBadge').textContent = `v${APP_CONFIG.version}`; $('#buildVersion').textContent = APP_CONFIG.version; $('#builtAt').textContent = BUILD_MANIFEST.generatedAtUtc || '—'; $('#dependencyCount').textContent = String(BUILD_MANIFEST.dependencies?.length || 0);
+      applyLanguage();
+    })();
+  </script>
+</body>
+</html>
