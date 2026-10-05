@@ -63,6 +63,10 @@ In v1.0.0, Japanese fields remain independent: for example, a generated name and
 7. Choose an output format and filename, then save the generated file.
 8. Use **Save settings file** if you want to keep the row count, Seed, and column schema for later.
 
+Numeric settings are required; enter `0` explicitly where allowed. Editing settings or Seed cancels pending work and requires regeneration before saving. Keyboard focus stays with a moved column or changed type; Delete moves to a neighboring name and Undo returns to the restored name.
+
+Known filename extensions are normalized to the selected format (`sample.csv` becomes `sample.json` when saving JSON). Blank names use `test-data`.
+
 ## Privacy
 
 Generation runs entirely in the browser. The app does not upload column settings or generated rows, and it does not use analytics or telemetry. Japanese dictionaries are embedded in the HTML. Column settings and Seed may be saved in local browser storage so they can be restored after reload. Generated rows are not stored automatically. Settings files contain configuration only and are created locally.
@@ -114,3 +118,5 @@ Current stable desktop and mobile Chromium, Firefox, and Safari are the target. 
 ## License
 
 [MIT License](LICENSE)
+
+Application regression checks require Node.js 22 or newer (CI uses Node.js 24). The repository check tests source and all generated variants; the normal build also refreshes `test-data-generator.html`.

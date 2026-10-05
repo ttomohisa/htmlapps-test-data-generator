@@ -242,3 +242,13 @@ if (-not $webrtcReadyText.Contains("options.requireReadyChannelOpen!==false&&(!r
   throw "WebRTC application-ready must wait for the designated DataChannel to open."
 }
 
+
+# Run the actual application and worker regressions in each shipped variant.
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js 22 or newer is required for application regression tests." }
+foreach ($target in @("src/index.template.html", "dist/index.html", "dist/index.self-extract.html", "test-data-generator.html")) {
+  & node (Join-Path $Root "scripts/test-data-behavior.test.cjs") (Join-Path $Root $target)
+  if ($LASTEXITCODE -ne 0) { throw "Application regression tests failed: $target" }
+}
+& node (Join-Path $Root "scripts/test-data-release.test.cjs")
+if ($LASTEXITCODE -ne 0) { throw "Release parity checks failed." }
+Write-Host "[OK] Application and release checks passed." -ForegroundColor Green
