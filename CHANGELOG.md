@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Reject blank required numeric settings instead of treating them as zero; preserve valid explicit zero values.
+- Keep keyboard focus during column moves/type changes, and provide predictable deletion/Undo focus and localized desktop control names.
+- Normalize export extensions across CSV/TSV/JSON/JSONL and use a valid default for blank filenames.
+- Cancel stale generation/export work when Seed changes or settings are reset/replaced.
+- Add deterministic small-data behavior regressions to CI and regenerate the root standalone download alongside readable/self-extract builds.
+
 ## [1.0.0] - 2026-09-06
 
 ### Stable release

@@ -570,7 +570,7 @@
             </select>
           </label>
         </div>
-        <p class="summary-note export-note" id="outputFilenameHelp" data-i18n="outputFilenameHelp">拡張子は自動で付きます。</p>
+        <p class="summary-note export-note" id="outputFilenameHelp" data-i18n="outputFilenameHelp">拡張子は選んだ形式に合わせます。空欄なら test-data を使います。</p>
         <div class="export-actions">
           <div class="process-status">
             <span class="export-status" id="exportStatus" aria-live="polite" data-i18n="exportReadyAfterGenerate">データを生成すると保存できます。</span>
@@ -637,8 +637,8 @@
       <ol>
         <li data-i18n="helpStep1">生成件数を指定します。</li>
         <li data-i18n="helpStep2">列名とデータの種類を設定します。列は追加・複製・削除・並べ替えでき、テンプレートからまとめて設定できます。</li>
-        <li data-i18n="helpStep3">「データを生成」を押し、先頭20件のプレビューを確認します。</li>
-        <li data-i18n="helpStep4">保存形式とファイル名を選び、CSV / TSV / JSON / JSONLとして保存します。</li>
+        <li data-i18n="helpStep3">数値設定は空欄にせず入力し、「データを生成」を押します。設定・Seedを変更したら、保存する前にもう一度生成してください。</li>
+        <li data-i18n="helpStep4">保存形式とファイル名を選びます。拡張子は選んだ形式に合わせ、空欄の名前には test-data を使います。</li>
       </ol>
       <h3 data-i18n="helpTypesTitle">v1.0.0で使える種類</h3>
       <p data-i18n="helpTypesBody">連番、整数、小数、真偽値、UUID、ランダム文字列、選択肢、固定値、日付、日時、金額、パーセント、URL、IPv4に対応しています。</p>
@@ -660,7 +660,7 @@
       'use strict';
 
       const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Test Data Generator","nameJa":"テストデータ生成","slug":"test-data-generator","version":"1.0.0","description":"Generate reproducible test data locally in the browser with 23 data types, deterministic Seed reproduction, missing/boundary/invalid values, templates, large-data background processing, and CSV / TSV / JSON / JSONL export.","descriptionJa":"23種類のデータ、Seedによる再現、欠損・境界・異常値、テンプレート、大量データのバックグラウンド処理、CSV / TSV / JSON / JSONL保存に対応した完全ローカル処理のテストデータ生成ツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-test-data-generator"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":25,"selfExtractWarningMb":12}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-09-05T17:35:31.4445668Z","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.0.0"},"dependencies":[]};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-05T03:30:05.3686070Z","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.0.0"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -737,14 +737,14 @@
           generationSettingsTitle: '生成設定', generationSettingsBody: '件数、Seed、テスト配合を指定します。v1.0.0では最大1,000,000件です。', rowCountLabel: '生成件数', rowCountHelp: '1〜1,000,000件（列数に応じて安全上限があります）', seedLabel: 'Seed', seedHelp: '空欄なら生成時にSeedを自動作成します。', randomSeed: 'Seedを変更', randomSeedShort: '変更', regenerateSameSeed: '同じSeedでもう一度生成', usedSeedLabel: '今回のSeed:', saveSchema: '設定ファイルを保存', loadSchema: '設定ファイルを読み込む', schemaSaved: '設定ファイルを作成しました：{name}', schemaLoaded: '設定ファイルを読み込みました。', schemaLoadTitle: '設定ファイルを読み込みますか？', schemaLoadBody: '現在の列設定・件数・Seedを、読み込んだ設定で置き換えます。生成結果は消去されます。', schemaLoadAction: '読み込む', schemaInvalid: 'この設定ファイルは読み込めません。Test Data Generatorの設定ファイルか確認してください。', schemaTooLarge: '設定ファイルが大きすぎます。1 MB以下のJSONファイルを選んでください。', settingsSavedNote: '列設定とSeedは、このブラウザー内に保存されます。生成したデータ自体は自動保存しません。', testPresetLabel: 'テスト配合', presetNormal: '通常', presetLight: '軽くテスト', presetStrict: '厳しめテスト', presetCustom: '現在：カスタム', testPresetHelp: '全列へまとめて適用します。列ごとに割合を調整できます。', presetApplied: '「{name}」を全列に適用しました。', templateLabel: 'テンプレート', templateChoose: 'テンプレートを選択', templateUser: 'ユーザー', templateCustomer: '顧客', templateEmployee: '社員', templateProduct: '商品', templateOrder: '注文', templateInquiry: '問い合わせ', templateAccessLog: 'アクセスログ', applyTemplate: '適用', templateHelp: 'よく使う列構成をまとめて設定します。現在の列は置き換わります。', templateConfirmTitle: 'テンプレートを適用しますか？', templateConfirmBody: '現在の列設定を「{name}」テンプレートで置き換えます。生成結果も消去されます。', templateConfirmAction: 'テンプレートを適用', templateApplied: '「{name}」テンプレートを適用しました。',
           columnsTitle: '列設定', columnsBody: '列名、データの種類、生成方法を設定します。', reset: '初期状態に戻す', columnName: '列名', dataType: 'データの種類', typeSettings: '設定', testValues: 'テスト値', operations: '操作', addColumn: '列を追加',
           emptyColumnsTitle: '列がありません', emptyColumnsBody: '生成したいデータの列を追加してください。', readyToGenerate: '設定後に「データを生成」を押してください。', generate: 'データを生成', generationProgressLabel: '生成の進捗', cancelGeneration: '生成を中止', generationPreparing: '生成の準備をしています…', generatingProgress: '{done} / {total}件（{percent}%）', generationCancelled: '生成を中止しました。',
-          previewTitle: 'プレビュー', previewBody: '生成結果の先頭20件を確認できます。', previewEmptyTitle: 'まだデータを生成していません', previewEmptyBody: '列を設定して「データを生成」を押すと、ここに結果が表示されます。', outputTitle: '保存', outputBody: '生成したデータをファイルとして保存します。', outputFormatLabel: '形式', outputFilenameLabel: 'ファイル名', outputFilenameHelp: '拡張子は自動で付きます。', encodingLabel: '文字コード', newlineLabel: '改行', exportReadyAfterGenerate: 'データを生成すると保存できます。', exportReady: '{count}件を{format}で保存できます。', saveFormat: '{format}を保存', savedFile: '{format}を作成しました：{name}', errorFilename: 'ファイル名を入力してください。', exportProgressLabel: '保存の進捗', cancelExport: '保存を中止', exportPreparing: '{format}を準備しています…', exportProgress: '{format}を作成中：{done} / {total}件（{percent}%）', exportCancelled: '保存を中止しました。', exportFailed: 'ファイルを作成できませんでした。もう一度お試しください。', futureNote: 'テンプレートから列を始めたり、Seed・欠損・境界・異常値を組み合わせてCSV / TSV / JSON / JSONLとして保存できます。',
+          previewTitle: 'プレビュー', previewBody: '生成結果の先頭20件を確認できます。', previewEmptyTitle: 'まだデータを生成していません', previewEmptyBody: '列を設定して「データを生成」を押すと、ここに結果が表示されます。', outputTitle: '保存', outputBody: '生成したデータをファイルとして保存します。', outputFormatLabel: '形式', outputFilenameLabel: 'ファイル名', outputFilenameHelp: '拡張子は選んだ形式に合わせます。空欄なら test-data を使います。', encodingLabel: '文字コード', newlineLabel: '改行', exportReadyAfterGenerate: 'データを生成すると保存できます。', exportReady: '{count}件を{format}で保存できます。', saveFormat: '{format}を保存', savedFile: '{format}を作成しました：{name}', exportProgressLabel: '保存の進捗', cancelExport: '保存を中止', exportPreparing: '{format}を準備しています…', exportProgress: '{format}を作成中：{done} / {total}件（{percent}%）', exportCancelled: '保存を中止しました。', exportFailed: 'ファイルを作成できませんでした。もう一度お試しください。', futureNote: 'テンプレートから列を始めたり、Seed・欠損・境界・異常値を組み合わせてCSV / TSV / JSON / JSONLとして保存できます。',
           typeGroupBasic: '基本', typeGroupJapanese: '日本語データ', typeSequence: '連番', typeInteger: '整数', typeDecimal: '小数', typeBoolean: '真偽値', typeUuid: 'UUID', typeString: 'ランダム文字列', typeChoice: '選択肢', typeFixed: '固定値', typeDate: '日付', typeDatetime: '日時', typeMoney: '金額', typePercent: 'パーセント', typeUrl: 'URL', typeIpv4: 'IPv4', typeJaName: '日本人氏名', typeJaKana: 'ふりがな', typeEmail: 'メールアドレス', typePhone: '電話番号', typePostal: '郵便番号', typePrefecture: '都道府県', typeCity: '市区町村', typeJaAddress: '日本風住所', typeCompany: '会社名', namePart: '氏名の範囲', nameFull: '姓名', nameSurname: '姓のみ', nameGiven: '名のみ', kanaScript: '表記', kanaHiragana: 'ひらがな', kanaKatakana: 'カタカナ', emailDomain: 'ドメイン', phoneKind: '種類', phoneMixed: '混在', phoneMobile: '携帯電話', phoneLandline: '固定電話', start: '開始値', step: '増分', min: '最小値', max: '最大値', decimals: '小数桁数', length: '文字数', fixedValue: '値', booleanFormat: '出力形式', booleanTrueFalse: 'true / false', booleanOneZero: '1 / 0', booleanYesNo: 'YES / NO', choices: '候補（1行1項目）', startDate: '開始日', endDate: '終了日', dateFormat: '日付形式', dateDash: 'YYYY-MM-DD', dateSlash: 'YYYY/MM/DD', startDatetime: '開始日時', endDatetime: '終了日時', datetimeFormat: '日時形式', datetimeIso: 'ISO 8601', datetimeSpace: 'YYYY-MM-DD HH:mm:ss', moneyStep: '刻み', percentRange: '範囲', percent100: '0〜100', percent1: '0〜1', urlBase: 'ベースURL',
           moveUp: '上へ移動', moveDown: '下へ移動', duplicateColumn: '列を複製', deleteColumn: '列を削除', columnsCount: '{count}列', generatedCount: '{count}件生成', previewLimit: '先頭{count}件を表示', missingRate: '欠損 %', boundaryRate: '境界 %', invalidRate: '異常 %', boundaryUnavailable: 'この種類は境界値なし', statusMissing: '欠損', statusBoundary: '境界', statusInvalid: '異常', missingDisplay: '(空)', testSummary: '欠損 {missing} / 境界 {boundary} / 異常 {invalid}',
           generating: '生成しています…', generated: '{count}件生成しました。', workerUnavailable: 'このブラウザーでは大量生成用の処理を開始できませんでした。', settingsChanged: '設定を変更しました。もう一度生成してください。', seedChanged: 'Seedを変更しました。もう一度生成してください。',
           errorRows: '生成件数は1〜1,000,000の整数で入力してください。', errorCells: '生成件数 × 列数は10,000,000セル以下にしてください。列数か生成件数を減らしてください。', errorNoColumns: '列を1つ以上追加してください。', errorEmptyName: '列名が空の列があります。', errorDuplicateName: '同じ列名が使用されています。列名は重複しないようにしてください。', errorSequence: '連番の開始値と増分は整数で入力してください。', errorInteger: '整数の最小値と最大値を確認してください。最小値は最大値以下にしてください。', errorDecimal: '小数の範囲と小数桁数を確認してください。小数桁数は0〜10です。', errorString: 'ランダム文字列の文字数は1〜128の整数で入力してください。', errorChoice: '選択肢を1つ以上入力してください。1行を1項目として扱います。', errorDate: '日付の開始日と終了日を確認してください。開始日は終了日以前にしてください。', errorDatetime: '日時の開始日時と終了日時を確認してください。開始日時は終了日時以前にしてください。', errorMoney: '金額の最小値・最大値・刻みを確認してください。刻みは0より大きくしてください。', errorPercent: 'パーセントの小数桁数は0〜6の整数で入力してください。', errorUrl: 'ベースURLは http:// または https:// で始まる有効なURLを入力してください。', errorEmail: 'メールアドレスのドメインを確認してください。例: example.com', errorTestRates: 'テスト値の割合は0〜100の整数で、合計が100%以下になるようにしてください。',
           deleted: '「{name}」を削除しました。', undo: '元に戻す', undone: '元に戻しました。', added: '列を追加しました。', duplicated: '「{name}」を複製しました。', resetDone: '初期状態に戻しました。',
           confirmTitle: '確認', confirmAction: '実行する', cancel: 'キャンセル', resetConfirmTitle: '列設定を初期状態に戻しますか？', resetConfirmBody: '現在の列設定と生成結果を消して、最初の設定に戻します。', resetConfirmAction: '初期状態に戻す',
-          helpBasicsTitle: '基本操作', helpStep1: '生成件数を指定します。', helpStep2: '列名とデータの種類を設定します。列は追加・複製・削除・並べ替えでき、テンプレートからまとめて設定できます。', helpStep3: '「データを生成」を押し、先頭20件のプレビューを確認します。', helpStep4: '保存形式とファイル名を選び、CSV / TSV / JSON / JSONLとして保存します。', helpTypesTitle: 'v1.0.0で使える種類', helpTypesBody: '基本型に加え、日本人氏名、ふりがな、メールアドレス、電話番号、郵便番号、都道府県、市区町村、日本風住所、会社名に対応しています。日本語の各列はv1.0.0でも独立生成です。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: '設定と生成処理はブラウザー内で完結します。このアプリから入力内容や生成結果を外部へ送信しません。', helpNotesTitle: '注意事項', helpNoteStorage: '列設定はブラウザー内に保存されます。ブラウザーのサイトデータを削除すると設定も消える場合があります。', helpNotePreview: 'v1.0.0のプレビューは先頭20件です。最大1,000,000件まで指定できます。大量処理はバックグラウンドで進み、生成・保存を途中で中止できます。端末保護のため、生成件数 × 列数は10,000,000セル以下に制限しています。', helpNoteRoadmap: '同じ設定・件数・Seedでは同じ結果を再生成できます。列ごとに欠損・境界・異常値の割合を設定でき、プリセットで全列へまとめて適用できます。7種類のテンプレートから列構成を始めることもできます。設定ファイルには生成済みデータは含まれません。', helpOffline: '必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。',
+          helpBasicsTitle: '基本操作', helpStep1: '生成件数を指定します。', helpStep2: '列名とデータの種類を設定します。列は追加・複製・削除・並べ替えでき、テンプレートからまとめて設定できます。', helpStep3: '数値設定は空欄にせず入力し、「データを生成」を押します。設定・Seedを変更したら、保存する前にもう一度生成してください。', helpStep4: '保存形式とファイル名を選びます。CSV / TSV / JSON / JSONLの拡張子は選んだ形式に合わせ、空欄の名前には test-data を使います。', helpTypesTitle: 'v1.0.0で使える種類', helpTypesBody: '基本型に加え、日本人氏名、ふりがな、メールアドレス、電話番号、郵便番号、都道府県、市区町村、日本風住所、会社名に対応しています。日本語の各列はv1.0.0でも独立生成です。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: '設定と生成処理はブラウザー内で完結します。このアプリから入力内容や生成結果を外部へ送信しません。', helpNotesTitle: '注意事項', helpNoteStorage: '列設定はブラウザー内に保存されます。ブラウザーのサイトデータを削除すると設定も消える場合があります。', helpNotePreview: 'v1.0.0のプレビューは先頭20件です。最大1,000,000件まで指定できます。大量処理はバックグラウンドで進み、生成・保存を途中で中止できます。端末保護のため、生成件数 × 列数は10,000,000セル以下に制限しています。', helpNoteRoadmap: '同じ設定・件数・Seedでは同じ結果を再生成できます。列ごとに欠損・境界・異常値の割合を設定でき、プリセットで全列へまとめて適用できます。7種類のテンプレートから列構成を始めることもできます。設定ファイルには生成済みデータは含まれません。', helpOffline: '必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。',
           buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数', footer: '完全内包HTMLとして生成'
         },
         en: {
@@ -753,14 +753,14 @@
           generationSettingsTitle: 'Generation settings', generationSettingsBody: 'Choose the row count, Seed, and test mix. v1.0.0 supports up to 1,000,000 rows.', rowCountLabel: 'Rows', rowCountHelp: '1 to 1,000,000 rows (a safe cell limit also applies)', seedLabel: 'Seed', seedHelp: 'Leave blank to create a Seed automatically when generating.', randomSeed: 'Change Seed', randomSeedShort: 'Change', regenerateSameSeed: 'Generate again with same Seed', usedSeedLabel: 'Seed used:', saveSchema: 'Save settings file', loadSchema: 'Load settings file', schemaSaved: 'Created settings file: {name}', schemaLoaded: 'Loaded the settings file.', schemaLoadTitle: 'Load this settings file?', schemaLoadBody: 'This replaces the current columns, row count, and Seed. The generated result will be cleared.', schemaLoadAction: 'Load settings', schemaInvalid: 'This settings file could not be loaded. Check that it was created by Test Data Generator.', schemaTooLarge: 'The settings file is too large. Choose a JSON file no larger than 1 MB.', settingsSavedNote: 'Column settings and Seed are saved in this browser. Generated rows are not saved automatically.', testPresetLabel: 'Test mix', presetNormal: 'Normal', presetLight: 'Light test', presetStrict: 'Stricter test', presetCustom: 'Current: Custom', testPresetHelp: 'Apply a mix to all columns, then fine-tune each column if needed.', presetApplied: 'Applied “{name}” to all columns.', templateLabel: 'Template', templateChoose: 'Choose a template', templateUser: 'User', templateCustomer: 'Customer', templateEmployee: 'Employee', templateProduct: 'Product', templateOrder: 'Order', templateInquiry: 'Inquiry', templateAccessLog: 'Access log', applyTemplate: 'Apply', templateHelp: 'Set up a common column layout at once. This replaces the current columns.', templateConfirmTitle: 'Apply this template?', templateConfirmBody: 'This replaces the current columns with the “{name}” template and clears the generated result.', templateConfirmAction: 'Apply template', templateApplied: 'Applied the “{name}” template.',
           columnsTitle: 'Columns', columnsBody: 'Set each column name, data type, and generation settings.', reset: 'Reset settings', columnName: 'Column name', dataType: 'Data type', typeSettings: 'Settings', testValues: 'Test values', operations: 'Actions', addColumn: 'Add column',
           emptyColumnsTitle: 'No columns', emptyColumnsBody: 'Add at least one column to generate data.', readyToGenerate: 'Configure the columns, then select Generate data.', generate: 'Generate data', generationProgressLabel: 'Generation progress', cancelGeneration: 'Cancel generation', generationPreparing: 'Preparing generation…', generatingProgress: '{done} / {total} rows ({percent}%)', generationCancelled: 'Generation cancelled.',
-          previewTitle: 'Preview', previewBody: 'Review the first 20 generated rows.', previewEmptyTitle: 'No data generated yet', previewEmptyBody: 'Configure the columns and select Generate data to see the result here.', outputTitle: 'Save', outputBody: 'Save the generated data as a file.', outputFormatLabel: 'Format', outputFilenameLabel: 'Filename', outputFilenameHelp: 'The extension is added automatically.', encodingLabel: 'Encoding', newlineLabel: 'Line endings', exportReadyAfterGenerate: 'Generate data before saving.', exportReady: '{count} rows are ready to save as {format}.', saveFormat: 'Save {format}', savedFile: 'Created {format}: {name}', errorFilename: 'Enter a filename.', exportProgressLabel: 'Save progress', cancelExport: 'Cancel save', exportPreparing: 'Preparing {format}…', exportProgress: 'Creating {format}: {done} / {total} rows ({percent}%)', exportCancelled: 'Save cancelled.', exportFailed: 'Could not create the file. Please try again.', futureNote: 'Start from a template, combine deterministic Seed data with missing, boundary, and invalid values, then save as CSV, TSV, JSON, or JSONL.',
+          previewTitle: 'Preview', previewBody: 'Review the first 20 generated rows.', previewEmptyTitle: 'No data generated yet', previewEmptyBody: 'Configure the columns and select Generate data to see the result here.', outputTitle: 'Save', outputBody: 'Save the generated data as a file.', outputFormatLabel: 'Format', outputFilenameLabel: 'Filename', outputFilenameHelp: 'The extension follows the selected format. Blank names use test-data.', encodingLabel: 'Encoding', newlineLabel: 'Line endings', exportReadyAfterGenerate: 'Generate data before saving.', exportReady: '{count} rows are ready to save as {format}.', saveFormat: 'Save {format}', savedFile: 'Created {format}: {name}', exportProgressLabel: 'Save progress', cancelExport: 'Cancel save', exportPreparing: 'Preparing {format}…', exportProgress: 'Creating {format}: {done} / {total} rows ({percent}%)', exportCancelled: 'Save cancelled.', exportFailed: 'Could not create the file. Please try again.', futureNote: 'Start from a template, combine deterministic Seed data with missing, boundary, and invalid values, then save as CSV, TSV, JSON, or JSONL.',
           typeGroupBasic: 'Basic', typeGroupJapanese: 'Japanese data', typeSequence: 'Sequence', typeInteger: 'Integer', typeDecimal: 'Decimal', typeBoolean: 'Boolean', typeUuid: 'UUID', typeString: 'Random string', typeChoice: 'Choice', typeFixed: 'Fixed value', typeDate: 'Date', typeDatetime: 'Date & time', typeMoney: 'Money', typePercent: 'Percent', typeUrl: 'URL', typeIpv4: 'IPv4', typeJaName: 'Japanese name', typeJaKana: 'Japanese kana name', typeEmail: 'Email address', typePhone: 'Phone number', typePostal: 'Postal code', typePrefecture: 'Prefecture', typeCity: 'City / ward', typeJaAddress: 'Japanese-style address', typeCompany: 'Company name', namePart: 'Name part', nameFull: 'Full name', nameSurname: 'Surname only', nameGiven: 'Given name only', kanaScript: 'Script', kanaHiragana: 'Hiragana', kanaKatakana: 'Katakana', emailDomain: 'Domain', phoneKind: 'Type', phoneMixed: 'Mixed', phoneMobile: 'Mobile', phoneLandline: 'Landline', start: 'Start', step: 'Step', min: 'Min', max: 'Max', decimals: 'Decimal places', length: 'Length', fixedValue: 'Value', booleanFormat: 'Output format', booleanTrueFalse: 'true / false', booleanOneZero: '1 / 0', booleanYesNo: 'YES / NO', choices: 'Choices (one per line)', startDate: 'Start date', endDate: 'End date', dateFormat: 'Date format', dateDash: 'YYYY-MM-DD', dateSlash: 'YYYY/MM/DD', startDatetime: 'Start date/time', endDatetime: 'End date/time', datetimeFormat: 'Date/time format', datetimeIso: 'ISO 8601', datetimeSpace: 'YYYY-MM-DD HH:mm:ss', moneyStep: 'Step', percentRange: 'Range', percent100: '0–100', percent1: '0–1', urlBase: 'Base URL',
           moveUp: 'Move up', moveDown: 'Move down', duplicateColumn: 'Duplicate column', deleteColumn: 'Delete column', columnsCount: '{count} columns', generatedCount: '{count} rows generated', previewLimit: 'Showing first {count}', missingRate: 'Missing %', boundaryRate: 'Boundary %', invalidRate: 'Invalid %', boundaryUnavailable: 'No boundary values for this type', statusMissing: 'Missing', statusBoundary: 'Boundary', statusInvalid: 'Invalid', missingDisplay: '(empty)', testSummary: 'Missing {missing} / Boundary {boundary} / Invalid {invalid}',
           generating: 'Generating…', generated: 'Generated {count} rows.', workerUnavailable: 'This browser could not start the background generator.', settingsChanged: 'Settings changed. Generate again to refresh the preview.', seedChanged: 'Seed changed. Generate again to refresh the preview.',
           errorRows: 'Enter a whole-number row count from 1 to 1,000,000.', errorCells: 'Rows × columns must be 10,000,000 cells or fewer. Reduce the row count or number of columns.', errorNoColumns: 'Add at least one column.', errorEmptyName: 'A column name is empty.', errorDuplicateName: 'Column names must be unique.', errorSequence: 'Sequence start and step must be whole numbers.', errorInteger: 'Check the integer range. Min must be less than or equal to max.', errorDecimal: 'Check the decimal range and decimal places. Decimal places must be from 0 to 10.', errorString: 'Random string length must be a whole number from 1 to 128.', errorChoice: 'Enter at least one choice. Each non-empty line is treated as one value.', errorDate: 'Check the start and end dates. Start must be on or before end.', errorDatetime: 'Check the start and end date/times. Start must be on or before end.', errorMoney: 'Check money min, max, and step. Step must be greater than zero.', errorPercent: 'Percent decimal places must be a whole number from 0 to 6.', errorUrl: 'Enter a valid base URL beginning with http:// or https://.', errorEmail: 'Check the email domain. Example: example.com', errorTestRates: 'Test-value rates must be whole numbers from 0 to 100 and total no more than 100%.',
           deleted: 'Deleted “{name}”.', undo: 'Undo', undone: 'Restored.', added: 'Column added.', duplicated: 'Duplicated “{name}”.', resetDone: 'Settings reset.',
           confirmTitle: 'Confirm', confirmAction: 'Continue', cancel: 'Cancel', resetConfirmTitle: 'Reset the column settings?', resetConfirmBody: 'This clears the current column settings and generated result, then restores the initial setup.', resetConfirmAction: 'Reset settings',
-          helpBasicsTitle: 'Basics', helpStep1: 'Choose how many rows to generate.', helpStep2: 'Set column names and data types. You can add, duplicate, delete, and reorder columns, or start from a template.', helpStep3: 'Select Generate data and review the first 20 rows.', helpStep4: 'Choose a format and filename, then save as CSV, TSV, JSON, or JSONL.', helpTypesTitle: 'Types in v1.0.0', helpTypesBody: 'In addition to the basic types, Japanese name, kana name, email, phone, postal code, prefecture, city/ward, Japanese-style address, and company name are available. Japanese columns are generated independently in v1.0.0.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Settings and generation stay in your browser. This app does not send your input or generated data outside the page.', helpNotesTitle: 'Notes', helpNoteStorage: 'Column settings are saved in browser storage. Clearing site data may remove them.', helpNotePreview: 'v1.0.0 previews the first 20 rows and accepts up to 1,000,000 rows. Large jobs run in the background and generation or saving can be cancelled. To protect the device, rows × columns is limited to 10,000,000 cells.', helpNoteRoadmap: 'The same settings, row count, and Seed reproduce the same result. Set missing, boundary, and invalid rates per column or apply a preset across all columns. You can also start from one of seven column templates. Settings files do not contain generated rows.', helpOffline: 'Required code is embedded in the distributable HTML and the app makes no runtime network request.',
+          helpBasicsTitle: 'Basics', helpStep1: 'Choose how many rows to generate.', helpStep2: 'Set column names and data types. You can add, duplicate, delete, and reorder columns, or start from a template.', helpStep3: 'Fill in numeric settings, then select Generate data. After changing settings or Seed, generate again before saving.', helpStep4: 'Choose CSV, TSV, JSON, or JSONL and a filename. Known extensions follow the selected format; blank names use test-data.', helpTypesTitle: 'Types in v1.0.0', helpTypesBody: 'In addition to the basic types, Japanese name, kana name, email, phone, postal code, prefecture, city/ward, Japanese-style address, and company name are available. Japanese columns are generated independently in v1.0.0.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Settings and generation stay in your browser. This app does not send your input or generated data outside the page.', helpNotesTitle: 'Notes', helpNoteStorage: 'Column settings are saved in browser storage. Clearing site data may remove them.', helpNotePreview: 'v1.0.0 previews the first 20 rows and accepts up to 1,000,000 rows. Large jobs run in the background and generation or saving can be cancelled. To protect the device, rows × columns is limited to 10,000,000 cells.', helpNoteRoadmap: 'The same settings, row count, and Seed reproduce the same result. Set missing, boundary, and invalid rates per column or apply a preset across all columns. You can also start from one of seven column templates. Settings files do not contain generated rows.', helpOffline: 'Required code is embedded in the distributable HTML and the app makes no runtime network request.',
           buildInfo: 'Build information', appVersion: 'App version', builtAt: 'Built at', dependencies: 'Embedded dependencies', footer: 'Generated as one self-contained HTML file'
         }
       };
@@ -973,13 +973,18 @@
         writeStorage(storageKeys.settings, JSON.stringify(serializable));
       }
       function clearGenerated(messageKey = '') {
+        cancelGeneration(true); cancelExport(true);
         generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 };
         $('#previewEmpty').hidden = false; $('#previewResult').hidden = true; $('#regenerateButton').disabled = !lastGeneratedSeed;
         if (messageKey) $('#generateStatus').textContent = translate(messageKey);
         $('#generateProgress').hidden = true; $('#generateProgress').value = 0; updateExportUI();
       }
       function setError(message = '') { $('#errorText').textContent = message; $('#errorBanner').classList.toggle('show', Boolean(message)); }
-      function invalidateAfterChange() { cancelGeneration(true); cancelExport(true); saveSettings(); setError(''); if (generatedRowCount) clearGenerated('settingsChanged'); }
+      function invalidateAfterChange(messageKey = 'settingsChanged') {
+        const hadWork = generatedRowCount || generationBusy || exportBusy;
+        cancelGeneration(true); cancelExport(true); saveSettings(); setError('');
+        if (hadWork) clearGenerated(messageKey);
+      }
 
       function typeOptions(selected) {
         const option = ([value,key]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${escapeHtml(translate(key))}</option>`;
@@ -1048,18 +1053,21 @@
         if (domain.length < 3 || domain.length > 253 || domain.includes('..')) return false;
         return /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(domain);
       }
+      function requiredNumber(value) {
+        return (typeof value === 'number' || typeof value === 'string') && String(value).trim() !== '' ? Number(value) : NaN;
+      }
       function columnErrorKey(column) {
         if (!column.name.trim()) return 'errorEmptyName';
         if (column.type === 'sequence') {
-          if (!Number.isInteger(Number(column.settings.start)) || !Number.isInteger(Number(column.settings.step))) return 'errorSequence';
+          if (!Number.isInteger(requiredNumber(column.settings.start)) || !Number.isInteger(requiredNumber(column.settings.step))) return 'errorSequence';
         } else if (column.type === 'integer') {
-          const min = Number(column.settings.min); const max = Number(column.settings.max);
+          const min = requiredNumber(column.settings.min); const max = requiredNumber(column.settings.max);
           if (!Number.isInteger(min) || !Number.isInteger(max) || min > max) return 'errorInteger';
         } else if (column.type === 'decimal') {
-          const min = Number(column.settings.min); const max = Number(column.settings.max); const decimals = Number(column.settings.decimals);
+          const min = requiredNumber(column.settings.min); const max = requiredNumber(column.settings.max); const decimals = requiredNumber(column.settings.decimals);
           if (!Number.isFinite(min) || !Number.isFinite(max) || min > max || !Number.isInteger(decimals) || decimals < 0 || decimals > 10) return 'errorDecimal';
         } else if (column.type === 'string') {
-          const length = Number(column.settings.length);
+          const length = requiredNumber(column.settings.length);
           if (!Number.isInteger(length) || length < 1 || length > 128) return 'errorString';
         } else if (column.type === 'choice') {
           if (!parseChoices(column.settings.values).length) return 'errorChoice';
@@ -1070,10 +1078,10 @@
           const start = parseDateTime(column.settings.start); const end = parseDateTime(column.settings.end);
           if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) return 'errorDatetime';
         } else if (column.type === 'money') {
-          const min = Number(column.settings.min); const max = Number(column.settings.max); const step = Number(column.settings.step);
+          const min = requiredNumber(column.settings.min); const max = requiredNumber(column.settings.max); const step = requiredNumber(column.settings.step);
           if (!Number.isFinite(min) || !Number.isFinite(max) || !Number.isFinite(step) || min > max || step <= 0) return 'errorMoney';
         } else if (column.type === 'percent') {
-          const decimals = Number(column.settings.decimals);
+          const decimals = requiredNumber(column.settings.decimals);
           if (!Number.isInteger(decimals) || decimals < 0 || decimals > 6) return 'errorPercent';
         } else if (column.type === 'url') {
           if (!isValidHttpUrl(column.settings.base)) return 'errorUrl';
@@ -1082,7 +1090,26 @@
         }
         return '';
       }
-      function renderColumns() {
+      function captureColumnFocus() {
+        const active = document.activeElement;
+        const row = active?.closest('.column-row');
+        if (!row) return null;
+        const attribute = ['data-role', 'data-setting', 'data-test-setting', 'data-action'].find(name => active.hasAttribute(name));
+        if (!attribute) return null;
+        return { id: row.dataset.columnId, attribute, value: active.getAttribute(attribute), start: active.selectionStart, end: active.selectionEnd, direction: active.selectionDirection };
+      }
+      function restoreColumnFocus(focus) {
+        if (!focus) return;
+        const row = $('#columnList').querySelector(`[data-column-id="${focus.id}"]`);
+        if (!row) { if (!state.columns.length) $('#emptyAddColumnButton').focus(); return; }
+        let target = row.querySelector(`[${focus.attribute}="${focus.value}"]`);
+        // A move button becomes disabled at an edge; keep the same column reachable.
+        if (target?.disabled && focus.attribute === 'data-action' && ['up','down'].includes(focus.value)) target = row.querySelector(`[data-action="${focus.value === 'up' ? 'down' : 'up'}"]`);
+        if (!target || target.disabled) target = row.querySelector('[data-role="name"]');
+        target.focus({ preventScroll: true });
+        if (typeof focus.start === 'number' && typeof target.setSelectionRange === 'function' && ['text','search','url','tel','password'].includes(target.type)) target.setSelectionRange(focus.start, focus.end, focus.direction);
+      }
+      function renderColumns(focus = captureColumnFocus()) {
         const list = $('#columnList'); list.textContent = '';
         const names = state.columns.map(column => column.name.trim());
         state.columns.forEach((column, index) => {
@@ -1090,8 +1117,8 @@
           const duplicateName = Boolean(column.name.trim()) && names.indexOf(column.name.trim()) !== names.lastIndexOf(column.name.trim());
           if (duplicateName || columnErrorKey(column)) row.classList.add('invalid');
           row.innerHTML = `
-            <label class="field"><span class="field-label mobile-label">${escapeHtml(translate('columnName'))}</span><input data-role="name" type="text" maxlength="80" value="${escapeHtml(column.name)}"></label>
-            <label class="field"><span class="field-label mobile-label">${escapeHtml(translate('dataType'))}</span><select data-role="type">${typeOptions(column.type)}</select></label>
+            <label class="field"><span class="field-label mobile-label">${escapeHtml(translate('columnName'))}</span><input data-role="name" aria-label="${escapeHtml(translate('columnName'))}" type="text" maxlength="80" value="${escapeHtml(column.name)}"></label>
+            <label class="field"><span class="field-label mobile-label">${escapeHtml(translate('dataType'))}</span><select data-role="type" aria-label="${escapeHtml(translate('dataType'))}">${typeOptions(column.type)}</select></label>
             <div class="type-settings"><span class="field-label mobile-label">${escapeHtml(translate('typeSettings'))}</span>${settingsMarkup(column)}</div>
             <div class="test-settings"><span class="field-label mobile-label">${escapeHtml(translate('testValues'))}</span>${testSettingsMarkup(column)}</div>
             <div class="column-actions">
@@ -1104,6 +1131,7 @@
         });
         $('#emptyColumns').hidden = state.columns.length > 0;
         $('#columnCountText').textContent = format('columnsCount', { count: new Intl.NumberFormat(language).format(state.columns.length) });
+        restoreColumnFocus(focus);
       }
       function columnById(id) { return state.columns.find(column => column.id === Number(id)); }
       function updateColumnFromElement(row, target) {
@@ -1157,9 +1185,11 @@
       }
       function deleteColumn(index) {
         if (index < 0 || index >= state.columns.length) return;
-        const [removed] = state.columns.splice(index, 1); invalidateAfterChange(); renderColumns();
+        const [removed] = state.columns.splice(index, 1); invalidateAfterChange();
+        const neighbor = state.columns[Math.min(index, state.columns.length - 1)];
+        renderColumns({ id: neighbor?.id, attribute: 'data-role', value: 'name' });
         AppToast.show({ message: format('deleted', { name: removed.name || translate('columnName') }), actionLabel: translate('undo'), duration: 5000, onAction: () => {
-          state.columns.splice(Math.min(index, state.columns.length), 0, removed); invalidateAfterChange(); renderColumns(); AppToast.show({ message: translate('undone') });
+          state.columns.splice(Math.min(index, state.columns.length), 0, removed); invalidateAfterChange(); renderColumns({ id: removed.id, attribute: 'data-role', value: 'name' }); AppToast.show({ message: translate('undone') });
         }});
       }
       function validate() {
@@ -1742,7 +1772,8 @@
       function exportExtension(formatName) { return ({ csv: '.csv', tsv: '.tsv', json: '.json', jsonl: '.jsonl' })[formatName] || '.txt'; }
       function exportMime(formatName) { return ({ csv: 'text/csv;charset=utf-8', tsv: 'text/tab-separated-values;charset=utf-8', json: 'application/json;charset=utf-8', jsonl: 'application/x-ndjson;charset=utf-8' })[formatName] || 'text/plain;charset=utf-8'; }
       function sanitizeFilenameBase(value) {
-        return String(value || '').trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-').replace(/[. ]+$/g, '').slice(0,120);
+        const cleaned = String(value ?? '').trim().replace(/[\\/:*?"<>|\u0000-\u001f\u007f]/g, '-').replace(/[. ]+$/g, '');
+        return cleaned.replace(/(?:\.(?:csv|tsv|jsonl?))+$/i, '').slice(0,120).replace(/[. ]+$/g, '') || 'test-data';
       }
       function updateExportUI() {
         const formatName = $('#exportFormat').value; const label = formatLabel(formatName); const count = new Intl.NumberFormat(language).format(generatedRowCount);
@@ -1758,7 +1789,6 @@
       function saveGeneratedOutput() {
         if (!generatedRowCount || !generatedSnapshot || generationBusy || exportBusy) return;
         saveExportPrefs(); const base = sanitizeFilenameBase(outputFilename);
-        if (!base) { AppToast.show({ message: translate('errorFilename') }); $('#outputNameInput').focus(); return; }
         if (base !== $('#outputNameInput').value.trim()) $('#outputNameInput').value = base;
         outputFilename = base; exportPrefs.filename = base; writeStorage(storageKeys.export, JSON.stringify(exportPrefs));
         const formatName = $('#exportFormat').value; const newline = $('#newlineSelect').value === 'crlf' ? '\r\n' : '\n';
@@ -1856,8 +1886,8 @@
       const helpDialog = $('#helpDialog'); $('#helpButton').addEventListener('click', () => helpDialog.showModal()); $('#closeHelpButton').addEventListener('click', () => helpDialog.close());
       helpDialog.addEventListener('click', event => { const rect = helpDialog.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outside) helpDialog.close(); });
       $('#rowCount').addEventListener('input', event => { state.rowCount = Number(event.target.value); invalidateAfterChange(); });
-      $('#seedInput').addEventListener('input', event => { state.seed = event.target.value; saveSettings(); setError(''); if (generatedRowCount) clearGenerated('seedChanged'); });
-      $('#randomSeedButton').addEventListener('click', () => { const seed = createAutomaticSeed(); state.seed = seed; $('#seedInput').value = seed; saveSettings(); setError(''); if (generatedRowCount) clearGenerated('seedChanged'); $('#seedHelp').textContent = translate('seedHelp'); });
+      $('#seedInput').addEventListener('input', event => { state.seed = event.target.value; invalidateAfterChange('seedChanged'); });
+      $('#randomSeedButton').addEventListener('click', () => { const seed = createAutomaticSeed(); state.seed = seed; $('#seedInput').value = seed; invalidateAfterChange('seedChanged'); $('#seedHelp').textContent = translate('seedHelp'); });
       $('#regenerateButton').addEventListener('click', () => { if (!lastGeneratedSeed) return; state.seed = lastGeneratedSeed; $('#seedInput').value = lastGeneratedSeed; generate(); });
       $('#saveSchemaButton').addEventListener('click', saveSchemaFile);
       $('#loadSchemaButton').addEventListener('click', () => $('#schemaFileInput').click());

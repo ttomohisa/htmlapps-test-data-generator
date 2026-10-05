@@ -151,3 +151,12 @@ The following remain future candidates rather than v1.0.0 requirements:
 - SQL INSERT and additional output formats.
 - Multi-table generation and foreign-key consistency.
 - User-defined templates and advanced expression / pattern generators.
+
+## 13. Editing and save reliability
+
+- Required numeric type settings reject blank or whitespace-only values before numeric conversion. Explicit zero remains valid wherever the existing range permits it. Invalid values stay editable and corrected values generate normally.
+- Column name and type controls have localized accessible names at desktop and narrow widths. Re-rendering preserves the focused column/control and text selection. Moving to an edge focuses the reverse move action; deletion focuses the next column name, or the previous one at the end. Deleting the last column focuses Add column. Undo focuses the restored name.
+- Editing schema, row count or Seed cancels pending generation/export and invalidates the previous result. Reset, settings-file replacement and templates reject late completions from the replaced worker.
+- Export names remove path separators/control characters, replace any trailing known CSV/TSV/JSON/JSONL extensions with the selected extension, and use `test-data` when no base remains. Other meaningful suffixes such as `.v2` are retained.
+- The normal build regenerates the root `test-data-generator.html` from exactly the readable artifact bytes. A custom output build does not rewrite this release alias.
+- Dependency-free Node.js tests exercise the actual inline application and worker on source, readable, self-extract and root artifacts using only tiny synthetic datasets. Browser verification remains necessary for rendering, native keyboard and real downloads.
