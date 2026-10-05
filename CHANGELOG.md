@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add explicit first-N-of-M JSON preview copying, bounded to 20 rows and 1 MiB UTF-8 with complete values and a selectable manual fallback.
+- Reject stale clipboard feedback after source changes, regeneration, export and page exit; localize copy help and preserve dialog focus.
+- Preserve prototype-shaped column names in preview and every export, and prevent inherited metadata from creating false Invalid badges after worker structured clone.
+- Pin ordinary seeded four-format output bytes and exercise copy lifecycle, byte boundaries, literal keys and native-dialog reopening regressions.
+
 - Reject blank required numeric settings instead of treating them as zero; preserve valid explicit zero values.
 - Keep keyboard focus during column moves/type changes, and provide predictable deletion/Undo focus and localized desktop control names.
 - Normalize export extensions across CSV/TSV/JSON/JSONL and use a valid default for blank filenames.

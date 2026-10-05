@@ -109,4 +109,99 @@ test('23 generators retain seeded four-format round trips with commas, quotes, T
     app.el('saveOutputButton').click(); app.complete(); assert.deepEqual(new Uint8Array(await app.downloads.at(-1).blob.arrayBuffer()), bytes);
   }
 });
+
+// Removing the literal-key worker maps or the own-metadata check must fail these cases.
+for (const mode of ['normal', 'missing', 'boundary', 'invalid']) test(`literal prototype names survive structured clone, ${mode} badges, and every format`, async () => {
+  const app = setup();
+  app.run(`state.columns = ['__proto__','constructor','toString','hasOwnProperty','ordinary'].map(name => newColumn('integer', name)); state.columns.forEach(c => c.test = { missing: 0, boundary: 0, invalid: 0, ${mode === 'normal' ? 'missing' : mode}: ${mode === 'normal' ? 0 : 100} }); renderColumns()`);
+  app.el('generateButton').click(); app.complete();
+  const expected = JSON.parse(app.run('JSON.stringify(generatedPreviewRows)'));
+  assert.deepEqual(Object.keys(expected[0]), ['__proto__','constructor','toString','hasOwnProperty','ordinary']);
+  assert.equal(app.run('Object.prototype.hasOwnProperty.call(generatedPreviewRows[0], "__proto__")'), true);
+  const cells = app.el('previewBodyRows').querySelectorAll('td');
+  assert.equal(cells.length, 15);
+  assert.equal(app.el('previewBodyRows').querySelectorAll('.value-status').length, mode === 'normal' ? 0 : 15);
+  for (let i = 0; i < cells.length; i++) assert.equal(cells[i].textContent, mode === 'normal' ? String(expected[Math.floor(i/5)][Object.keys(expected[0])[i%5]]) : app.run(`translate('status${mode[0].toUpperCase()+mode.slice(1)}')`) + (mode === 'missing' ? '(empty)' : String(expected[Math.floor(i/5)][Object.keys(expected[0])[i%5]])));
+  for (const format of ['csv','tsv','json','jsonl']) {
+    app.el('exportFormat').value = format; app.el('saveOutputButton').click(); app.complete(); const text = await app.downloads.at(-1).blob.text();
+    if (format === 'json') assert.deepEqual(JSON.parse(text), expected);
+    else if (format === 'jsonl') assert.deepEqual(text.split('\n').map(JSON.parse), expected);
+    else assert.deepEqual(parseDelimited(text, format === 'csv' ? ',' : '\t'), [Object.keys(expected[0]), ...expected.map(row => Object.keys(row).map(name => String(row[name] ?? '')))]);
+  }
+});
+test('ordinary strict-mix seeded exports keep upstream bytes for all 23 types and four formats', async () => {
+  const app = setup(); app.input(app.el('rowCount'), '21'); app.input(app.el('seedInput'), 'preview-copy-42');
+  app.run('state.columns = supportedTypes.map(type => newColumn(type, type)); state.columns.forEach(c => c.test = normalizeTestSettings(c.type, testPresets.strict)); renderColumns()');
+  app.el('generateButton').click(); app.complete();
+  const hashes = { csv: '45f79f28bdae864e1c72fd1f5e347b680e3d850105ce3be82a7a5d6da58eaa60', tsv: 'ac23be84c5262408ad5e74086df1f787b60b6080bcebfd6d223e19a6096998e5', json: '01aaf2d4dca4b22baf91853eac3043956fc1e67c0c99c268393419d2669ec2d4', jsonl: '3f1f54c29bf0ae4cf909664cf8fbe4da648d9a47a3f8ec8d257cb07200801f49' };
+  for (const format of Object.keys(hashes)) { app.el('exportFormat').value = format; app.el('saveOutputButton').click(); app.complete(); assert.equal(require('node:crypto').createHash('sha256').update(Buffer.from(await app.downloads.at(-1).blob.arrayBuffer())).digest('hex'), hashes[format]); }
+});
+for (const language of ['en','ja']) for (const count of [1, 20, 21]) test(`${language}: explicit copy includes first ${Math.min(count,20)} of ${count} rows as raw JSON`, async () => {
+  const app = setup(language); app.input(app.el('rowCount'), String(count));
+  app.run(`state.columns = [newColumn('sequence','number'),newColumn('fixed','__proto__'),newColumn('fixed','missing')]; state.columns[1].settings.value = 'a,b"c\\t日本語\\n<script>synthetic</script>'; state.columns[2].test.missing = 100; renderColumns()`);
+  assert.ok(app.el('copyPreviewButton'), 'copy action must exist'); assert.equal(app.el('copyPreviewButton').disabled, true);
+  app.el('generateButton').click(); assert.equal(app.el('copyPreviewButton').disabled, true); app.complete();
+  assert.equal(app.globals.clipboard, undefined, 'generation must not touch clipboard');
+  assert.equal(app.el('copyPreviewButton').disabled, false);
+  assert.equal(app.el('copyPreviewScope').textContent, language === 'ja' ? `全${count}件のうち先頭${Math.min(count,20)}件のみ（JSON）` : `First ${Math.min(count,20)} of ${count} rows only (JSON)`);
+  const expected = JSON.parse(app.run('JSON.stringify(generatedPreviewRows)')); const workers = app.workers.length, storage = [...app.storage];
+  app.el('copyPreviewButton').click(); await app.settle();
+  assert.deepEqual(JSON.parse(app.globals.clipboard), expected); assert.equal(typeof expected[0].number, 'number'); assert.equal(expected[0].missing, null); assert.equal(Object.hasOwn(expected[0], '__proto__'), true);
+  assert.equal(app.workers.length, workers); assert.deepEqual([...app.storage], storage); assert.equal(app.downloads.length, 0);
+  assert.match(app.el('copyPreviewStatus').textContent, language === 'ja' ? /コピーしました/ : /Copied/);
+});
+for (const method of ['unavailable','denied','throw']) test(`${method} clipboard opens complete selectable JSON without legacy copy and restores focus`, async () => {
+  const app = setup(); app.el('generateButton').click(); app.complete();
+  app.document.execCommand = () => { throw Error('legacy copy must not run'); };
+  if (method === 'unavailable') delete app.globals.navigator.clipboard;
+  else app.globals.navigator.clipboard.writeText = method === 'throw' ? () => { throw Error('blocked'); } : async () => { throw Error('denied'); };
+  const button = app.el('copyPreviewButton'); assert.ok(button, 'copy action must exist'); button.focus(); button.click(); await app.settle();
+  const dialog = app.el('copyPreviewDialog'), input = app.el('copyPreviewText');
+  assert.equal(dialog.open, true); assert.equal(input.hasAttribute('readonly'), true); assert.deepEqual(JSON.parse(input.value), JSON.parse(app.run('JSON.stringify(generatedPreviewRows)')));
+  assert.equal(app.document.activeElement, input); assert.equal(input.selectionEnd, input.value.length);
+  app.el('closeCopyPreviewButton').click(); assert.equal(dialog.open, false); assert.equal(input.value, ''); assert.equal(app.document.activeElement, button);
+  button.click(); await app.settle(); dialog.dispatch('cancel'); assert.equal(dialog.open, false); assert.equal(app.document.activeElement, button);
+  button.click(); await app.settle(); dialog.dispatch('click', {clientX:-1,clientY:-1}); assert.equal(dialog.open, false); assert.equal(app.document.activeElement, button);
+});
+for (const outcome of ['resolve','reject']) for (const action of ['edit','regenerate','export','pagehide']) test(`pending clipboard ${outcome} after ${action} cannot change current UI`, async () => {
+  const app = setup(); app.el('generateButton').click(); app.complete(); let finish, calls = 0;
+  app.globals.navigator.clipboard.writeText = () => { calls++; return new Promise((resolve,reject) => { finish = outcome === 'resolve' ? resolve : () => reject(Error('denied')); }); };
+  const button = app.el('copyPreviewButton'); assert.ok(button, 'copy action must exist'); button.click(); button.click(); assert.equal(calls,1);
+  if (action === 'edit') app.input(app.el('seedInput'),'new');
+  if (action === 'regenerate') app.el('generateButton').click();
+  if (action === 'export') app.el('saveOutputButton').click();
+  if (action === 'pagehide') app.window.dispatch('pagehide');
+  const status = app.el('copyPreviewStatus').textContent; finish(); await app.settle();
+  assert.equal(Boolean(app.el('copyPreviewDialog').open),false); assert.equal(app.el('copyPreviewText').value,''); assert.equal(app.el('copyPreviewStatus').textContent,status);
+});
+test('manual JSON is cleared on settings replacement and never restores focus into stale preview', async () => {
+  const app = setup(); app.el('generateButton').click(); app.complete(); delete app.globals.navigator.clipboard;
+  assert.ok(app.el('copyPreviewButton'), 'copy action must exist'); app.el('copyPreviewButton').click(); await app.settle();
+  app.el('seedInput').focus(); app.input(app.el('seedInput'),'changed');
+  assert.equal(app.el('copyPreviewDialog').open,false); assert.equal(app.el('copyPreviewText').value,''); assert.equal(app.el('copyPreviewButton').disabled,true); assert.equal(app.document.activeElement,app.el('seedInput'));
+});
+test('copy budget is inclusive 1 MiB UTF-8 and refuses larger JSON without truncation', async () => {
+  const app = setup(); app.el('generateButton').click(); app.complete(); assert.ok(app.el('copyPreviewButton'), 'copy action must exist');
+  let calls=0; app.globals.navigator.clipboard.writeText=async text=>{calls++;app.globals.clipboard=text;};
+  // The string is synthetic; byte accounting includes JSON punctuation and indentation.
+  const empty = JSON.stringify([{value:''}],null,2), bytes = 1024*1024, capacity=bytes-Buffer.byteLength(empty);
+  for (const extra of [0,1]) { const value='界'.repeat(Math.floor(capacity/3))+'a'.repeat(capacity%3+extra); app.run(`generatedPreviewRows = JSON.parse(${JSON.stringify(JSON.stringify([{value}]))})`); app.el('copyPreviewButton').click(); await app.settle(); if(!extra) assert.equal(Buffer.byteLength(app.globals.clipboard),bytes); else {assert.equal(calls,1);assert.match(app.el('copyPreviewStatus').textContent,/1 MiB/);assert.equal(Boolean(app.el('copyPreviewDialog').open),false);} }
+});
+
+
+test('a delayed close event from the previous manual dialog cannot dismiss a reopened dialog', async () => {
+  const app = setup(); app.el('generateButton').click(); app.complete(); delete app.globals.navigator.clipboard;
+  app.el('copyPreviewButton').click(); await app.settle(); app.el('closeCopyPreviewButton').click();
+  app.el('copyPreviewButton').click(); await app.settle(); const text = app.el('copyPreviewText').value;
+  app.el('copyPreviewDialog').dispatch('close');
+  assert.equal(app.el('copyPreviewDialog').open,true); assert.equal(app.el('copyPreviewText').value,text);
+});
+test('late clipboard denial does not cover another dialog or steal focus', async () => {
+  const app = setup(); app.el('generateButton').click(); app.complete(); let reject;
+  app.globals.navigator.clipboard.writeText = () => new Promise((resolve, deny) => reject=deny);
+  app.el('copyPreviewButton').click(); app.el('helpButton').click(); app.el('closeHelpButton').focus(); reject(Error('denied')); await app.settle();
+  assert.equal(Boolean(app.el('copyPreviewDialog').open),false); assert.equal(app.el('helpDialog').open,true); assert.equal(app.document.activeElement,app.el('closeHelpButton'));
+  assert.match(app.el('copyPreviewStatus').textContent,/Close the open dialog/);
+});
+
 (async () => { let failed = 0; console.log('Behavior target: ' + filename); for (const item of tests) { try { await item.body(); console.log('PASS ' + item.name); } catch (error) { failed++; console.error('FAIL ' + item.name + '\n' + (error.stack || error)); } } console.log(`${tests.length - failed}/${tests.length} behavior tests passed`); process.exitCode = failed ? 1 : 0; })();

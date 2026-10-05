@@ -54,3 +54,7 @@ Before adding or upgrading a package:
 - Refresh the selected lock entry with the dependency scripts; never hand-edit a lock hash to bypass a mismatch.
 - Rebuild with a clean cache.
 - Test with the network disabled.
+
+## Preview clipboard export
+
+Only an explicit Copy preview as JSON action writes the existing first 20 rows to the system clipboard, bounded to 1 MiB UTF-8 without truncation. Clipboard data may be visible to other apps or device synchronization. Denial/unavailability offers selectable read-only text without legacy clipboard commands. No runtime network access or automatic clipboard write is added. Source replacement clears manual-copy text and invalidates late UI feedback, but cannot cancel an operating-system write already dispatched. Column-key maps use literal own properties, and worker-returned preview metadata is checked for own properties before rendering text-only badges.

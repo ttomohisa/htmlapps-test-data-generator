@@ -56,7 +56,7 @@ function createApp(filename, options = {}) {
     setPointerCapture(id) { this.capture = id; }
     releasePointerCapture(id) { if (this.capture === id) { this.capture = null; this.dispatch('lostpointercapture', { pointerId: id }); } }
     getBoundingClientRect() { return { left: 0, top: 0, right: 600, bottom: 600, height: 60 }; }
-    select() {} setSelectionRange(start, end, direction) { this.selectionStart = start; this.selectionEnd = end; this.selectionDirection = direction; }
+    select() { this.setSelectionRange(0, this.value.length); } setSelectionRange(start, end, direction) { this.selectionStart = start; this.selectionEnd = end; this.selectionDirection = direction; }
     matches(selector) {
       if (selector.includes(',')) return selector.split(',').some(part => this.matches(part.trim()));
       const attr = selector.match(/\[([^=\]]+)(?:=["']?([^\]"']+)["']?)?\]/);
@@ -108,7 +108,7 @@ function createApp(filename, options = {}) {
   source = source.replace(/\}\)\(\);\s*$/, 'globalThis.testRun = code => eval(code);\n})();');
   context = vm.createContext(globals); vm.runInContext(source, context, { filename });
   const app = { html, document, window, storage, frames, timers, downloads, revoked, globals, workers, run: code => context.testRun(code), el: id => document.getElementById(id),
-    complete(worker = workers.at(-1)) { const messages = []; const workerContext = vm.createContext({ self: { postMessage: message => messages.push(message) }, URL, console, performance }); vm.runInContext('(' + app.run('generatorWorkerMain.toString()') + ')()', workerContext); workerContext.self.onmessage({ data: worker.message }); for (const message of messages) worker.onmessage?.({ data: message }); return messages; },
+    complete(worker = workers.at(-1)) { const messages = []; const workerContext = vm.createContext({ self: { postMessage: message => messages.push(structuredClone(message)) }, URL, console, performance }); vm.runInContext('(' + app.run('generatorWorkerMain.toString()') + ')()', workerContext); workerContext.self.onmessage({ data: structuredClone(worker.message) }); for (const message of messages) worker.onmessage?.({ data: message }); return messages; },
     frame(time) { now = time; const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(fn => fn(time)); },
     flushTimers() { const callbacks = [...timers.values()]; timers.clear(); callbacks.forEach(fn => fn()); },
     input(el, value) { el.value = value; el.dispatch('input'); },
