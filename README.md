@@ -41,6 +41,8 @@ A local-first browser tool for generating reproducible test data. Along with nor
 - Group Basic and Japanese data separately in the type selector.
 - Validate type settings before generation and highlight invalid columns.
 - Preview the first 20 rows without rendering the full dataset into the DOM.
+- Copy those preview rows as JSON with the first-N-of-M scope shown, up to 1 MiB without truncation. Clipboard restrictions offer a selectable manual-copy dialog.
+- Preserve literal column names such as `__proto__` in preview and all exports.
 - Save the generated dataset as CSV, TSV, JSON, or JSONL.
 - Choose UTF-8 or UTF-8 BOM for CSV / TSV and LF / CRLF line endings.
 - Set the output filename while the extension follows the selected format automatically.
@@ -59,7 +61,7 @@ In v1.0.0, Japanese fields remain independent: for example, a generated name and
 3. Optionally apply a User, Customer, Employee, or other built-in template.
 4. Adjust column names, data types, and test-value rates, then add, duplicate, delete, or reorder columns as needed.
 5. Select **Generate data**. A blank Seed is created automatically.
-6. Review the first 20 generated rows, test-value badges, and the Seed used.
+6. Review the first 20 generated rows, test-value badges, and the Seed used. **Copy preview as JSON** copies only these rows, including numbers and missing-value `null`s. Save a JSON file for all rows or previews larger than 1 MiB.
 7. Choose an output format and filename, then save the generated file.
 8. Use **Save settings file** if you want to keep the row count, Seed, and column schema for later.
 
@@ -70,6 +72,8 @@ Known filename extensions are normalized to the selected format (`sample.csv` be
 ## Privacy
 
 Generation runs entirely in the browser. The app does not upload column settings or generated rows, and it does not use analytics or telemetry. Japanese dictionaries are embedded in the HTML. Column settings and Seed may be saved in local browser storage so they can be restored after reload. Generated rows are not stored automatically. Settings files contain configuration only and are created locally.
+
+Copy writes only after you select the Copy action. The system clipboard may be accessible to other apps or device clipboard syncing; the app does not upload the copied JSON.
 
 The default Content Security Policy includes `connect-src 'none'`.
 
