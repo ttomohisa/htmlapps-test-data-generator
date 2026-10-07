@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fix pre-existing PowerShell parser errors in dependency-maintenance diagnostic strings and parse-check build/maintenance scripts before the repository build.
+
+- Standardize header target-language labels to EN / JA with localized accessible names and tooltips, and synchronize the visible version badge with v1.0.1.
+
 - Add explicit first-N-of-M JSON preview copying, bounded to 20 rows and 1 MiB UTF-8 with complete values and a selectable manual fallback.
 - Reject stale clipboard feedback after source changes, regeneration, export and page exit; localize copy help and preserve dialog focus.
 - Preserve prototype-shaped column names in preview and every export, and prevent inherited metadata from creating false Invalid badges after worker structured clone.

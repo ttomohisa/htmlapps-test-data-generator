@@ -4,7 +4,7 @@
 
 - **Name:** Test Data Generator / テストデータ生成
 - **Repository:** `ttomohisa/htmlapps-test-data-generator`
-- **Current version:** `1.0.0`
+- **Current version:** `1.0.1`
 - **Purpose:** Generate reproducible test data locally in the browser, including normal, missing, boundary, and invalid values.
 - **Release artifacts:** `dist/index.html` and `dist/index.self-extract.html`
 
@@ -118,9 +118,10 @@ v1.0.0 does not introduce a new schema-file field for templates: after a templat
 - Generated rows are not persisted automatically.
 - CSP keeps `connect-src 'none'`.
 
-## 11. v1.0.0 acceptance criteria
+## 11. Acceptance criteria
 
-- `app.config.json` and visible build information report `1.0.0`.
+- `app.config.json` and visible build information report `1.0.1`.
+- Header language switching shows the target language as `EN` in Japanese and `JA` in English, with localized aria-label/title (`英語に切り替え` / `Switch to Japanese`). The visible `vX.Y.Z` badge matches `app.config.json`; privacy remains `完全ローカル処理` / `Fully local processing`.
 - Seed placeholder remains `42`.
 - All 23 data types generate successfully in one schema.
 - Normal / Light test / Stricter test mixes remain deterministic and strict mix produces missing / boundary / invalid data.

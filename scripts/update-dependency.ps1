@@ -32,7 +32,7 @@ if ([string]::IsNullOrWhiteSpace($targetVersion)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($targetVersion)) { throw "Target version cannot be empty." }
-Write-Host "[Dependency Update] $Id: $currentVersion -> $targetVersion" -ForegroundColor Yellow
+Write-Host "[Dependency Update] ${Id}: $currentVersion -> $targetVersion" -ForegroundColor Yellow
 
 $dependenciesBackup = [System.IO.File]::ReadAllBytes($DependenciesPath)
 $lockExisted = Test-Path $LockPath

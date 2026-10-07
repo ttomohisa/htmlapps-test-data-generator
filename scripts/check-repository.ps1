@@ -152,6 +152,12 @@ $buildCompatibilityFiles = @(
 foreach ($relative in $buildCompatibilityFiles) {
   $compatibilityPath = Join-Path $Root $relative
   $compatibilityText = Get-Content -Raw -Encoding UTF8 $compatibilityPath
+  $tokens = $null
+  $parseErrors = $null
+  [void][System.Management.Automation.Language.Parser]::ParseFile($compatibilityPath, [ref]$tokens, [ref]$parseErrors)
+  if (@($parseErrors).Count -gt 0) {
+    throw "$relative has PowerShell parser errors: $($parseErrors.Message -join '; ')"
+  }
   if ($compatibilityText -match '(?i)\bGet-FileHash\b') {
     throw "$relative must not depend on Get-FileHash; use the .NET SHA-256 helper for broader Windows PowerShell compatibility."
   }

@@ -97,7 +97,7 @@ function Get-ValidatedLockEntry([object]$Dependency) {
     if (-not $assetFull.StartsWith($rootFull + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
       throw "Dependency asset path escapes the package root: $configuredPath"
     }
-    if (-not (Test-Path $assetFull)) { throw "Dependency asset not found in $packageName@$version: $configuredPath" }
+    if (-not (Test-Path $assetFull)) { throw "Dependency asset not found in $packageName@${version}: $configuredPath" }
   }
 
   $entry = [ordered]@{
