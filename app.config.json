@@ -3,7 +3,7 @@
   "name": "Test Data Generator",
   "nameJa": "テストデータ生成",
   "slug": "test-data-generator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate reproducible test data locally in the browser with 23 data types, deterministic Seed reproduction, missing/boundary/invalid values, templates, large-data background processing, and CSV / TSV / JSON / JSONL export.",
   "descriptionJa": "23種類のデータ、Seedによる再現、欠損・境界・異常値、テンプレート、大量データのバックグラウンド処理、CSV / TSV / JSON / JSONL保存に対応した完全ローカル処理のテストデータ生成ツールです。",
   "defaultLanguage": "auto",

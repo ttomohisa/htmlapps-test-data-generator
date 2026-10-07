@@ -6,6 +6,37 @@ const filename = path.resolve(process.argv[2] || path.join(__dirname, '..', 'src
 const tests = [];
 const test = (name, body) => tests.push({ name, body });
 const setup = (language = 'en') => { const app = createApp(filename, { language }); app.input(app.el('rowCount'), '3'); app.input(app.el('seedInput'), 'edit-save-42'); return app; };
+
+for (const initialLanguage of ['ja', 'en']) test(`${initialLanguage}: header target-language labels, hints, privacy and version survive repeated toggles and reload`, () => {
+  const app = createApp(filename, { language: initialLanguage });
+  const config = JSON.parse(require('node:fs').readFileSync(path.join(__dirname, '..', 'app.config.json'), 'utf8'));
+  const button = app.el('languageButton');
+  for (let count = 0; count < 4; count++) {
+    const language = count % 2 ? (initialLanguage === 'ja' ? 'en' : 'ja') : initialLanguage;
+    const hint = language === 'ja' ? '英語に切り替え' : 'Switch to Japanese';
+    assert.equal(button.textContent, language === 'ja' ? 'EN' : 'JA');
+    assert.equal(button.getAttribute('aria-label'), hint);
+    assert.equal(button.title, hint);
+    assert.equal(app.document.documentElement.lang, language);
+    assert.equal(app.document.querySelector('[data-i18n="localBadge"]').textContent, language === 'ja' ? '完全ローカル処理' : 'Fully local processing');
+    assert.equal(app.el('versionBadge').textContent, `v${config.version}`);
+    button.click();
+  }
+  button.click();
+  const restored = createApp(filename, { language: initialLanguage, storage: [...app.storage] });
+  assert.equal(restored.document.documentElement.lang, initialLanguage === 'ja' ? 'en' : 'ja');
+  assert.equal(restored.el('languageButton').textContent, initialLanguage === 'ja' ? 'JA' : 'EN');
+});
+test('initial header matches Japanese markup and canonical version before runtime starts', () => {
+  const { loadHtml } = require('./test-data-harness.cjs');
+  const html = loadHtml(filename), config = JSON.parse(require('node:fs').readFileSync(path.join(__dirname, '..', 'app.config.json'), 'utf8'));
+  assert.equal(html.match(/id="versionBadge">([^<]+)</)[1], `v${config.version}`);
+  const button = html.match(/<button[^>]*id="languageButton"[^>]*>[^<]*<\/button>/)[0];
+  assert.match(button, />EN<\/button>/);
+  assert.match(button, /aria-label="英語に切り替え"/);
+  assert.match(button, /title="英語に切り替え"/);
+});
+
 const rows = app => app.document.querySelectorAll('.column-row');
 const control = (app, index, selector) => rows(app)[index].querySelector(selector);
 const type = (app, index, value) => { const input = control(app, index, '[data-role="type"]'); input.value = value; input.focus(); input.dispatch('change'); };
