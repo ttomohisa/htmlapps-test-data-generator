@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#f5f5f2">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Test Data Generator</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2316624F'/%3E%3Crect x='15' y='14' width='34' height='36' rx='5' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M15 25h34M26 25v25' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M33 34h9M33 42h9' fill='none' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%0A%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%2316624F%22%2F%3E%0A%20%20%3Crect%20x%3D%2215%22%20y%3D%2214%22%20width%3D%2234%22%20height%3D%2236%22%20rx%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M15%2025h34M26%2025v25%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M33%2034h9M33%2042h9%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3C%2Fsvg%3E">
   <style>
     :root {
       color-scheme: light;
@@ -55,9 +55,9 @@
     .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .brand-mark {
       display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 auto;
-      border-radius: 11px; background: var(--accent); color: #fff; box-shadow: var(--shadow-sm);
+      border-radius: 25%; box-shadow: var(--shadow-sm);
     }
-    .brand-mark svg { width: 21px; height: 21px; display: block; }
+    .brand-mark svg { width: 100%; height: 100%; display: block; }
     .brand-copy { min-width: 0; }
     .brand-name { margin: 0; font-size: 17px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .brand-meta { margin: 2px 0 0; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -265,6 +265,22 @@
     .dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
     .dialog-header h2 { margin: 0; font-size: 17px; }
     .dialog-body { padding: 20px 20px 28px; overflow: auto; max-height: calc(100dvh - 102px); }
+    /* Help owns the remaining height; no guessed header height or nested clipping. */
+    html.help-open { overflow: hidden; scrollbar-gutter: stable; }
+    #helpDialog {
+      --help-top: max(14px, env(safe-area-inset-top));
+      --help-bottom: max(14px, env(safe-area-inset-bottom));
+      position: fixed; inset: var(--help-top) 0 auto; margin: 0 auto;
+      max-height: min(760px, calc(100vh - var(--help-top) - var(--help-bottom)));
+      max-height: min(760px, calc(100dvh - var(--help-top) - var(--help-bottom)));
+      width: min(640px, calc(100% - 28px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+      overscroll-behavior: none;
+    }
+    #helpDialog[open] { display: flex; flex-direction: column; }
+    #helpDialog .dialog-header { flex: 0 0 auto; }
+    #closeHelpButton { flex: 0 0 auto; }
+    #helpBody { min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; overflow-wrap: anywhere; }
+    #helpBody:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
     .dialog-body h3 { margin: 25px 0 8px; padding-top: 19px; border-top: 1px solid var(--line); font-size: 14px; }
     .dialog-body h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
     .dialog-body p, .dialog-body li { color: var(--muted); font-size: 13px; line-height: 1.7; }
@@ -306,7 +322,7 @@
     @media (max-width: 520px) {
       :root { --header-height: 58px; }
       .header-inner { padding-block: 8px; }
-      .brand-mark { width: 34px; height: 34px; border-radius: 10px; }
+      .brand-mark { width: 34px; height: 34px; }
       .brand-name { font-size: 15px; }
       .brand-meta { display: none; }
       .header-actions { gap: 11px; }
@@ -346,12 +362,15 @@
     <div class="header-inner">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M4 9h16M9 9v11.5M12.5 13h4M12.5 16.5h4"/>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <rect width="64" height="64" rx="16" fill="#16624F"/>
+            <rect x="15" y="14" width="34" height="36" rx="5" fill="none" stroke="#fff" stroke-width="4"/>
+            <path d="M15 25h34M26 25v25" fill="none" stroke="#fff" stroke-width="4"/>
+            <path d="M33 34h9M33 42h9" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
           </svg>
         </div>
         <div class="brand-copy">
-          <p class="brand-name"><span id="brandName">Test Data Generator</span><span class="version-badge" id="versionBadge">v1.0.1</span></p>
+          <p class="brand-name"><span id="brandName">Test Data Generator</span><span class="version-badge" id="versionBadge">v1.0.2</span></p>
           <p class="brand-meta" data-i18n="brandMeta">ブラウザーだけでテストデータを生成</p>
         </div>
       </div>
@@ -654,8 +673,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
       </button>
     </div>
-    <div class="dialog-body">
+    <div class="dialog-body" id="helpBody" tabindex="0" role="region" aria-labelledby="helpDialogTitle">
       <!-- APP:HELP:BEGIN -->
+      <p data-i18n="helpReading">本文をスクロールして読めます。閉じるボタン・Esc・背景のクリックで元の画面に戻ります。</p>
       <h3 data-i18n="helpBasicsTitle">基本操作</h3>
       <ol>
         <li data-i18n="helpStep1">生成件数を指定します。</li>
@@ -682,8 +702,8 @@
     (() => {
       'use strict';
 
-      const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Test Data Generator","nameJa":"テストデータ生成","slug":"test-data-generator","version":"1.0.1","description":"Generate reproducible test data locally in the browser with 23 data types, deterministic Seed reproduction, missing/boundary/invalid values, templates, large-data background processing, and CSV / TSV / JSON / JSONL export.","descriptionJa":"23種類のデータ、Seedによる再現、欠損・境界・異常値、テンプレート、大量データのバックグラウンド処理、CSV / TSV / JSON / JSONL保存に対応した完全ローカル処理のテストデータ生成ツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-test-data-generator"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":25,"selfExtractWarningMb":12}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-07T01:02:12.5966413Z","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.0.1"},"dependencies":[]};
+      const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Test Data Generator","nameJa":"テストデータ生成","slug":"test-data-generator","version":"1.0.2","description":"Generate reproducible test data locally in the browser with 23 data types, deterministic Seed reproduction, missing/boundary/invalid values, templates, large-data background processing, and CSV / TSV / JSON / JSONL export.","descriptionJa":"23種類のデータ、Seedによる再現、欠損・境界・異常値、テンプレート、大量データのバックグラウンド処理、CSV / TSV / JSON / JSONL保存に対応した完全ローカル処理のテストデータ生成ツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-test-data-generator"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":25,"selfExtractWarningMb":12}}};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-10T07:02:55.786652+00:00","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.0.2"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -755,7 +775,7 @@
 
       const translations = {
         ja: {
-          brandMeta: 'ブラウザーだけでテストデータを生成', helpTitle: '使い方と注意事項', close: '閉じる',
+          brandMeta: 'ブラウザーだけでテストデータを生成', helpReading: '本文をスクロールして読めます。閉じるボタン・Esc・背景のクリックで元の画面に戻ります。', helpTitle: '使い方と注意事項', close: '閉じる',
           introTitle: 'テストデータ生成', lead: '列と件数を指定して、動作確認に使えるテストデータをブラウザー内で生成します。', localBadge: '完全ローカル処理',
           generationSettingsTitle: '生成設定', generationSettingsBody: '件数、Seed、テスト配合を指定します。v1.0.0では最大1,000,000件です。', rowCountLabel: '生成件数', rowCountHelp: '1〜1,000,000件（列数に応じて安全上限があります）', seedLabel: 'Seed', seedHelp: '空欄なら生成時にSeedを自動作成します。', randomSeed: 'Seedを変更', randomSeedShort: '変更', regenerateSameSeed: '同じSeedでもう一度生成', usedSeedLabel: '今回のSeed:', saveSchema: '設定ファイルを保存', loadSchema: '設定ファイルを読み込む', schemaSaved: '設定ファイルを作成しました：{name}', schemaLoaded: '設定ファイルを読み込みました。', schemaLoadTitle: '設定ファイルを読み込みますか？', schemaLoadBody: '現在の列設定・件数・Seedを、読み込んだ設定で置き換えます。生成結果は消去されます。', schemaLoadAction: '読み込む', schemaInvalid: 'この設定ファイルは読み込めません。Test Data Generatorの設定ファイルか確認してください。', schemaTooLarge: '設定ファイルが大きすぎます。1 MB以下のJSONファイルを選んでください。', settingsSavedNote: '列設定とSeedは、このブラウザー内に保存されます。生成したデータ自体は自動保存しません。', testPresetLabel: 'テスト配合', presetNormal: '通常', presetLight: '軽くテスト', presetStrict: '厳しめテスト', presetCustom: '現在：カスタム', testPresetHelp: '全列へまとめて適用します。列ごとに割合を調整できます。', presetApplied: '「{name}」を全列に適用しました。', templateLabel: 'テンプレート', templateChoose: 'テンプレートを選択', templateUser: 'ユーザー', templateCustomer: '顧客', templateEmployee: '社員', templateProduct: '商品', templateOrder: '注文', templateInquiry: '問い合わせ', templateAccessLog: 'アクセスログ', applyTemplate: '適用', templateHelp: 'よく使う列構成をまとめて設定します。現在の列は置き換わります。', templateConfirmTitle: 'テンプレートを適用しますか？', templateConfirmBody: '現在の列設定を「{name}」テンプレートで置き換えます。生成結果も消去されます。', templateConfirmAction: 'テンプレートを適用', templateApplied: '「{name}」テンプレートを適用しました。',
           columnsTitle: '列設定', columnsBody: '列名、データの種類、生成方法を設定します。', reset: '初期状態に戻す', columnName: '列名', dataType: 'データの種類', typeSettings: '設定', testValues: 'テスト値', operations: '操作', addColumn: '列を追加',
@@ -772,7 +792,7 @@
           buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数', footer: '完全内包HTMLとして生成'
         },
         en: {
-          brandMeta: 'Generate test data in your browser', helpTitle: 'How to use & notes', close: 'Close',
+          brandMeta: 'Generate test data in your browser', helpReading: 'Scroll within this panel to read. Close, Escape, or a click outside returns to your place in the app.', helpTitle: 'How to use & notes', close: 'Close',
           introTitle: 'Test Data Generator', lead: 'Choose columns and a row count, then generate test data entirely in your browser.', localBadge: 'Fully local processing',
           generationSettingsTitle: 'Generation settings', generationSettingsBody: 'Choose the row count, Seed, and test mix. v1.0.0 supports up to 1,000,000 rows.', rowCountLabel: 'Rows', rowCountHelp: '1 to 1,000,000 rows (a safe cell limit also applies)', seedLabel: 'Seed', seedHelp: 'Leave blank to create a Seed automatically when generating.', randomSeed: 'Change Seed', randomSeedShort: 'Change', regenerateSameSeed: 'Generate again with same Seed', usedSeedLabel: 'Seed used:', saveSchema: 'Save settings file', loadSchema: 'Load settings file', schemaSaved: 'Created settings file: {name}', schemaLoaded: 'Loaded the settings file.', schemaLoadTitle: 'Load this settings file?', schemaLoadBody: 'This replaces the current columns, row count, and Seed. The generated result will be cleared.', schemaLoadAction: 'Load settings', schemaInvalid: 'This settings file could not be loaded. Check that it was created by Test Data Generator.', schemaTooLarge: 'The settings file is too large. Choose a JSON file no larger than 1 MB.', settingsSavedNote: 'Column settings and Seed are saved in this browser. Generated rows are not saved automatically.', testPresetLabel: 'Test mix', presetNormal: 'Normal', presetLight: 'Light test', presetStrict: 'Stricter test', presetCustom: 'Current: Custom', testPresetHelp: 'Apply a mix to all columns, then fine-tune each column if needed.', presetApplied: 'Applied “{name}” to all columns.', templateLabel: 'Template', templateChoose: 'Choose a template', templateUser: 'User', templateCustomer: 'Customer', templateEmployee: 'Employee', templateProduct: 'Product', templateOrder: 'Order', templateInquiry: 'Inquiry', templateAccessLog: 'Access log', applyTemplate: 'Apply', templateHelp: 'Set up a common column layout at once. This replaces the current columns.', templateConfirmTitle: 'Apply this template?', templateConfirmBody: 'This replaces the current columns with the “{name}” template and clears the generated result.', templateConfirmAction: 'Apply template', templateApplied: 'Applied the “{name}” template.',
           columnsTitle: 'Columns', columnsBody: 'Set each column name, data type, and generation settings.', reset: 'Reset settings', columnName: 'Column name', dataType: 'Data type', typeSettings: 'Settings', testValues: 'Test values', operations: 'Actions', addColumn: 'Add column',
@@ -1979,8 +1999,37 @@
       }
 
       $('#languageButton').addEventListener('click', () => { language = language === 'ja' ? 'en' : 'ja'; writeStorage(storageKeys.language, language); applyLanguage(); });
-      const helpDialog = $('#helpDialog'); $('#helpButton').addEventListener('click', () => helpDialog.showModal()); $('#closeHelpButton').addEventListener('click', () => helpDialog.close());
-      helpDialog.addEventListener('click', event => { const rect = helpDialog.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outside) helpDialog.close(); });
+      const helpDialog = $('#helpDialog');
+      let helpPageState = null;
+      function restoreHelpPage() {
+        // A queued close event from an earlier opening must not unlock a reopened dialog.
+        if (helpDialog.open || !helpPageState) return;
+        const previous = helpPageState; helpPageState = null;
+        Object.assign(document.body.style, previous.style);
+        document.documentElement.classList.remove('help-open');
+        window.scrollTo({ left: previous.x, top: previous.y, behavior: 'instant' });
+        $('#helpButton').focus({ preventScroll: true });
+      }
+      function closeHelp() { if (helpDialog.open) helpDialog.close(); restoreHelpPage(); }
+      $('#helpButton').addEventListener('click', () => {
+        if (helpDialog.open) return;
+        restoreHelpPage();
+        const style = document.body.style;
+        helpPageState = { x: window.scrollX || 0, y: window.scrollY || 0,
+          style: Object.fromEntries(['position', 'top', 'left', 'right', 'width', 'overflow'].map(key => [key, style[key]])) };
+        // Fixed-body locking also prevents background touch scrolling on mobile browsers.
+        document.documentElement.classList.add('help-open');
+        Object.assign(style, { position: 'fixed', top: `${-helpPageState.y}px`, left: `${-helpPageState.x}px`, right: '0', width: '100%', overflow: 'hidden' });
+        try { helpDialog.showModal(); }
+        catch (error) { restoreHelpPage(); throw error; }
+        // The closed dialog has no layout box, so reset only after showModal().
+        $('#helpBody').scrollTop = 0;
+        $('#closeHelpButton').focus({ preventScroll: true });
+      });
+      $('#closeHelpButton').addEventListener('click', closeHelp);
+      helpDialog.addEventListener('cancel', event => { event.preventDefault(); closeHelp(); });
+      helpDialog.addEventListener('close', restoreHelpPage);
+      helpDialog.addEventListener('click', event => { const rect = helpDialog.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outside) closeHelp(); });
       $('#rowCount').addEventListener('input', event => { state.rowCount = Number(event.target.value); invalidateAfterChange(); });
       $('#seedInput').addEventListener('input', event => { state.seed = event.target.value; invalidateAfterChange('seedChanged'); });
       $('#randomSeedButton').addEventListener('click', () => { const seed = createAutomaticSeed(); state.seed = seed; $('#seedInput').value = seed; invalidateAfterChange('seedChanged'); $('#seedHelp').textContent = translate('seedHelp'); });

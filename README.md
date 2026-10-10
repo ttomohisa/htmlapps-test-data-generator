@@ -65,6 +65,8 @@ In v1.0.0, Japanese fields remain independent: for example, a generated name and
 7. Choose an output format and filename, then save the generated file.
 8. Use **Save settings file** if you want to keep the row count, Seed, and column schema for later.
 
+Use the header Help button for instructions and notes. Help stays near the top of the screen, scrolls its text independently, and restores your place when closed. You can also close it with Escape or by clicking outside; Tab reaches the reading area for keyboard scrolling.
+
 Numeric settings are required; enter `0` explicitly where allowed. Editing settings or Seed cancels pending work and requires regeneration before saving. Keyboard focus stays with a moved column or changed type; Delete moves to a neighboring name and Undo returns to the restored name.
 
 Known filename extensions are normalized to the selected format (`sample.csv` becomes `sample.json` when saving JSON). Blank names use `test-data`.
@@ -124,3 +126,7 @@ Current stable desktop and mobile Chromium, Firefox, and Safari are the target. 
 [MIT License](LICENSE)
 
 Application regression checks require Node.js 22 or newer (CI uses Node.js 24). The repository check tests source and all generated variants; the normal build also refreshes `test-data-generator.html`.
+
+### Help layout regression
+
+The normal repository check includes the dependency-free Help lifecycle and canonical-icon assertions in all release variants. For optional rendering checks, install development-only Python Playwright, then run `CHROMIUM_PATH=/path/to/chromium python scripts/test-data-help-browser.py` after building (use `--source` before building). The isolated loopback fixture checks desktop/phone geometry, page-scroll locking and restoration, keyboard reading, repeated dismissal, resizing, and unexpected runtime HTTP requests. This test dependency is not shipped with the application.

@@ -37,6 +37,57 @@ test('initial header matches Japanese markup and canonical version before runtim
   assert.match(button, /title="英語に切り替え"/);
 });
 
+for (const language of ['ja', 'en']) test(`${language}: Help locks the page, resets reading position and restores state after every dismissal`, () => {
+  const app = setup(language), help = app.el('helpDialog'), trigger = app.el('helpButton');
+  const scroller = help.querySelector('.dialog-body');
+  assert.equal(scroller.getAttribute('tabindex'), '0', 'help reading area is keyboard accessible');
+  assert.equal(scroller.getAttribute('aria-labelledby'), 'helpDialogTitle');
+  // A display:none dialog has no layout box: browsers ignore writes until showModal().
+  let readingOffset = 300;
+  Object.defineProperty(scroller, 'scrollTop', { get: () => readingOffset, set: value => { if (help.open) readingOffset = value; } });
+  const before = app.run('JSON.stringify(state)');
+  app.window.scrollX = 0; app.window.scrollY = 640;
+  let restored;
+  app.window.scrollTo = options => { restored = options; };
+  app.document.body.style.position = 'relative';
+  app.document.body.style.top = '3px';
+  for (const method of ['button', 'escape', 'backdrop', 'native']) {
+    readingOffset = 300; trigger.focus(); trigger.click();
+    assert.equal(help.open, true);
+    assert.equal(scroller.scrollTop, 0, 'every opening starts with the first instructions');
+    assert.equal(app.document.body.style.position, 'fixed', 'mobile-safe background scroll lock');
+    assert.equal(app.document.body.style.top, '-640px');
+    assert.equal(app.document.activeElement, app.el('closeHelpButton'));
+    // A delayed close event from a previous opening must not release the current lock.
+    help.dispatch('close');
+    assert.equal(app.document.body.style.position, 'fixed');
+    help.dispatch('click', {clientX: 100, clientY: 100});
+    assert.equal(help.open, true, 'clicking inside does not dismiss Help');
+    if (method === 'button') app.el('closeHelpButton').click();
+    if (method === 'escape') { const event = help.dispatch('cancel'); assert.equal(event.defaultPrevented, true); }
+    if (method === 'backdrop') help.dispatch('click', {clientX: -1, clientY: -1});
+    if (method === 'native') help.close();
+    assert.equal(help.open, false);
+    assert.equal(app.document.body.style.position, 'relative');
+    assert.equal(app.document.body.style.top, '3px');
+    assert.equal(restored.top, 640); assert.equal(restored.left, 0);
+    assert.equal(restored.behavior, 'instant', 'restoration does not animate from the top');
+    assert.equal(app.document.activeElement, trigger);
+    assert.equal(app.run('JSON.stringify(state)'), before, 'Help does not alter the dataset settings');
+  }
+});
+
+test('header and embedded favicon reproduce the canonical asset SVG', () => {
+  const { loadHtml } = require('./test-data-harness.cjs');
+  const html = loadHtml(filename);
+  const asset = require('node:fs').readFileSync(path.join(__dirname, '..', 'assets/favicon.svg'), 'utf8');
+  const normalize = svg => svg.replace(/\s+/g, ' ').replace(/> </g, '><').trim();
+  const header = html.match(/<div class="brand-mark"[^>]*>\s*(<svg[\s\S]*?<\/svg>)/)[1];
+  const favicon = decodeURIComponent(html.match(/<link rel="icon" href="data:image\/svg\+xml,([^"]+)"/)[1]);
+  assert.equal(normalize(header), normalize(asset));
+  assert.equal(normalize(favicon), normalize(asset));
+});
+
 const rows = app => app.document.querySelectorAll('.column-row');
 const control = (app, index, selector) => rows(app)[index].querySelector(selector);
 const type = (app, index, value) => { const input = control(app, index, '[data-role="type"]'); input.value = value; input.focus(); input.dispatch('change'); };
