@@ -4,7 +4,7 @@
 
 - **Name:** Test Data Generator / テストデータ生成
 - **Repository:** `ttomohisa/htmlapps-test-data-generator`
-- **Current version:** `1.0.1`
+- **Current version:** `1.0.2`
 - **Purpose:** Generate reproducible test data locally in the browser, including normal, missing, boundary, and invalid values.
 - **Release artifacts:** `dist/index.html` and `dist/index.self-extract.html`
 
@@ -120,7 +120,7 @@ v1.0.0 does not introduce a new schema-file field for templates: after a templat
 
 ## 11. Acceptance criteria
 
-- `app.config.json` and visible build information report `1.0.1`.
+- `app.config.json` and visible build information report `1.0.2`.
 - Header language switching shows the target language as `EN` in Japanese and `JA` in English, with localized aria-label/title (`英語に切り替え` / `Switch to Japanese`). The visible `vX.Y.Z` badge matches `app.config.json`; privacy remains `完全ローカル処理` / `Fully local processing`.
 - Seed placeholder remains `42`.
 - All 23 data types generate successfully in one schema.
@@ -172,3 +172,10 @@ The following remain future candidates rather than v1.0.0 requirements:
 - Copy does not upload data, but the user-requested write leaves the page for the system clipboard, which other apps or device syncing may access.
 - Column names such as `__proto__`, `constructor`, `toString` and `hasOwnProperty` are literal own data keys in worker rows and metadata. Preview badge lookup requires an own property after structured clone restores a normal object prototype. No columns are omitted, no `[object Object]` values are invented, and normal values have no false Invalid badge.
 - Ordinary seeded outputs keep byte parity across all 23 types and all four export formats. Existing generation/export cancellation, immutable snapshots, first-20 retention and filename behavior remain unchanged.
+
+## 15. Help viewport and app icon
+
+- Help opens near the top of the viewport with safe-area-aware margins, a fixed title/Close row, and one independently scrolling reading area. Its last paragraph remains reachable at desktop, narrow phone, and short landscape heights.
+- Opening Help after scrolling locks the background page without changing settings. Button, Escape, backdrop, and native close release the lock, restore the previous page position without smooth scrolling, and return focus to Help. A late close event cannot unlock a reopened dialog.
+- Each opening starts at the first instruction. Tab reaches the labeled reading area; Page Down scrolls it while the Close button stays visible. Resizing an open dialog preserves viewport bounds.
+- The header embeds the complete `assets/favicon.svg` artwork at the same aspect ratio. The embedded favicon and self-extract loader use the same SVG; no independently redrawn header glyph is retained.

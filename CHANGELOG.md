@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Bump the patch version to v1.0.2.
+- Keep Help near the viewport top with safe-area margins, a fixed close header, keyboard-scrollable text, and no clipped final paragraph.
+- Lock background scrolling while Help is open, restore the previous page position and focus on dismissal, and reset reading position on reopen.
+- Use the canonical asset SVG for the complete header mark and embedded favicon; cover lifecycle and icon parity in every generated variant.
+
 - Fix pre-existing PowerShell parser errors in dependency-maintenance diagnostic strings and parse-check build/maintenance scripts before the repository build.
 
 - Standardize header target-language labels to EN / JA with localized accessible names and tooltips, and synchronize the visible version badge with v1.0.1.
