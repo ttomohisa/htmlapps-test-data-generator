@@ -33,6 +33,12 @@ async def layout(page, width, height):
     assert body_box['y'] + body_box['height'] <= box['y'] + box['height'] - 1
     assert await page.locator('#helpDialog').evaluate('(node) => node.scrollHeight <= node.clientHeight + 1'), 'outer dialog never clips its scroll area'
 
+async def open_help(page):
+    # Native pointer input avoids locator auto-scroll moving a sticky header before click.
+    box = await page.locator('#helpButton').bounding_box()
+    assert box and box['y'] >= 0, 'sticky Help trigger remains visible'
+    await page.mouse.click(box['x'] + box['width']/2, box['y'] + box['height']/2)
+
 async def run_case(browser, url, relative, width, height, language):
     context = await browser.new_context(viewport={'width':width,'height':height},locale=language)
     page = await context.new_page()
@@ -46,7 +52,7 @@ async def run_case(browser, url, relative, width, height, language):
     await page.evaluate('window.scrollTo({top:640,behavior:"instant"})')
     for method in ['button','escape','backdrop']:
         before_y = await page.evaluate('scrollY')
-        await page.locator('#helpButton').click()
+        await open_help(page)
         await layout(page,width,height)
         body = page.locator('#helpBody')
         assert await body.evaluate('(node) => node.scrollTop') == 0, 'reopen starts at beginning'
@@ -74,7 +80,7 @@ async def run_case(browser, url, relative, width, height, language):
         assert await page.locator('#helpButton').evaluate('(node) => node === document.activeElement')
         assert await page.locator('#seedInput').input_value() == 'help-regression-seed'
         assert await page.locator('#columnList').inner_text() == original
-    await page.locator('#helpButton').click()
+    await open_help(page)
     await page.set_viewport_size({'width':320,'height':300})
     await layout(page,320,300)
     await page.keyboard.press('Escape')
