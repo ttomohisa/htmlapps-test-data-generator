@@ -179,3 +179,8 @@ The following remain future candidates rather than v1.0.0 requirements:
 - Opening Help after scrolling locks the background page without changing settings. Button, Escape, backdrop, and native close release the lock, restore the previous page position without smooth scrolling, and return focus to Help. A late close event cannot unlock a reopened dialog.
 - Each opening starts at the first instruction. Tab reaches the labeled reading area; Page Down scrolls it while the Close button stays visible. Resizing an open dialog preserves viewport bounds.
 - The header embeds the complete `assets/favicon.svg` artwork at the same aspect ratio. The embedded favicon and self-extract loader use the same SVG; no independently redrawn header glyph is retained.
+
+## Shared mobile footer and Help build information
+
+- Hide only the informational page footer at the existing smartphone breakpoint (520px); preserve functional bottom navigation/actions and Help controls.
+- The existing build-information disclosure is the final item inside the scrollable Help body, retaining its metadata IDs, population, and desktop/mobile availability.

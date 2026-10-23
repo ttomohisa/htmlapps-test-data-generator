@@ -320,6 +320,7 @@
       .build-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 520px) {
+      footer { display: none; }
       :root { --header-height: 58px; }
       .header-inner { padding-block: 8px; }
       .brand-mark { width: 34px; height: 34px; }
@@ -618,15 +619,6 @@
       </section>
     </div>
     <!-- APP:END -->
-
-    <details class="build-details">
-      <summary data-i18n="buildInfo">ビルド情報</summary>
-      <div class="build-grid">
-        <div class="build-item"><span data-i18n="appVersion">アプリバージョン</span><strong id="buildVersion">—</strong></div>
-        <div class="build-item"><span data-i18n="builtAt">生成日時</span><strong id="builtAt">—</strong></div>
-        <div class="build-item"><span data-i18n="dependencies">内包依存数</span><strong id="dependencyCount">0</strong></div>
-      </div>
-    </details>
   </main>
 
   <footer><span id="footerName">Test Data Generator</span> · MIT License · <span data-i18n="footer">完全内包HTMLとして生成</span></footer>
@@ -695,6 +687,14 @@
       </ul>
       <p class="dialog-note" data-i18n="helpOffline">必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。</p>
       <!-- APP:HELP:END -->
+    <details class="build-details">
+      <summary data-i18n="buildInfo">ビルド情報</summary>
+      <div class="build-grid">
+        <div class="build-item"><span data-i18n="appVersion">アプリバージョン</span><strong id="buildVersion">—</strong></div>
+        <div class="build-item"><span data-i18n="builtAt">生成日時</span><strong id="builtAt">—</strong></div>
+        <div class="build-item"><span data-i18n="dependencies">内包依存数</span><strong id="dependencyCount">0</strong></div>
+      </div>
+    </details>
     </div>
   </dialog>
 
@@ -2029,7 +2029,7 @@
       $('#closeHelpButton').addEventListener('click', closeHelp);
       helpDialog.addEventListener('cancel', event => { event.preventDefault(); closeHelp(); });
       helpDialog.addEventListener('close', restoreHelpPage);
-      helpDialog.addEventListener('click', event => { const rect = helpDialog.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outside) closeHelp(); });
+      helpDialog.addEventListener('click', event => {if(event.target!==helpDialog)return; const rect = helpDialog.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outside) closeHelp(); });
       $('#rowCount').addEventListener('input', event => { state.rowCount = Number(event.target.value); invalidateAfterChange(); });
       $('#seedInput').addEventListener('input', event => { state.seed = event.target.value; invalidateAfterChange('seedChanged'); });
       $('#randomSeedButton').addEventListener('click', () => { const seed = createAutomaticSeed(); state.seed = seed; $('#seedInput').value = seed; invalidateAfterChange('seedChanged'); $('#seedHelp').textContent = translate('seedHelp'); });

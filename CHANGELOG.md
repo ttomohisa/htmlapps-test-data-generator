@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Hide the informational page footer at the existing smartphone breakpoint and move the unchanged build information to the end of Help. Preserve native disclosure and dialog dismissal.
+
 - Bump the patch version to v1.0.2.
 - Keep Help near the viewport top with safe-area margins, a fixed close header, keyboard-scrollable text, and no clipped final paragraph.
 - Lock background scrolling while Help is open, restore the previous page position and focus on dismissal, and reset reading position on reopen.

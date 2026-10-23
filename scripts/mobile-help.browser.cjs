@@ -1,0 +1,177 @@
+'use strict';
+// Run against the official generated files in the unprivileged PR build job.
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
+const { chromium } = require('playwright');
+const { execFileSync } = require('node:child_process');
+const os = require('node:os');
+const baselineCommit = '84a180a8c8a8cdb46dc4ee7204544e6f3823a767';
+const viewports = [[1360, 900], [521, 568], [520, 568], [360, 640], [320, 568], [393, 252]];
+const buildSelector = 'details.build-details';
+
+
+async function setLanguage(page, language) {
+  await page.locator('#helpButton').waitFor();
+  if (await page.locator('html').getAttribute('lang') !== language) await page.locator('#languageButton').click();
+  await page.locator('#languageButton').click(); await page.locator('#languageButton').click();
+}
+async function readPageGeometry(page) {
+  return page.evaluate(() => ({
+    viewport: innerWidth,
+    document: document.documentElement.scrollWidth,
+    body: document.body.scrollWidth,
+    maximumHorizontalScroll: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    offenders: [...document.querySelectorAll('body *')].filter(el => {
+      const rect = el.getBoundingClientRect(); return rect.width && rect.right > innerWidth + 1;
+    }).map(el => {
+      const rect = el.getBoundingClientRect();
+      return { tag: el.tagName, id: el.id, className: el.className, owner: el.closest('.generate-actions, .export-button-group')?.className || null, left: rect.left, right: rect.right, width: rect.width };
+    })
+  }));
+}
+async function measureImmutableBaseline(browser, directory) {
+  // This is the immutable base's official tracked HTML, never a replacement for current dist.
+  const file = path.join(directory, 'baseline.html');
+  fs.writeFileSync(file, execFileSync('git', ['show', baselineCommit + ':test-data-generator.html'], { cwd: path.resolve(__dirname, '..') }));
+  const measurements = new Map();
+  for (const language of ['ja', 'en']) for (const [width, height] of viewports) {
+    const context = await browser.newContext({ viewport: { width, height }, locale: language, reducedMotion: 'reduce' });
+    try {
+      const page = await context.newPage(), errors = [], requests = [];
+      page.on('pageerror', error => errors.push(error.message));
+      page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+      page.on('request', request => { if (/^https?:/.test(request.url())) requests.push(request.url()); });
+      await page.goto(pathToFileURL(file).href); await setLanguage(page, language);
+      const geometry = await readPageGeometry(page);
+      measurements.set(`${language}-${width}-${height}`, geometry);
+      console.log('IMMUTABLE_BASELINE ' + baselineCommit + ' ' + `${language} ${width}x${height} ` + JSON.stringify(geometry));
+      assert.deepEqual(errors, []); assert.deepEqual(requests, []);
+    } finally { await context.close(); }
+  }
+  return measurements;
+}
+
+
+async function prepareApp(page,width,label){
+ assert.equal(await page.locator('#generateButton').isVisible(),true,label+': generation control preserved');
+}
+async function smoke(page,results,file){
+ await page.locator('#rowCount').fill('3');await page.locator('#seedInput').fill('mobile-help-regression');await page.locator('#generateButton').click();
+ await page.waitForFunction(()=>!document.querySelector('#saveOutputButton').disabled);
+ await page.locator('#exportFormat').selectOption('json');await page.locator('#outputNameInput').fill('mobile-help-data');
+ const pending=page.waitForEvent('download');await page.locator('#saveOutputButton').click();const download=await pending;assert.equal(download.suggestedFilename(),'mobile-help-data.json');
+ const target=path.join(results,file.includes('self-extract')?'synthetic-loader.json':'synthetic-readable.json');await download.saveAs(target);const rows=JSON.parse(fs.readFileSync(target,'utf8'));assert.equal(rows.length,3);assert.ok(Object.keys(rows[0]).length>0);
+ console.log('PASS synthetic seeded data to edited-name JSON '+file);
+}
+
+async function main() {
+  const results = path.resolve(__dirname, '..', 'test-results', 'mobile-help');
+  fs.mkdirSync(results, { recursive: true });
+  const browser = await chromium.launch();
+  const baselineDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'test-data-layout-baseline-'));
+  try {
+    const baselineMeasurements = await measureImmutableBaseline(browser, baselineDirectory);
+    for (const file of ['dist/index.html', 'dist/index.self-extract.html', 'test-data-generator.html']) {
+      for (const language of ['ja', 'en']) {
+        for (const [width, height] of viewports) {
+          const context = await browser.newContext({ viewport: { width, height }, locale: language, reducedMotion: 'reduce' });
+          const page = await context.newPage();
+          const errors = [], requests = [];
+          page.on('pageerror', error => errors.push(error.message));
+          page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+          page.on('request', request => { if (/^https?:/.test(request.url())) requests.push(request.url()); });
+          const label = `${file} ${language} ${width}x${height}`;
+          try {
+            await page.goto(pathToFileURL(path.resolve(__dirname, '..', file)).href);
+            await setLanguage(page, language);
+            assert.equal(await page.locator('html').getAttribute('lang'),language,label+': repeated language toggles');
+            for(const id of ['buildVersion','builtAt','dependencyCount']){assert.equal(await page.locator('#'+id).count(),1,label+': unique metadata after toggles');assert.ok(!['','—','-'].includes((await page.locator('#'+id).textContent()).trim()),label+': populated metadata after toggles');}
+            assert.equal(await page.locator('[data-i18n="localBadge"]').textContent(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
+            assert.ok(await page.locator('.local-badge').evaluate(el => {
+              const box = el.getBoundingClientRect();
+              const range = document.createRange();
+              range.selectNodeContents(el.querySelector('[data-i18n="localBadge"]'));
+              return box.left >= 0 && box.right <= innerWidth && el.scrollWidth <= el.clientWidth + 1
+                && [...range.getClientRects()].every(rect => rect.left >= box.left - 1 && rect.right <= box.right + 1 && rect.top >= box.top - 1 && rect.bottom <= box.bottom + 1);
+            }), label + ': badge text fits');
+            assert.equal(await page.locator('main #buildVersion').count(), 0, label);
+            assert.equal(await page.locator('footer').isVisible(), width > 520, label);
+            await prepareApp(page, width, label);
+
+            const pageGeometry = await readPageGeometry(page);
+            const baseline = baselineMeasurements.get(`${language}-${width}-${height}`);
+            console.log('PAGE_GEOMETRY ' + label + ' ' + JSON.stringify(pageGeometry));
+            if (baseline.document <= width) {
+              assert.ok(pageGeometry.document <= width, label + ': page width');
+            } else {
+              // Only identical pre-existing main-control overflow is allowed. New offenders or worse widths fail.
+              assert.deepEqual(pageGeometry, baseline, label + ': unchanged immutable-base main-control geometry');
+              assert.ok(pageGeometry.offenders.every(el => ['generate-actions', 'export-button-group'].includes(el.owner)), label + ': overflow is attributed only to existing generation/export controls');
+              console.log('KNOWN_BASELINE_MAIN_OVERFLOW ' + label);
+            }
+
+            await page.locator('#helpButton').click();
+            const body = page.locator('#helpDialog .dialog-body');
+            assert.ok(await body.evaluate(el => el.lastElementChild.contains(document.querySelector('#buildVersion'))), label + ': build is final body child');
+            assert.equal(await page.locator(buildSelector).count(), 1, label);
+            assert.equal(await page.locator(buildSelector).isVisible(), true, label);
+            for (const id of ['buildVersion', 'builtAt', 'dependencyCount']) assert.equal(await page.locator('#' + id).count(), 1, label);
+
+            if (await page.locator(buildSelector).getAttribute('open') === null) {
+              const summary = page.locator(buildSelector).locator('summary');
+              await summary.focus();
+              await page.keyboard.press('Enter');
+              assert.equal(await page.locator(buildSelector).getAttribute('open'), '', label);
+              assert.notEqual(await page.locator('#buildVersion').innerText(), '—', label);
+              assert.match(await page.locator('#builtAt').innerText(), /\d{4}/, label + ': populated build timestamp');
+            }
+            await body.evaluate(el => { el.scrollTop = el.scrollHeight; });
+            const finalItem = page.locator('#dependencyCount');
+            const finalBox = await finalItem.boundingBox(), bodyBox = await body.boundingBox();
+            console.log('GEOMETRY ' + label + ' ' + JSON.stringify({ finalBox, bodyBox, viewportHeight: height }));
+            assert.ok(finalBox && bodyBox && finalBox.y >= 0 && finalBox.y + finalBox.height <= height && finalBox.y >= bodyBox.y - 1 && finalBox.y + finalBox.height <= bodyBox.y + bodyBox.height + 1, label + ': final Help item reachable');
+            assert.ok(await body.evaluate(el => el.scrollWidth <= el.clientWidth + 1), label + ': Help width');
+            const headerBox = await page.locator('#helpDialog .dialog-header').boundingBox();
+            assert.ok(headerBox && headerBox.x >= 0 && headerBox.x + headerBox.width <= width && headerBox.y >= 0 && headerBox.y + headerBox.height <= height, label + ': header visible');
+            const closeBox=await page.locator('#closeHelpButton').boundingBox();
+            assert.ok(closeBox && closeBox.x>=0 && closeBox.x+closeBox.width<=width && closeBox.y>=headerBox.y && closeBox.y+closeBox.height<=headerBox.y+headerBox.height+1,label+': Close fits header');
+            if (file === 'dist/index.html' && [1360, 320].includes(width)) {
+              await page.screenshot({ path: path.join(results, `help-${language}-${width}.png`) });
+            }
+            const dialogBox = await page.locator('#helpDialog').boundingBox();
+            assert.ok(finalBox.y >= dialogBox.y - 1 && finalBox.y + finalBox.height <= dialogBox.y + dialogBox.height + 1, label + ': final item inside dialog');
+            assert.ok(dialogBox.y > 1, label + ': top coordinate is genuine backdrop');
+            const beforeScroll = await page.evaluate(() => scrollY);
+            await page.mouse.move(2, 1);
+            await page.mouse.wheel(0, 400);
+            await page.waitForTimeout(100);
+            assert.equal(await page.evaluate(() => scrollY), beforeScroll, label + ': background locked');
+            await page.keyboard.press('Escape');
+            assert.equal(await page.locator('#helpDialog').isVisible(), false, label + ': Escape');
+            await page.locator('#helpButton').click();
+            await page.locator('#closeHelpButton').click();
+            assert.equal(await page.locator('#helpDialog').isVisible(), false, label + ': reopen and Close');
+            await page.locator('#helpButton').click();
+            await page.mouse.click(2, 1);
+            assert.equal(await page.locator('#helpDialog').isVisible(), false, label + ': backdrop');
+            if(file!=='test-data-generator.html' && language==='ja' && width===360) await smoke(page,results,file);
+            assert.deepEqual(errors, [], label + ': console errors');
+            assert.deepEqual(requests, [], label + ': external runtime requests');
+            console.log('PASS ' + label);
+          } catch (error) {
+            await page.screenshot({ path: path.join(results, `failure-${file.replace(/[^a-z0-9]/gi, '-')}-${language}-${width}x${height}.png`) }).catch(() => {});
+            throw error;
+          } finally {
+            await context.close();
+          }
+        }
+      }
+    }
+  } finally {
+    fs.rmSync(baselineDirectory, { recursive: true, force: true });
+    await browser.close();
+  }
+}
+main().catch(error => { console.error(error); process.exitCode = 1; });
