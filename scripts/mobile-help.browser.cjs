@@ -54,7 +54,9 @@ async function main() {
             assert.equal(await page.locator('footer').isVisible(), width > 520, label);
             await prepareApp(page, width, label);
 
-            assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), label + ': page width');
+            const pageGeometry = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth, offenders: [...document.querySelectorAll('body *')].filter(el => { const rect=el.getBoundingClientRect(); return rect.width && rect.right > innerWidth + 1; }).map(el=>{const rect=el.getBoundingClientRect(); return {tag:el.tagName,id:el.id,className:el.className,left:rect.left,right:rect.right,width:rect.width};}).slice(0,20) }));
+            console.log('PAGE_GEOMETRY ' + label + ' ' + JSON.stringify(pageGeometry));
+            assert.ok(pageGeometry.document <= width, label + ': page width');
 
             await page.locator('#helpButton').click();
             const body = page.locator('#helpDialog .dialog-body');
