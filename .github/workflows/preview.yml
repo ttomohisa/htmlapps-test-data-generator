@@ -50,6 +50,9 @@ jobs:
         $env:NODE_PATH = Join-Path $testTools "node_modules"
         & (Join-Path $testTools "node_modules/.bin/playwright.cmd") install chromium
         if ($LASTEXITCODE -ne 0) { throw "Chromium installation failed." }
+        # Read only the immutable base needed to distinguish existing main-control overflow.
+        git fetch --no-tags --depth=1 origin 84a180a8c8a8cdb46dc4ee7204544e6f3823a767
+        if ($LASTEXITCODE -ne 0) { throw "Immutable layout baseline fetch failed." }
         New-Item -ItemType Directory -Force -Path test-results/mobile-help | Out-Null
         node scripts/mobile-help.browser.cjs 2>&1 | Tee-Object -FilePath test-results/mobile-help/results.log
         if ($LASTEXITCODE -ne 0) { throw "Mobile Help browser regression failed." }
