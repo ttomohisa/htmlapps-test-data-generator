@@ -357,6 +357,8 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
   </style>
+  <style>__BK_UI_CSS__</style>
+  <script data-bk-ui-version="1.0.0">__BK_UI_JS__</script>
 </head>
 <body>
   <header class="app-header">
@@ -376,8 +378,8 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="language-button" id="languageButton" type="button" aria-label="英語に切り替え" title="英語に切り替え">EN</button>
-        <button class="header-icon-button" id="helpButton" type="button" data-i18n-title="helpTitle" data-i18n-aria-label="helpTitle" title="使い方と注意事項" aria-label="使い方と注意事項">
+        <button class="language-button" data-bk-header-action id="languageButton" type="button" aria-label="英語に切り替え" title="英語に切り替え">EN</button>
+        <button class="header-icon-button" data-bk-header-action id="helpButton" type="button" data-i18n-title="helpTitle" data-i18n-aria-label="helpTitle" title="使い方と注意事項" aria-label="使い方と注意事項">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.35 2.35 0 1 1 3.72 1.9c-.92.67-1.52 1.12-1.52 2.1"/><path d="M12 17h.01"/></svg>
         </button>
       </div>
@@ -405,6 +407,10 @@
             <p class="panel-description" data-i18n="generationSettingsBody">件数、Seed、テスト配合を指定します。v1.0.0では最大1,000,000件です。</p>
           </div>
         </div>
+        <p id="settingsSaveStatus" data-bk-save-status role="status" aria-live="polite"></p>
+        <button id="retrySettings" type="button" data-bk-button data-bk-variant="secondary" data-i18n="retry" hidden></button>
+        <p id="languageStatus" role="status" aria-live="polite"></p>
+        <p data-i18n="previewRetention"></p>
         <div class="settings-grid">
           <label class="field" for="rowCount">
             <span class="field-label" data-i18n="rowCountLabel">生成件数</span>
@@ -415,7 +421,7 @@
             <span class="field-label" data-i18n="seedLabel">Seed</span>
             <span class="seed-input-row">
               <input id="seedInput" type="text" maxlength="128" autocomplete="off" spellcheck="false" placeholder="42">
-              <button class="button" id="randomSeedButton" type="button" data-i18n-title="randomSeed" data-i18n-aria-label="randomSeed" title="Seedを変更" aria-label="Seedを変更">
+              <button class="button" data-bk-button data-bk-variant="secondary" id="randomSeedButton" type="button" data-i18n-title="randomSeed" data-i18n-aria-label="randomSeed" title="Seedを変更" aria-label="Seedを変更">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="4.5" width="15" height="15" rx="3"/><circle cx="9" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/></svg>
                 <span data-i18n="randomSeedShort">変更</span>
               </button>
@@ -444,7 +450,7 @@
                 <option value="inquiry" data-i18n="templateInquiry">問い合わせ</option>
                 <option value="access_log" data-i18n="templateAccessLog">アクセスログ</option>
               </select>
-              <button class="button" id="applyTemplateButton" type="button" disabled>
+              <button class="button" data-bk-button data-bk-variant="secondary" id="applyTemplateButton" type="button" disabled>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 10v9"/></svg>
                 <span data-i18n="applyTemplate">適用</span>
               </button>
@@ -452,15 +458,16 @@
             <span class="field-help" data-i18n="templateHelp">よく使う列構成をまとめて設定します。現在の列は置き換わります。</span>
           </div>
           <div class="generation-secondary-actions">
-            <button class="button" id="regenerateButton" type="button" disabled>
+            <button class="button" data-bk-button data-bk-variant="secondary" id="regenerateButton" type="button" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg>
               <span data-i18n="regenerateSameSeed">同じSeedでもう一度生成</span>
             </button>
-            <button class="button" id="saveSchemaButton" type="button">
+<label for="schemaOutputName"><span data-i18n="schemaFilename"></span><input id="schemaOutputName" value="test-data-schema" maxlength="120">.json</label>
+            <button class="button" data-bk-button data-bk-variant="secondary" id="saveSchemaButton" type="button">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6h8V4M8 16h8"/></svg>
               <span data-i18n="saveSchema">設定ファイルを保存</span>
             </button>
-            <button class="button" id="loadSchemaButton" type="button">
+            <button class="button" data-bk-button data-bk-variant="secondary" id="loadSchemaButton" type="button">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h6l2 2h8v11H4z"/><path d="M12 11v5M9.5 13.5 12 16l2.5-2.5"/></svg>
               <span data-i18n="loadSchema">設定ファイルを読み込む</span>
             </button>
@@ -476,7 +483,7 @@
             <h2 class="panel-title" id="columnsTitle" data-i18n="columnsTitle">列設定</h2>
             <p class="panel-description" data-i18n="columnsBody">列名、データの種類、生成方法を設定します。</p>
           </div>
-          <button class="button danger-quiet" id="resetButton" type="button" data-i18n="reset">初期状態に戻す</button>
+          <button class="button danger-quiet" data-bk-button data-bk-variant="secondary" id="resetButton" type="button" data-i18n="reset">初期状態に戻す</button>
         </div>
 
         <div class="error-banner" id="errorBanner" role="alert" aria-live="assertive">
@@ -496,13 +503,13 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
           <strong data-i18n="emptyColumnsTitle">列がありません</strong>
           <span data-i18n="emptyColumnsBody">生成したいデータの列を追加してください。</span>
-          <button class="button" id="emptyAddColumnButton" type="button">
+          <button class="button" data-bk-button data-bk-variant="secondary" id="emptyAddColumnButton" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
             <span data-i18n="addColumn">列を追加</span>
           </button>
         </div>
         <div class="columns-toolbar">
-          <button class="button" id="addColumnButton" type="button">
+          <button class="button" data-bk-button data-bk-variant="secondary" id="addColumnButton" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
             <span data-i18n="addColumn">列を追加</span>
           </button>
@@ -515,11 +522,11 @@
             <progress class="process-progress" id="generateProgress" max="100" value="0" hidden aria-label="生成の進捗" data-i18n-aria-label="generationProgressLabel"></progress>
           </div>
           <div class="generate-actions">
-            <button class="button cancel-process" id="cancelGenerateButton" type="button" hidden>
+            <button class="button cancel-process" data-bk-button data-bk-variant="secondary" id="cancelGenerateButton" type="button" hidden>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
               <span data-i18n="cancelGeneration">生成を中止</span>
             </button>
-            <button class="button primary" id="generateButton" type="button">
+            <button class="button primary" data-bk-button data-bk-variant="primary" id="generateButton" type="button">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/><path d="m17 15 3 3-3 3"/></svg>
               <span data-i18n="generate">データを生成</span>
             </button>
@@ -535,7 +542,7 @@
           </div>
         </div>
         <div class="preview-copy">
-          <button class="button" id="copyPreviewButton" type="button" disabled aria-describedby="copyPreviewScope copyPreviewStatus" data-i18n="copyPreview">プレビューをJSONでコピー</button>
+          <button class="button" data-bk-button data-bk-variant="secondary" id="copyPreviewButton" type="button" disabled aria-describedby="copyPreviewScope copyPreviewStatus" data-i18n="copyPreview">プレビューをJSONでコピー</button>
           <span class="preview-copy-note" id="copyPreviewScope"></span>
           <p class="preview-copy-status" id="copyPreviewStatus" role="status" aria-live="polite"></p>
         </div>
@@ -606,11 +613,13 @@
             <progress class="process-progress" id="exportProgress" max="100" value="0" hidden aria-label="保存の進捗" data-i18n-aria-label="exportProgressLabel"></progress>
           </div>
           <div class="export-button-group">
-            <button class="button cancel-process" id="cancelExportButton" type="button" hidden>
+            <button class="button cancel-process" data-bk-button data-bk-variant="secondary" id="cancelExportButton" type="button" hidden>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
               <span data-i18n="cancelExport">保存を中止</span>
             </button>
-            <button class="button primary" id="saveOutputButton" type="button" disabled>
+<p id="exportPrefsStatus" data-bk-save-status role="status" aria-live="polite"></p><button id="retryExportPrefs" type="button" data-bk-button data-bk-variant="secondary" data-i18n="retry" hidden></button>
+            <p id="outputScope" role="status" aria-live="polite"></p>
+            <button class="button primary" data-bk-button data-bk-variant="primary" id="saveOutputButton" type="button" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
               <span id="saveOutputText">CSVを保存</span>
             </button>
@@ -638,8 +647,8 @@
     <div class="app-confirm-body">
       <p class="app-confirm-message" id="appConfirmMessage"></p>
       <div class="app-confirm-actions">
-        <button class="app-confirm-button" id="appConfirmCancel" type="button">キャンセル</button>
-        <button class="app-confirm-button primary" id="appConfirmOk" type="button">実行する</button>
+        <button class="app-confirm-button" data-bk-button data-bk-variant="secondary" id="appConfirmCancel" type="button">キャンセル</button>
+        <button class="app-confirm-button primary" data-bk-button data-bk-variant="secondary" id="appConfirmOk" type="button">実行する</button>
       </div>
     </div>
   </dialog>
@@ -686,6 +695,7 @@
         <li data-i18n="helpNoteRoadmap">列ごとに欠損・境界・異常値の割合を設定できます。プリセットで全列へまとめて適用することもできます。</li>
       </ul>
       <p class="dialog-note" data-i18n="helpOffline">必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。</p>
+      <p data-i18n="previewRetention"></p>
       <!-- APP:HELP:END -->
     <details class="build-details">
       <summary data-i18n="buildInfo">ビルド情報</summary>
@@ -775,6 +785,16 @@
 
       const translations = {
         ja: {
+          retry:"再試行",
+          settingsScope:"列設定とSeedのみ:",
+          prefsScope:"出力設定のみ:",
+          storageUnreadable:"保存済み設定を読み込めません。元データは上書きしていません。設定JSONを保存して退避するか、保存領域を回復して再試行してください。",
+          previewRetention:"生成データはこのタブ内だけに保持します。設定変更・再生成で前回のプレビューを破棄します。列設定とSeedはこのブラウザーへ自動保存します。設定JSONに生成行は含みません。",
+          schemaFilename:"設定JSONのファイル名",
+          schemaExportFailed:"設定JSONを保存できませんでした。現在の設定は保持しています。設定JSONの保存を再試行してください。",
+          retryExport:"生成結果は保持しています。「保存」から再試行してください。",
+          downloadNotice:"保存を開始しました: {name}",
+          outputScope:"全{count}行を保存（プレビューの20行だけではありません）。",
           brandMeta: 'ブラウザーだけでテストデータを生成', helpReading: '本文をスクロールして読めます。閉じるボタン・Esc・背景のクリックで元の画面に戻ります。', helpTitle: '使い方と注意事項', close: '閉じる',
           introTitle: 'テストデータ生成', lead: '列と件数を指定して、動作確認に使えるテストデータをブラウザー内で生成します。', localBadge: '完全ローカル処理',
           generationSettingsTitle: '生成設定', generationSettingsBody: '件数、Seed、テスト配合を指定します。v1.0.0では最大1,000,000件です。', rowCountLabel: '生成件数', rowCountHelp: '1〜1,000,000件（列数に応じて安全上限があります）', seedLabel: 'Seed', seedHelp: '空欄なら生成時にSeedを自動作成します。', randomSeed: 'Seedを変更', randomSeedShort: '変更', regenerateSameSeed: '同じSeedでもう一度生成', usedSeedLabel: '今回のSeed:', saveSchema: '設定ファイルを保存', loadSchema: '設定ファイルを読み込む', schemaSaved: '設定ファイルを作成しました：{name}', schemaLoaded: '設定ファイルを読み込みました。', schemaLoadTitle: '設定ファイルを読み込みますか？', schemaLoadBody: '現在の列設定・件数・Seedを、読み込んだ設定で置き換えます。生成結果は消去されます。', schemaLoadAction: '読み込む', schemaInvalid: 'この設定ファイルは読み込めません。Test Data Generatorの設定ファイルか確認してください。', schemaTooLarge: '設定ファイルが大きすぎます。1 MB以下のJSONファイルを選んでください。', settingsSavedNote: '列設定とSeedは、このブラウザー内に保存されます。生成したデータ自体は自動保存しません。', testPresetLabel: 'テスト配合', presetNormal: '通常', presetLight: '軽くテスト', presetStrict: '厳しめテスト', presetCustom: '現在：カスタム', testPresetHelp: '全列へまとめて適用します。列ごとに割合を調整できます。', presetApplied: '「{name}」を全列に適用しました。', templateLabel: 'テンプレート', templateChoose: 'テンプレートを選択', templateUser: 'ユーザー', templateCustomer: '顧客', templateEmployee: '社員', templateProduct: '商品', templateOrder: '注文', templateInquiry: '問い合わせ', templateAccessLog: 'アクセスログ', applyTemplate: '適用', templateHelp: 'よく使う列構成をまとめて設定します。現在の列は置き換わります。', templateConfirmTitle: 'テンプレートを適用しますか？', templateConfirmBody: '現在の列設定を「{name}」テンプレートで置き換えます。生成結果も消去されます。', templateConfirmAction: 'テンプレートを適用', templateApplied: '「{name}」テンプレートを適用しました。',
@@ -787,14 +807,24 @@
           generating: '生成しています…', generated: '{count}件生成しました。', workerUnavailable: 'このブラウザーでは大量生成用の処理を開始できませんでした。', settingsChanged: '設定を変更しました。もう一度生成してください。', seedChanged: 'Seedを変更しました。もう一度生成してください。',
           errorRows: '生成件数は1〜1,000,000の整数で入力してください。', errorCells: '生成件数 × 列数は10,000,000セル以下にしてください。列数か生成件数を減らしてください。', errorNoColumns: '列を1つ以上追加してください。', errorEmptyName: '列名が空の列があります。', errorDuplicateName: '同じ列名が使用されています。列名は重複しないようにしてください。', errorSequence: '連番の開始値と増分は整数で入力してください。', errorInteger: '整数の最小値と最大値を確認してください。最小値は最大値以下にしてください。', errorDecimal: '小数の範囲と小数桁数を確認してください。小数桁数は0〜10です。', errorString: 'ランダム文字列の文字数は1〜128の整数で入力してください。', errorChoice: '選択肢を1つ以上入力してください。1行を1項目として扱います。', errorDate: '日付の開始日と終了日を確認してください。開始日は終了日以前にしてください。', errorDatetime: '日時の開始日時と終了日時を確認してください。開始日時は終了日時以前にしてください。', errorMoney: '金額の最小値・最大値・刻みを確認してください。刻みは0より大きくしてください。', errorPercent: 'パーセントの小数桁数は0〜6の整数で入力してください。', errorUrl: 'ベースURLは http:// または https:// で始まる有効なURLを入力してください。', errorEmail: 'メールアドレスのドメインを確認してください。例: example.com', errorTestRates: 'テスト値の割合は0〜100の整数で、合計が100%以下になるようにしてください。',
           deleted: '「{name}」を削除しました。', undo: '元に戻す', undone: '元に戻しました。', added: '列を追加しました。', duplicated: '「{name}」を複製しました。', resetDone: '初期状態に戻しました。',
-          confirmTitle: '確認', confirmAction: '実行する', cancel: 'キャンセル', resetConfirmTitle: '列設定を初期状態に戻しますか？', resetConfirmBody: '現在の列設定と生成結果を消して、最初の設定に戻します。', resetConfirmAction: '初期状態に戻す',
+          confirmTitle: '確認', confirmAction: '実行する', cancel: 'キャンセル', resetConfirmTitle: '列設定を初期状態に戻しますか？', resetConfirmBody: 'このツールの列設定・件数・Seedと生成結果を初期状態に置き換えます。元に戻せません。出力設定と言語は残ります。', resetConfirmAction: '初期状態に戻す',
           helpBasicsTitle: '基本操作', helpStep1: '生成件数を指定します。', helpStep2: '列名とデータの種類を設定します。列は追加・複製・削除・並べ替えでき、テンプレートからまとめて設定できます。', helpStep3: '数値設定は空欄にせず入力し、「データを生成」を押します。設定・Seedを変更したら、保存する前にもう一度生成してください。', helpStep4: 'プレビュー横の「プレビューをJSONでコピー」で先頭20件までをコピーできます。全件は保存形式とファイル名を選んで保存します。CSV / TSV / JSON / JSONLの拡張子は選んだ形式に合わせ、空欄の名前には test-data を使います。', helpTypesTitle: 'v1.0.0で使える種類', helpTypesBody: '基本型に加え、日本人氏名、ふりがな、メールアドレス、電話番号、郵便番号、都道府県、市区町村、日本風住所、会社名に対応しています。日本語の各列はv1.0.0でも独立生成です。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: '設定と生成処理はブラウザー内で完結し、サーバーへ送信しません。コピーを押した場合のみ、プレビューのJSONを端末のクリップボードへ書き込みます。クリップボードは他のアプリや端末の同期機能から利用される場合があります。', helpNotesTitle: '注意事項', helpNoteStorage: '列設定はブラウザー内に保存されます。ブラウザーのサイトデータを削除すると設定も消える場合があります。', helpNotePreview: 'プレビューとJSONコピーは先頭20件のみです。コピーは1 MiBまでで、超過時は省略せずファイル保存を案内します。自動コピーが使えない場合は手動コピー用画面を開きます。最大1,000,000件まで指定できます。大量処理はバックグラウンドで進み、生成・保存を途中で中止できます。端末保護のため、生成件数 × 列数は10,000,000セル以下に制限しています。', helpNoteRoadmap: '同じ設定・件数・Seedでは同じ結果を再生成できます。列ごとに欠損・境界・異常値の割合を設定でき、プリセットで全列へまとめて適用できます。7種類のテンプレートから列構成を始めることもできます。設定ファイルには生成済みデータは含まれません。', helpOffline: '必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。',
           buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数', footer: '完全内包HTMLとして生成'
         },
         en: {
+          retry:"Retry",
+          settingsScope:"Column settings and Seed only:",
+          prefsScope:"Export preferences only:",
+          storageUnreadable:"Could not read saved settings. Stored data has not been overwritten. Save a settings JSON copy, or restore storage access and retry.",
+          previewRetention:"Generated data stays in this tab only. Changing settings or generating again discards the previous preview. Column settings and Seed save automatically in this browser. Settings JSON contains no generated rows.",
+          schemaFilename:"Settings JSON filename",
+          schemaExportFailed:"Could not save settings JSON. Current settings are retained. Retry Save settings file.",
+          retryExport:"Generated data is retained. Use Save to retry.",
+          downloadNotice:"Download started: {name}",
+          outputScope:"Save all {count} rows (not just the 20-row preview).",
           brandMeta: 'Generate test data in your browser', helpReading: 'Scroll within this panel to read. Close, Escape, or a click outside returns to your place in the app.', helpTitle: 'How to use & notes', close: 'Close',
           introTitle: 'Test Data Generator', lead: 'Choose columns and a row count, then generate test data entirely in your browser.', localBadge: 'Fully local processing',
-          generationSettingsTitle: 'Generation settings', generationSettingsBody: 'Choose the row count, Seed, and test mix. v1.0.0 supports up to 1,000,000 rows.', rowCountLabel: 'Rows', rowCountHelp: '1 to 1,000,000 rows (a safe cell limit also applies)', seedLabel: 'Seed', seedHelp: 'Leave blank to create a Seed automatically when generating.', randomSeed: 'Change Seed', randomSeedShort: 'Change', regenerateSameSeed: 'Generate again with same Seed', usedSeedLabel: 'Seed used:', saveSchema: 'Save settings file', loadSchema: 'Load settings file', schemaSaved: 'Created settings file: {name}', schemaLoaded: 'Loaded the settings file.', schemaLoadTitle: 'Load this settings file?', schemaLoadBody: 'This replaces the current columns, row count, and Seed. The generated result will be cleared.', schemaLoadAction: 'Load settings', schemaInvalid: 'This settings file could not be loaded. Check that it was created by Test Data Generator.', schemaTooLarge: 'The settings file is too large. Choose a JSON file no larger than 1 MB.', settingsSavedNote: 'Column settings and Seed are saved in this browser. Generated rows are not saved automatically.', testPresetLabel: 'Test mix', presetNormal: 'Normal', presetLight: 'Light test', presetStrict: 'Stricter test', presetCustom: 'Current: Custom', testPresetHelp: 'Apply a mix to all columns, then fine-tune each column if needed.', presetApplied: 'Applied “{name}” to all columns.', templateLabel: 'Template', templateChoose: 'Choose a template', templateUser: 'User', templateCustomer: 'Customer', templateEmployee: 'Employee', templateProduct: 'Product', templateOrder: 'Order', templateInquiry: 'Inquiry', templateAccessLog: 'Access log', applyTemplate: 'Apply', templateHelp: 'Set up a common column layout at once. This replaces the current columns.', templateConfirmTitle: 'Apply this template?', templateConfirmBody: 'This replaces the current columns with the “{name}” template and clears the generated result.', templateConfirmAction: 'Apply template', templateApplied: 'Applied the “{name}” template.',
+          generationSettingsTitle: 'Generation settings', generationSettingsBody: 'Choose the row count, Seed, and test mix. v1.0.0 supports up to 1,000,000 rows.', rowCountLabel: 'Rows', rowCountHelp: '1 to 1,000,000 rows (a safe cell limit also applies)', seedLabel: 'Seed', seedHelp: 'Leave blank to create a Seed automatically when generating.', randomSeed: 'Change Seed', randomSeedShort: 'Change', regenerateSameSeed: 'Generate again with same Seed', usedSeedLabel: 'Seed used:', saveSchema: 'Save settings file', loadSchema: 'Load settings file', schemaSaved: 'Download started: {name}', schemaLoaded: 'Loaded the settings file.', schemaLoadTitle: 'Load this settings file?', schemaLoadBody: 'This replaces the current columns, row count, and Seed. The generated result will be cleared.', schemaLoadAction: 'Load settings', schemaInvalid: 'This settings file could not be loaded. Check that it was created by Test Data Generator.', schemaTooLarge: 'The settings file is too large. Choose a JSON file no larger than 1 MB.', settingsSavedNote: 'Column settings and Seed are saved in this browser. Generated rows are not saved automatically.', testPresetLabel: 'Test mix', presetNormal: 'Normal', presetLight: 'Light test', presetStrict: 'Stricter test', presetCustom: 'Current: Custom', testPresetHelp: 'Apply a mix to all columns, then fine-tune each column if needed.', presetApplied: 'Applied “{name}” to all columns.', templateLabel: 'Template', templateChoose: 'Choose a template', templateUser: 'User', templateCustomer: 'Customer', templateEmployee: 'Employee', templateProduct: 'Product', templateOrder: 'Order', templateInquiry: 'Inquiry', templateAccessLog: 'Access log', applyTemplate: 'Apply', templateHelp: 'Set up a common column layout at once. This replaces the current columns.', templateConfirmTitle: 'Apply this template?', templateConfirmBody: 'This replaces the current columns with the “{name}” template and clears the generated result.', templateConfirmAction: 'Apply template', templateApplied: 'Applied the “{name}” template.',
           columnsTitle: 'Columns', columnsBody: 'Set each column name, data type, and generation settings.', reset: 'Reset settings', columnName: 'Column name', dataType: 'Data type', typeSettings: 'Settings', testValues: 'Test values', operations: 'Actions', addColumn: 'Add column',
           emptyColumnsTitle: 'No columns', emptyColumnsBody: 'Add at least one column to generate data.', readyToGenerate: 'Configure the columns, then select Generate data.', generate: 'Generate data', generationProgressLabel: 'Generation progress', cancelGeneration: 'Cancel generation', generationPreparing: 'Preparing generation…', generatingProgress: '{done} / {total} rows ({percent}%)', generationCancelled: 'Generation cancelled.',
           copyPreview: 'Copy preview as JSON', copyPreviewScope: 'First {count} of {total} rows only (JSON)', copyPreviewEmpty: 'Generate data to copy up to the first 20 rows.', copyPreviewPending: 'Copying JSON…', copyPreviewCopied: 'Copied JSON for the first {count} of {total} rows.', copyPreviewTooLarge: 'Preview JSON exceeds 1 MiB. Values are never truncated. Save a JSON file instead.', copyPreviewManualTitle: 'Copy JSON manually', copyPreviewManualInstructions: 'Automatic copying is unavailable. Copy the selected JSON with Ctrl+C / Command+C or your device’s Copy menu.', copyPreviewManual: 'Select the JSON to copy it manually.', copyPreviewRetry: 'Automatic copying is unavailable. Close the open dialog and select Copy again to select the JSON.',
@@ -804,7 +834,7 @@
           generating: 'Generating…', generated: 'Generated {count} rows.', workerUnavailable: 'This browser could not start the background generator.', settingsChanged: 'Settings changed. Generate again to refresh the preview.', seedChanged: 'Seed changed. Generate again to refresh the preview.',
           errorRows: 'Enter a whole-number row count from 1 to 1,000,000.', errorCells: 'Rows × columns must be 10,000,000 cells or fewer. Reduce the row count or number of columns.', errorNoColumns: 'Add at least one column.', errorEmptyName: 'A column name is empty.', errorDuplicateName: 'Column names must be unique.', errorSequence: 'Sequence start and step must be whole numbers.', errorInteger: 'Check the integer range. Min must be less than or equal to max.', errorDecimal: 'Check the decimal range and decimal places. Decimal places must be from 0 to 10.', errorString: 'Random string length must be a whole number from 1 to 128.', errorChoice: 'Enter at least one choice. Each non-empty line is treated as one value.', errorDate: 'Check the start and end dates. Start must be on or before end.', errorDatetime: 'Check the start and end date/times. Start must be on or before end.', errorMoney: 'Check money min, max, and step. Step must be greater than zero.', errorPercent: 'Percent decimal places must be a whole number from 0 to 6.', errorUrl: 'Enter a valid base URL beginning with http:// or https://.', errorEmail: 'Check the email domain. Example: example.com', errorTestRates: 'Test-value rates must be whole numbers from 0 to 100 and total no more than 100%.',
           deleted: 'Deleted “{name}”.', undo: 'Undo', undone: 'Restored.', added: 'Column added.', duplicated: 'Duplicated “{name}”.', resetDone: 'Settings reset.',
-          confirmTitle: 'Confirm', confirmAction: 'Continue', cancel: 'Cancel', resetConfirmTitle: 'Reset the column settings?', resetConfirmBody: 'This clears the current column settings and generated result, then restores the initial setup.', resetConfirmAction: 'Reset settings',
+          confirmTitle: 'Confirm', confirmAction: 'Continue', cancel: 'Cancel', resetConfirmTitle: 'Reset the column settings?', resetConfirmBody: 'Replace this tool’s column settings, row count, Seed and generated result with the initial setup? This cannot be undone. Export preferences and language remain.', resetConfirmAction: 'Reset settings',
           helpBasicsTitle: 'Basics', helpStep1: 'Choose how many rows to generate.', helpStep2: 'Set column names and data types. You can add, duplicate, delete, and reorder columns, or start from a template.', helpStep3: 'Fill in numeric settings, then select Generate data. After changing settings or Seed, generate again before saving.', helpStep4: 'Use Copy preview as JSON beside the preview to copy up to the first 20 rows. To save all rows, choose CSV, TSV, JSON, or JSONL and a filename. Known extensions follow the selected format; blank names use test-data.', helpTypesTitle: 'Types in v1.0.0', helpTypesBody: 'In addition to the basic types, Japanese name, kana name, email, phone, postal code, prefecture, city/ward, Japanese-style address, and company name are available. Japanese columns are generated independently in v1.0.0.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Settings and generation stay in your browser without server uploads. Selecting Copy writes preview JSON to your device clipboard, which other apps or device clipboard syncing may access.', helpNotesTitle: 'Notes', helpNoteStorage: 'Column settings are saved in browser storage. Clearing site data may remove them.', helpNotePreview: 'Preview and JSON copy include only the first 20 rows. Copy is limited to 1 MiB; larger JSON must be saved as a file and is never truncated. If automatic copying is unavailable, select the JSON in the manual-copy dialog. Generation accepts up to 1,000,000 rows. Large jobs run in the background and generation or saving can be cancelled. To protect the device, rows × columns is limited to 10,000,000 cells.', helpNoteRoadmap: 'The same settings, row count, and Seed reproduce the same result. Set missing, boundary, and invalid rates per column or apply a preset across all columns. You can also start from one of seven column templates. Settings files do not contain generated rows.', helpOffline: 'Required code is embedded in the distributable HTML and the app makes no runtime network request.',
           buildInfo: 'Build information', appVersion: 'App version', builtAt: 'Built at', dependencies: 'Embedded dependencies', footer: 'Generated as one self-contained HTML file'
         }
@@ -869,9 +899,12 @@
       const MAX_CELLS = 10000000;
       const PREVIEW_LIMIT = 20;
       const PREVIEW_COPY_MAX_BYTES = 1024 * 1024;
+      const storageStatus={settings:{state:'dirty',time:'',blocked:false},export:{state:'dirty',time:'',blocked:false}};
+      let languageFailure=false, sourceGeneration=0,undoEpoch=0, replacementBusy=false, exportFailure=false, schemaFailure='', exportNotice=null, currentErrorKey='',lastGenerationProgress=null,lastExportProgress=null;
+      const replacementControls=new Map();
       let outputFilename = 'test-data';
       let exportPrefs = loadExportPrefs();
-      let language = readStorage(storageKeys.language) || detectLanguage();
+      let language = BrowserKittyUI.resolveLanguage({legacyKeys:[storageKeys.language]});
       let generatedPreviewRows = [];
       let generatedPreviewMeta = [];
       let generatedRowCount = 0;
@@ -894,53 +927,80 @@
       const AppConfirm = (() => {
         const dialog = $('#appConfirmDialog'); const title = $('#appConfirmTitle'); const message = $('#appConfirmMessage');
         const closeButton = $('#appConfirmClose'); const cancelButton = $('#appConfirmCancel'); const okButton = $('#appConfirmOk');
-        let resolver = null; let restoreFocus = null;
+        let resolver = null; let restoreFocus = null;let currentCopy=null;
         function finish(result) {
           if (!dialog.open) return; const currentResolver = resolver; resolver = null; dialog.close();
           if (restoreFocus instanceof HTMLElement && restoreFocus.isConnected) restoreFocus.focus({ preventScroll: true });
           restoreFocus = null; if (currentResolver) currentResolver(result);
         }
-        function ask({ title: heading, message: body, confirmLabel, cancelLabel, tone = 'default' } = {}) {
+        function refresh(){if(!currentCopy)return;const copy=currentCopy();title.textContent=copy.title;message.textContent=copy.message;cancelButton.textContent=translate('cancel');okButton.textContent=copy.confirmLabel;}
+        function ask({ title: heading, message: body, confirmLabel, cancelLabel, tone = 'default',copy=null } = {}) {
           if (dialog.open) finish(false); title.textContent = heading || translate('confirmTitle'); message.textContent = body || '';
           cancelButton.textContent = cancelLabel || translate('cancel'); okButton.textContent = confirmLabel || translate('confirmAction');
-          okButton.classList.toggle('danger', tone === 'danger'); okButton.classList.toggle('primary', tone !== 'danger'); restoreFocus = document.activeElement;
+          okButton.setAttribute('data-bk-variant',tone==='danger'?'danger':'primary');currentCopy=copy;refresh();okButton.classList.toggle('danger', tone === 'danger'); okButton.classList.toggle('primary', tone !== 'danger'); restoreFocus = document.activeElement;
           return new Promise(resolve => { resolver = resolve; dialog.showModal(); requestAnimationFrame(() => cancelButton.focus({ preventScroll: true })); });
         }
         closeButton.addEventListener('click', () => finish(false)); cancelButton.addEventListener('click', () => finish(false)); okButton.addEventListener('click', () => finish(true));
         dialog.addEventListener('cancel', event => { event.preventDefault(); finish(false); });
         dialog.addEventListener('click', event => { const rect = dialog.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outside) finish(false); });
-        return Object.freeze({ ask });
+        return Object.freeze({ ask,refresh });
       })();
       window.AppConfirm = AppConfirm;
 
       const AppToast = (() => {
         const root = $('#appToast'); const message = $('#appToastMessage'); const action = $('#appToastAction');
         let timer = 0; let actionHandler = null;
-        function dismiss() { clearTimeout(timer); timer = 0; root.classList.remove('show'); actionHandler = null; }
+        function dismiss() { if(root.contains(document.activeElement)&&actionHandler){timer=window.setTimeout(dismiss,5000);return;}clearTimeout(timer); timer = 0; root.classList.remove('show'); actionHandler = null; }
         function show({ message: text = '', actionLabel = '', onAction = null, duration = 3200, tone = 'default' } = {}) {
           clearTimeout(timer); message.textContent = String(text); root.dataset.tone = tone; actionHandler = typeof onAction === 'function' ? onAction : null;
           action.textContent = actionLabel || ''; action.hidden = !actionHandler || !actionLabel; root.classList.add('show');
           if (duration > 0) timer = window.setTimeout(dismiss, duration); return Object.freeze({ dismiss });
         }
-        action.addEventListener('click', () => { const handler = actionHandler; dismiss(); if (handler) handler(); });
+        action.addEventListener('focus',()=>{clearTimeout(timer);timer=0;});action.addEventListener('blur',()=>{if(actionHandler)timer=window.setTimeout(dismiss,5000);});
+        action.addEventListener('click', () => { const handler = actionHandler;actionHandler=null; dismiss(); if (handler) handler(); });
         return Object.freeze({ show, dismiss });
       })();
       window.AppToast = AppToast;
 
-      function readStorage(key) { try { return localStorage.getItem(key); } catch { return null; } }
-      function writeStorage(key, value) { try { localStorage.setItem(key, value); } catch { /* Storage may be unavailable. */ } }
+      function readStorage(key) { try { return localStorage.getItem(key); } catch {const domain=key===storageKeys.settings?'settings':key===storageKeys.export?'export':null;if(domain){storageStatus[domain].state='error';storageStatus[domain].blocked=true;}return null; } }
+      function writeStorage(key,value){
+        const domain=key===storageKeys.settings?'settings':key===storageKeys.export?'export':null,record=domain&&storageStatus[domain];
+        if(record?.blocked){renderStorageStatus();return false;}
+        try{localStorage.setItem(key,value);if(record){record.state='saved';record.time=new Date().toLocaleTimeString(language,{hour:'2-digit',minute:'2-digit'});}renderStorageStatus();return true;}
+        catch{if(record)record.state='error';renderStorageStatus();return false;}
+      }
+      function renderStorageStatus(){
+        for(const domain of ['settings','export']){const record=storageStatus[domain],el=$(domain==='settings'?'#settingsSaveStatus':'#exportPrefsStatus');
+          BrowserKittyUI.setSaveStatus(el,{mode:'autosave',state:record.state,language,time:record.time});el.textContent=translate(domain==='settings'?'settingsScope':'prefsScope')+' '+el.textContent+(record.blocked?' '+translate('storageUnreadable'):'');
+          $(domain==='settings'?'#retrySettings':'#retryExportPrefs').hidden=record.state!=='error';
+        }
+        $('#languageStatus').textContent=languageFailure?BrowserKittyUI.text('languageSessionOnly',language):'';
+      }
+      function retryStorage(domain){
+        const record=storageStatus[domain];if(replacementBusy)return;
+        if(record.blocked){try{const raw=localStorage.getItem(storageKeys[domain]);const parsed=raw===null?null:JSON.parse(raw);if(parsed&&(domain==='settings'?!Array.isArray(parsed.columns):typeof parsed!=='object'))throw Error('invalid');record.blocked=false;}catch{renderStorageStatus();return;}}
+        if(domain==='settings')saveSettings();else saveExportPrefs();
+      }
+      function setReplacementBusy(busy){
+        replacementBusy=busy;
+        const controls=[...document.querySelectorAll('#columnList input,#columnList select,#columnList button'),...['rowCount','seedInput','randomSeedButton','regenerateButton','applyTemplateButton','addColumnButton','emptyAddColumnButton','resetButton','loadSchemaButton','generateButton'].map(id=>document.getElementById(id)),...document.querySelectorAll('[data-preset]')];
+        if(busy){for(const control of controls){if(!control)continue;if(!replacementControls.has(control))replacementControls.set(control,control.disabled);control.disabled=true;}}
+        else{for(const [control,disabled] of replacementControls)if(control.isConnected)control.disabled=disabled;replacementControls.clear();setGenerationBusy(generationBusy);setExportBusy(exportBusy);}
+      }
+      function downloadBlob(blob,filename){const url=URL.createObjectURL(blob),link=document.createElement('a');try{link.href=url;link.download=filename;link.hidden=true;document.body.append(link);link.click();}finally{link.remove();URL.revokeObjectURL(url);}}
+
       function loadExportPrefs() {
         const fallback = { format: 'csv', filename: 'test-data', encoding: 'utf8', newline: 'lf' };
         const raw = readStorage(storageKeys.export); if (!raw) return fallback;
         try {
-          const parsed = JSON.parse(raw);
+          const parsed = JSON.parse(raw);if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw Error('invalid');storageStatus.export.state='saved';
           return {
             format: ['csv','tsv','json','jsonl'].includes(parsed.format) ? parsed.format : fallback.format,
             filename: typeof parsed.filename === 'string' && parsed.filename.trim() ? parsed.filename.trim().slice(0,120) : fallback.filename,
             encoding: ['utf8','utf8bom'].includes(parsed.encoding) ? parsed.encoding : fallback.encoding,
             newline: ['lf','crlf'].includes(parsed.newline) ? parsed.newline : fallback.newline
           };
-        } catch { return fallback; }
+        } catch { storageStatus.export.state='error';storageStatus.export.blocked=true;return fallback; }
       }
       function saveExportPrefs() {
         exportPrefs = { format: $('#exportFormat').value, filename: $('#outputNameInput').value, encoding: $('#encodingSelect').value, newline: $('#newlineSelect').value };
@@ -1014,9 +1074,9 @@
       function loadSettings() {
         const raw = readStorage(storageKeys.settings); if (!raw) return null;
         try {
-          const parsed = JSON.parse(raw); if (!Array.isArray(parsed.columns)) return null;
+          const parsed = JSON.parse(raw); if (!Array.isArray(parsed.columns)) throw Error('invalid');storageStatus.settings.state='saved';
           return { rowCount: Number.isInteger(parsed.rowCount) ? parsed.rowCount : 100, seed: typeof parsed.seed === 'string' ? parsed.seed.slice(0,128) : '', columns: parsed.columns.map(normalizeLoadedColumn) };
-        } catch { return null; }
+        } catch {storageStatus.settings.state='error';storageStatus.settings.blocked=true;return null;}
       }
       function saveSettings() {
         const serializable = { rowCount: Number(state.rowCount), seed: String(state.seed ?? ''), columns: state.columns.map(({ name, type, settings, test }) => ({ name, type, settings, test: normalizeTestSettings(type, test) })) };
@@ -1030,8 +1090,9 @@
         if (messageKey) $('#generateStatus').textContent = translate(messageKey);
         $('#generateProgress').hidden = true; $('#generateProgress').value = 0; updateExportUI();
       }
-      function setError(message = '') { $('#errorText').textContent = message; $('#errorBanner').classList.toggle('show', Boolean(message)); }
+      function setError(message = '') {currentErrorKey=Object.keys(translations[language]).find(key=>translations[language][key]===message)||''; $('#errorText').textContent = message; $('#errorBanner').classList.toggle('show', Boolean(message)); }
       function invalidateAfterChange(messageKey = 'settingsChanged') {
+        sourceGeneration++;exportNotice=null;
         const hadWork = generatedRowCount || generationBusy || exportBusy;
         cancelGeneration(true); cancelExport(true); saveSettings(); setError('');
         if (hadWork) clearGenerated(messageKey);
@@ -1173,10 +1234,10 @@
             <div class="type-settings"><span class="field-label mobile-label">${escapeHtml(translate('typeSettings'))}</span>${settingsMarkup(column)}</div>
             <div class="test-settings"><span class="field-label mobile-label">${escapeHtml(translate('testValues'))}</span>${testSettingsMarkup(column)}</div>
             <div class="column-actions">
-              <button class="button icon-only" data-action="up" type="button" ${index === 0 ? 'disabled' : ''} aria-label="${escapeHtml(translate('moveUp'))}" title="${escapeHtml(translate('moveUp'))}">${icon('up')}</button>
-              <button class="button icon-only" data-action="down" type="button" ${index === state.columns.length - 1 ? 'disabled' : ''} aria-label="${escapeHtml(translate('moveDown'))}" title="${escapeHtml(translate('moveDown'))}">${icon('down')}</button>
-              <button class="button icon-only" data-action="duplicate" type="button" aria-label="${escapeHtml(translate('duplicateColumn'))}" title="${escapeHtml(translate('duplicateColumn'))}">${icon('duplicate')}</button>
-              <button class="button icon-only danger-quiet" data-action="delete" type="button" aria-label="${escapeHtml(translate('deleteColumn'))}" title="${escapeHtml(translate('deleteColumn'))}">${icon('trash')}</button>
+              <button class="button icon-only" data-bk-button data-bk-variant="secondary" data-action="up" type="button" ${index === 0 ? 'disabled' : ''} aria-label="${escapeHtml(translate('moveUp'))}" title="${escapeHtml(translate('moveUp'))}">${icon('up')}</button>
+              <button class="button icon-only" data-bk-button data-bk-variant="secondary" data-action="down" type="button" ${index === state.columns.length - 1 ? 'disabled' : ''} aria-label="${escapeHtml(translate('moveDown'))}" title="${escapeHtml(translate('moveDown'))}">${icon('down')}</button>
+              <button class="button icon-only" data-bk-button data-bk-variant="secondary" data-action="duplicate" type="button" aria-label="${escapeHtml(translate('duplicateColumn'))}" title="${escapeHtml(translate('duplicateColumn'))}">${icon('duplicate')}</button>
+              <button class="button icon-only danger-quiet" data-bk-button data-bk-variant="secondary" data-action="delete" type="button" aria-label="${escapeHtml(translate('deleteColumn'))}" title="${escapeHtml(translate('deleteColumn'))}">${icon('trash')}</button>
             </div>`;
           list.append(row);
         });
@@ -1186,6 +1247,7 @@
       }
       function columnById(id) { return state.columns.find(column => column.id === Number(id)); }
       function updateColumnFromElement(row, target) {
+        if(replacementBusy)return;
         const column = columnById(row.dataset.columnId); if (!column) return;
         const presetBefore = detectPreset();
         if (target.matches('[data-role="name"]')) column.name = target.value;
@@ -1201,10 +1263,12 @@
         invalidateAfterChange(); updatePresetUI();
       }
       function moveColumn(index, delta) {
+        if(replacementBusy)return;
         const target = index + delta; if (target < 0 || target >= state.columns.length) return;
         [state.columns[index], state.columns[target]] = [state.columns[target], state.columns[index]]; invalidateAfterChange(); renderColumns();
       }
       function duplicateColumn(index) {
+        if(replacementBusy)return;
         if (index < 0 || index >= state.columns.length || state.columns.length >= 200) return;
         const source = state.columns[index];
         const baseName = `${source.name || 'column'}_copy`;
@@ -1219,28 +1283,31 @@
         AppToast.show({ message: format('duplicated', { name: source.name || translate('columnName') }), tone: 'success' });
       }
       async function applySelectedTemplate() {
+        if(replacementBusy)return;const generation=sourceGeneration;setReplacementBusy(true);try{
         const templateName = $('#templateSelect').value;
         if (!columnTemplates[templateName]) return;
         const label = translate(templateTranslationKey(templateName));
         if (state.columns.length) {
-          const ok = await AppConfirm.ask({ title: translate('templateConfirmTitle'), message: format('templateConfirmBody', { name: label }), confirmLabel: translate('templateConfirmAction'), cancelLabel: translate('cancel') });
-          if (!ok) return;
+          const ok = await AppConfirm.ask({ copy:()=>({title:translate('templateConfirmTitle'),message:format('templateConfirmBody',{name:translate(templateTranslationKey(templateName))}),confirmLabel:translate('templateConfirmAction')}),tone:'danger' });
+          if (!ok||generation!==sourceGeneration) return;
         }
         const currentPreset = detectPreset();
-        state.columns = templateColumns(templateName, currentPreset === 'custom' ? 'normal' : currentPreset);
+        undoEpoch++;state.columns = templateColumns(templateName, currentPreset === 'custom' ? 'normal' : currentPreset);
         lastGeneratedSeed = ''; generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 };
         $('#regenerateButton').disabled = true; $('#seedHelp').textContent = translate('seedHelp');
         invalidateAfterChange(); renderColumns(); updatePresetUI(); clearGenerated();
         $('#generateStatus').textContent = translate('readyToGenerate');
-        AppToast.show({ message: format('templateApplied', { name: label }), tone: 'success' });
+        AppToast.show({ message: format('templateApplied', { name: label }), tone: 'success' });$('#applyTemplateButton').focus({preventScroll:true});
+        }finally{setReplacementBusy(false);}
       }
       function deleteColumn(index) {
+        if(replacementBusy)return;
         if (index < 0 || index >= state.columns.length) return;
-        const [removed] = state.columns.splice(index, 1); invalidateAfterChange();
+        const deletionGeneration=undoEpoch;const [removed] = state.columns.splice(index, 1); invalidateAfterChange();
         const neighbor = state.columns[Math.min(index, state.columns.length - 1)];
         renderColumns({ id: neighbor?.id, attribute: 'data-role', value: 'name' });
         AppToast.show({ message: format('deleted', { name: removed.name || translate('columnName') }), actionLabel: translate('undo'), duration: 5000, onAction: () => {
-          state.columns.splice(Math.min(index, state.columns.length), 0, removed); invalidateAfterChange(); renderColumns({ id: removed.id, attribute: 'data-role', value: 'name' }); AppToast.show({ message: translate('undone') });
+          if(replacementBusy||undoEpoch!==deletionGeneration||state.columns.some(c=>c.id===removed.id)||state.columns.length>=200)return;state.columns.splice(Math.min(index, state.columns.length), 0, removed); invalidateAfterChange(); renderColumns({ id: removed.id, attribute: 'data-role', value: 'name' }); AppToast.show({ message: translate('undone') });
         }});
       }
       function validate() {
@@ -1273,6 +1340,7 @@
         $('#testPresetHelp').textContent = current === 'custom' ? `${translate('testPresetHelp')} ${translate('presetCustom')}` : translate('testPresetHelp');
       }
       function applyPreset(name) {
+        if(replacementBusy)return;
         if (!testPresets[name]) return;
         for (const column of state.columns) column.test = presetTestSettings(column.type, name);
         invalidateAfterChange(); renderColumns(); updatePresetUI();
@@ -1726,14 +1794,15 @@
       }
 
       function setGenerationBusy(busy) {
-        generationBusy = busy;
+        generationBusy = busy;BrowserKittyUI.setButtonState($('#generateButton'),busy?'busy':(exportBusy||replacementBusy?'unavailable':'ready'));
         updatePreviewCopyUI();
-        $('#generateButton').disabled = busy || exportBusy;
+        $('#generateButton').disabled = busy || exportBusy || replacementBusy;
         $('#cancelGenerateButton').hidden = !busy;
         $('#regenerateButton').disabled = busy || exportBusy || !lastGeneratedSeed;
         $('#saveOutputButton').disabled = busy || exportBusy || !generatedRowCount;
       }
       function setExportBusy(busy) {
+        BrowserKittyUI.setButtonState($('#saveOutputButton'),busy?'busy':(generationBusy||!generatedRowCount?'unavailable':'ready'));
         if (busy) invalidatePreviewCopy();
         exportBusy = busy;
         updatePreviewCopyUI();
@@ -1755,11 +1824,13 @@
         if (!silent) $('#exportStatus').textContent = translate('exportCancelled'); else updateExportUI();
       }
       function handleGenerationProgress(message) {
+        lastGenerationProgress=message;
         const done = Number(message.done) || 0; const total = Number(message.total) || Number(state.rowCount) || 0; const percent = Number(message.percent) || 0;
         $('#generateProgress').hidden = false; $('#generateProgress').value = percent;
         $('#generateStatus').textContent = message.phase === 'prepare' ? translate('generationPreparing') : format('generatingProgress', { done: new Intl.NumberFormat(language).format(done), total: new Intl.NumberFormat(language).format(total), percent });
       }
       function generate() {
+        if(replacementBusy)return;lastGenerationProgress=null;
         if (generationBusy || exportBusy) return;
         state.rowCount = Number($('#rowCount').value);
         let seed = String($('#seedInput').value ?? '').trim();
@@ -1827,7 +1898,7 @@
       }
       function updatePreviewCopyUI() {
         const ready = Boolean(generatedSnapshot && generatedRowCount && generatedPreviewRows.length);
-        $('#copyPreviewButton').disabled = !ready || generationBusy || exportBusy || previewCopyBusy;
+        BrowserKittyUI.setButtonState($('#copyPreviewButton'),previewCopyBusy?'busy':(!generatedRowCount||generationBusy||exportBusy?'unavailable':'ready'));$('#copyPreviewButton').disabled = !ready || generationBusy || exportBusy || previewCopyBusy;
         const scope = ready ? format('copyPreviewScope', previewCopyCounts()) : translate('copyPreviewEmpty');
         $('#copyPreviewScope').textContent = scope;
         $('#copyPreviewManualScope').textContent = scope;
@@ -1893,15 +1964,18 @@
         updatePreviewCopyUI();
         const formatName = $('#exportFormat').value; const label = formatLabel(formatName); const count = new Intl.NumberFormat(language).format(generatedRowCount);
         $('#outputExtension').textContent = exportExtension(formatName); $('#encodingField').hidden = !['csv','tsv'].includes(formatName); $('#saveOutputText').textContent = format('saveFormat', { format: label });
-        if (!exportBusy) $('#exportStatus').textContent = generatedRowCount ? format('exportReady', { count, format: label }) : translate('exportReadyAfterGenerate');
+        if (!exportBusy) $('#exportStatus').textContent = exportFailure?translate('exportFailed')+' '+translate('retryExport'):exportNotice?format('downloadNotice',exportNotice):generatedRowCount ? format('exportReady', { count, format: label }) : translate('exportReadyAfterGenerate');
+        $('#outputScope').textContent=format('outputScope',{count});
         $('#saveOutputButton').disabled = exportBusy || generationBusy || !generatedRowCount;
       }
       function handleExportProgress(message, formatName) {
+        lastExportProgress={message,formatName};
         const done = Number(message.done) || 0; const total = Number(message.total) || generatedRowCount; const percent = Number(message.percent) || 0;
         $('#exportProgress').hidden = false; $('#exportProgress').value = percent;
         $('#exportStatus').textContent = message.phase === 'prepare' ? format('exportPreparing', { format: formatLabel(formatName) }) : format('exportProgress', { format: formatLabel(formatName), done: new Intl.NumberFormat(language).format(done), total: new Intl.NumberFormat(language).format(total), percent });
       }
       function saveGeneratedOutput() {
+        if(replacementBusy)return;exportFailure=false;exportNotice=null;lastExportProgress=null;
         if (!generatedRowCount || !generatedSnapshot || generationBusy || exportBusy) return;
         saveExportPrefs(); const base = sanitizeFilenameBase(outputFilename);
         if (base !== $('#outputNameInput').value.trim()) $('#outputNameInput').value = base;
@@ -1910,26 +1984,27 @@
         const bom = ['csv','tsv'].includes(formatName) && $('#encodingSelect').value === 'utf8bom' ? '\ufeff' : '';
         exportParts = bom ? [bom] : []; setExportBusy(true); $('#exportProgress').hidden = false; $('#exportProgress').value = 0; $('#exportStatus').textContent = format('exportPreparing', { format: formatLabel(formatName) });
         let worker;
-        try { worker = createGeneratorWorker(); } catch { exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); return; }
+        try { worker = createGeneratorWorker(); } catch { exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; exportFailure=true;updateExportUI(); return; }
         exportWorker = worker;
         worker.onmessage = event => {
           if (worker !== exportWorker) return; const message = event.data || {};
           if (message.type === 'chunk') { exportParts.push(String(message.text || '')); return; }
           if (message.type === 'progress') { handleExportProgress(message, formatName); return; }
           if (message.type === 'error') {
-            worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); updateExportUI(); return;
+            worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; exportFailure=true;updateExportUI(); updateExportUI(); return;
           }
           if (message.type !== 'complete' || message.task !== 'export') return;
           worker.terminate(); exportWorker = null;
           try {
             const blob = new Blob(exportParts, { type: exportMime(formatName) }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); const filename = `${base}${exportExtension(formatName)}`;
-            link.href = url; link.download = filename; link.hidden = true; document.body.append(link); link.click(); link.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-            AppToast.show({ message: format('savedFile', { format: formatLabel(formatName), name: filename }), tone: 'success' });
-          } catch { AppToast.show({ message: translate('exportFailed') }); }
+            try{link.href = url; link.download = filename; link.hidden = true; document.body.append(link); link.click();}finally{link.remove();URL.revokeObjectURL(url);}
+            exportNotice={name:filename,format:formatLabel(formatName),count:new Intl.NumberFormat(language).format(generatedRowCount)};
+            AppToast.show({ message: format('downloadNotice',exportNotice), tone: 'success' });
+          } catch { exportFailure=true;updateExportUI(); }
           exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; $('#exportProgress').value = 100; updateExportUI();
         };
         worker.onerror = () => {
-          if (worker !== exportWorker) return; worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); updateExportUI();
+          if (worker !== exportWorker) return; worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; exportFailure=true;updateExportUI(); updateExportUI();
         };
         worker.postMessage({ task: 'export', snapshot: generatedSnapshot, options: { format: formatName, newline }, generatorData: workerGeneratorData() });
       }
@@ -1947,11 +2022,9 @@
       function saveSchemaFile() {
         state.rowCount = Number($('#rowCount').value); state.seed = String($('#seedInput').value ?? '').trim(); saveSettings();
         const error = validate(); if (error) { setError(error); return; }
-        const text = JSON.stringify(schemaPayload(), null, 2);
-        const blob = new Blob([text], { type: 'application/json;charset=utf-8' }); const url = URL.createObjectURL(blob);
-        const link = document.createElement('a'); const filename = 'test-data-schema.json'; link.href = url; link.download = filename; link.hidden = true; document.body.append(link); link.click(); link.remove();
-        window.setTimeout(() => URL.revokeObjectURL(url), 0);
-        AppToast.show({ message: format('schemaSaved', { name: filename }), tone: 'success' });
+        const filename=sanitizeFilenameBase($('#schemaOutputName').value)+'.json';
+        try {const text=JSON.stringify(schemaPayload(),null,2);downloadBlob(new Blob([text],{type:'application/json;charset=utf-8'}),filename);schemaFailure='';setError('');AppToast.show({message:format('downloadNotice',{name:filename,format:'JSON',count:state.columns.length}),tone:'success'});}
+        catch{schemaFailure='schemaExportFailed';setError(translate(schemaFailure));}
       }
       function parseSchemaFile(text) {
         const parsed = JSON.parse(text);
@@ -1968,16 +2041,18 @@
         return candidate;
       }
       async function loadSchemaFile(file) {
-        if (!file) return;
-        if (file.size > 1024 * 1024) { AppToast.show({ message: translate('schemaTooLarge') }); return; }
+        if (!file||replacementBusy) return;const generation=sourceGeneration;setReplacementBusy(true);try{
+        if (file.size > 1024 * 1024) {schemaFailure='schemaTooLarge';setError(translate(schemaFailure));return;}
         let candidate;
-        try { candidate = parseSchemaFile(await file.text()); } catch { AppToast.show({ message: translate('schemaInvalid') }); return; }
-        const ok = await AppConfirm.ask({ title: translate('schemaLoadTitle'), message: translate('schemaLoadBody'), confirmLabel: translate('schemaLoadAction'), cancelLabel: translate('cancel') });
-        if (!ok) return;
+        try { candidate = parseSchemaFile(await file.text()); } catch {schemaFailure='schemaInvalid';setError(translate(schemaFailure));return;}
+        if(generation!==sourceGeneration)return;
+        const ok = await AppConfirm.ask({copy:()=>({title:translate('schemaLoadTitle'),message:translate('schemaLoadBody'),confirmLabel:translate('schemaLoadAction')}),tone:'danger'});
+        if (!ok||generation!==sourceGeneration) return;storageStatus.settings.blocked=false;sourceGeneration++;undoEpoch++;schemaFailure='';
         state = candidate; lastGeneratedSeed = ''; generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 }; $('#rowCount').value = String(state.rowCount); $('#seedInput').value = state.seed;
         $('#seedHelp').textContent = translate('seedHelp'); $('#regenerateButton').disabled = true;
         saveSettings(); setError(''); renderColumns(); updatePresetUI(); clearGenerated(); $('#generateStatus').textContent = translate('readyToGenerate');
         AppToast.show({ message: translate('schemaLoaded'), tone: 'success' });
+        }finally{setReplacementBusy(false);$('#loadSchemaButton').focus({preventScroll:true});}
       }
 
       function applyLanguage() {
@@ -1989,16 +2064,16 @@
         $('#languageButton').setAttribute('aria-label', language === 'ja' ? '英語に切り替え' : 'Switch to Japanese');
         $('#languageButton').title = language === 'ja' ? '英語に切り替え' : 'Switch to Japanese';
         document.title = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name; $('#brandName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name; $('#footerName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;
-        renderColumns(); updatePresetUI();
+        renderColumns(); updatePresetUI();if(replacementBusy)setReplacementBusy(true);
         if (generatedRowCount) {
           renderPreview();
           $('#generateStatus').textContent = format('generated', { count: new Intl.NumberFormat(language).format(generatedRowCount) });
         }
         if (lastGeneratedSeed) $('#seedHelp').textContent = `${translate('usedSeedLabel')} ${lastGeneratedSeed}`; else $('#seedHelp').textContent = translate('seedHelp');
-        updateExportUI();
+        updateExportUI();renderStorageStatus();AppConfirm.refresh();if(currentErrorKey)setError(translate(currentErrorKey));if(generationBusy&&lastGenerationProgress)handleGenerationProgress(lastGenerationProgress);if(exportBusy&&lastExportProgress)handleExportProgress(lastExportProgress.message,lastExportProgress.formatName);
       }
 
-      $('#languageButton').addEventListener('click', () => { language = language === 'ja' ? 'en' : 'ja'; writeStorage(storageKeys.language, language); applyLanguage(); });
+      $('#languageButton').addEventListener('click', () => { language = language === 'ja' ? 'en' : 'ja'; languageFailure=!BrowserKittyUI.chooseLanguage(language).persisted; applyLanguage(); });
       const helpDialog = $('#helpDialog');
       let helpPageState = null;
       function restoreHelpPage() {
@@ -2030,22 +2105,23 @@
       helpDialog.addEventListener('cancel', event => { event.preventDefault(); closeHelp(); });
       helpDialog.addEventListener('close', restoreHelpPage);
       helpDialog.addEventListener('click', event => {if(event.target!==helpDialog)return; const rect = helpDialog.getBoundingClientRect(); const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom; if (outside) closeHelp(); });
-      $('#rowCount').addEventListener('input', event => { state.rowCount = Number(event.target.value); invalidateAfterChange(); });
-      $('#seedInput').addEventListener('input', event => { state.seed = event.target.value; invalidateAfterChange('seedChanged'); });
-      $('#randomSeedButton').addEventListener('click', () => { const seed = createAutomaticSeed(); state.seed = seed; $('#seedInput').value = seed; invalidateAfterChange('seedChanged'); $('#seedHelp').textContent = translate('seedHelp'); });
-      $('#regenerateButton').addEventListener('click', () => { if (!lastGeneratedSeed) return; state.seed = lastGeneratedSeed; $('#seedInput').value = lastGeneratedSeed; generate(); });
+      $('#rowCount').addEventListener('input', event => { if(replacementBusy)return; state.rowCount = Number(event.target.value); invalidateAfterChange(); });
+      $('#seedInput').addEventListener('input', event => { if(replacementBusy)return; state.seed = event.target.value; invalidateAfterChange('seedChanged'); });
+      $('#randomSeedButton').addEventListener('click', () => { if(replacementBusy)return; const seed = createAutomaticSeed(); state.seed = seed; $('#seedInput').value = seed; invalidateAfterChange('seedChanged'); $('#seedHelp').textContent = translate('seedHelp'); });
+      $('#regenerateButton').addEventListener('click', () => { if(replacementBusy)return; if (!lastGeneratedSeed) return; state.seed = lastGeneratedSeed; $('#seedInput').value = lastGeneratedSeed; generate(); });
       $('#saveSchemaButton').addEventListener('click', saveSchemaFile);
       $('#loadSchemaButton').addEventListener('click', () => $('#schemaFileInput').click());
       $('#schemaFileInput').addEventListener('change', async event => { const file = event.target.files?.[0]; event.target.value = ''; await loadSchemaFile(file); });
       $('#testPresetButtons').addEventListener('click', event => { const button = event.target.closest('[data-preset]'); if (button) applyPreset(button.dataset.preset); });
-      $('#columnList').addEventListener('input', event => { const row = event.target.closest('.column-row'); if (row) updateColumnFromElement(row, event.target); });
-      $('#columnList').addEventListener('change', event => { const row = event.target.closest('.column-row'); if (row) updateColumnFromElement(row, event.target); });
-      $('#columnList').addEventListener('click', event => {
+      $('#columnList').addEventListener('input', event => { if(replacementBusy)return; const row = event.target.closest('.column-row'); if (row) updateColumnFromElement(row, event.target); });
+      $('#columnList').addEventListener('change', event => { if(replacementBusy)return; const row = event.target.closest('.column-row'); if (row) updateColumnFromElement(row, event.target); });
+      $('#columnList').addEventListener('click', event => { if(replacementBusy)return;
         const button = event.target.closest('[data-action]'); if (!button) return; const row = button.closest('.column-row');
         const index = state.columns.findIndex(column => column.id === Number(row.dataset.columnId));
         if (button.dataset.action === 'up') moveColumn(index, -1); else if (button.dataset.action === 'down') moveColumn(index, 1); else if (button.dataset.action === 'duplicate') duplicateColumn(index); else if (button.dataset.action === 'delete') deleteColumn(index);
       });
       function addColumn() {
+        if(replacementBusy)return;
         if (state.columns.length >= 200) return;
         const base = `column_${state.columns.length + 1}`; state.columns.push(newColumn('string', base, detectPreset() === 'custom' ? 'normal' : detectPreset())); invalidateAfterChange(); renderColumns(); updatePresetUI(); AppToast.show({ message: translate('added') });
       }
@@ -2071,12 +2147,16 @@
       $('#saveOutputButton').addEventListener('click', saveGeneratedOutput);
       $('#cancelExportButton').addEventListener('click', () => cancelExport(false));
       $('#resetButton').addEventListener('click', async () => {
-        const ok = await AppConfirm.ask({ title: translate('resetConfirmTitle'), message: translate('resetConfirmBody'), confirmLabel: translate('resetConfirmAction'), cancelLabel: translate('cancel'), tone: 'danger' });
-        if (!ok) return; state = createInitialState(); lastGeneratedSeed = ''; generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 }; $('#rowCount').value = String(state.rowCount); $('#seedInput').value = state.seed; $('#seedHelp').textContent = translate('seedHelp'); $('#regenerateButton').disabled = true; saveSettings(); setError(''); renderColumns(); updatePresetUI(); clearGenerated(); $('#generateStatus').textContent = translate('readyToGenerate'); AppToast.show({ message: translate('resetDone') });
+        if(replacementBusy)return;const generation=sourceGeneration;setReplacementBusy(true);try{
+        const ok=await AppConfirm.ask({copy:()=>({title:translate('resetConfirmTitle'),message:translate('resetConfirmBody'),confirmLabel:translate('resetConfirmAction')}),tone:'danger'});
+        if (!ok||generation!==sourceGeneration) return;storageStatus.settings.blocked=false;sourceGeneration++;schemaFailure=''; state = createInitialState(); lastGeneratedSeed = ''; generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 }; $('#rowCount').value = String(state.rowCount); $('#seedInput').value = state.seed; $('#seedHelp').textContent = translate('seedHelp'); $('#regenerateButton').disabled = true; saveSettings(); setError(''); renderColumns(); updatePresetUI(); clearGenerated(); $('#generateStatus').textContent = translate('readyToGenerate'); AppToast.show({ message: translate('resetDone') });
+        }finally{setReplacementBusy(false);$('#resetButton').focus({preventScroll:true});}
       });
 
+      $('#retrySettings').onclick=()=>retryStorage('settings');$('#retryExportPrefs').onclick=()=>retryStorage('export');
       window.addEventListener('pagehide', () => { invalidatePreviewCopy(); cancelGeneration(true); cancelExport(true); });
 
+      $('#exportFormat').value=exportPrefs.format;$('#outputNameInput').value=exportPrefs.filename;$('#encodingSelect').value=exportPrefs.encoding;$('#newlineSelect').value=exportPrefs.newline;outputFilename=exportPrefs.filename;
       $('#rowCount').value = String(state.rowCount); $('#seedInput').value = String(state.seed ?? '');
       $('#versionBadge').textContent = `v${APP_CONFIG.version}`; $('#buildVersion').textContent = APP_CONFIG.version; $('#builtAt').textContent = BUILD_MANIFEST.generatedAtUtc || '—'; $('#dependencyCount').textContent = String(BUILD_MANIFEST.dependencies?.length || 0);
       applyLanguage();

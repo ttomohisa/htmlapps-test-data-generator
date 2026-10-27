@@ -244,3 +244,7 @@ All notable changes to this project are documented here.
 
 - No runtime dependencies or external data services.
 - Runtime CSP retains `connect-src 'none'`.
+
+## Unreleased
+- Integrate fixed common UI v1 with separate persistence recovery, scoped output/download status, translated guarded replacements and focused Undo lifetime.
+- Restore existing export preferences into controls on reload; add editable settings JSON filename without changing version-one schemas or generated data semantics.

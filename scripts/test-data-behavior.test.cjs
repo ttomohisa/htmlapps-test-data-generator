@@ -286,4 +286,35 @@ test('late clipboard denial does not cover another dialog or steal focus', async
   assert.match(app.el('copyPreviewStatus').textContent,/Close the open dialog/);
 });
 
+test('separate storage failures retain settings/prefs and survive language changes without persistence writes',()=>{
+ const app=createApp(filename,{language:'en',writeFailure:true});app.input(app.el('seedInput'),'unsaved seed');app.input(app.el('outputNameInput'),'custom export');
+ assert.equal(app.run('storageStatus.settings.state'),'error');assert.equal(app.run('storageStatus.export.state'),'error');assert.match(app.el('settingsSaveStatus').textContent,/Could not save/);const count=app.writes.length;app.el('languageButton').click();
+ assert.equal(app.run('state.seed'),'unsaved seed');assert.equal(app.el('outputNameInput').value,'custom export');assert.equal(app.writes.length,count+1,'only explicit language write attempted');assert.match(app.el('settingsSaveStatus').textContent,/保存できません/);assert.match(app.el('exportPrefsStatus').textContent,/保存できません/);assert.match(app.el('languageStatus').textContent,/この画面/);
+ app.options.writeFailure=false;app.el('retrySettings').click();app.el('retryExportPrefs').click();assert.equal(app.run('storageStatus.settings.state'),'saved');assert.equal(app.run('storageStatus.export.state'),'saved');const restored=createApp(filename,{storage:[...app.storage]});assert.equal(restored.run('state.seed'),'unsaved seed');assert.equal(restored.el('outputNameInput').value,'custom export');
+});
+test('startup and language rendering do not migrate legacy storage; corrupt settings remain intact until confirmed replacement',async()=>{
+ const slug=require('../app.config.json').slug,key=slug+':settings-v1',app=createApp(filename,{storage:[[key,'{corrupt'],[slug+':language','ja']]});assert.equal(app.document.documentElement.lang,'ja');assert.equal(app.writes.length,0);app.input(app.el('seedInput'),'safe current work');assert.equal(app.storage.get(key),'{corrupt');assert.match(app.el('settingsSaveStatus').textContent,/読み込めません/);
+ app.el('resetButton').click();app.frame(0);assert.equal(app.document.activeElement,app.el('appConfirmCancel'));app.el('appConfirmCancel').click();await app.settle();assert.equal(app.storage.get(key),'{corrupt');app.el('resetButton').click();app.el('appConfirmOk').click();await app.settle();assert.doesNotThrow(()=>JSON.parse(app.storage.get(key)));assert.equal(app.run('state.seed'),'');
+});
+test('settings restore locks new mutations and generation through file read and confirmation, Cancel retains state',async()=>{
+ const app=setup(),before=app.run('JSON.stringify(state)');let resolveText;const pending=app.run('loadSchemaFile')({size:100,text:()=>new Promise(r=>resolveText=r)});assert.equal(app.run('replacementBusy'),true);app.run('addColumn();generate();deleteColumn(0)');assert.equal(app.run('JSON.stringify(state)'),before);assert.equal(app.workers.length,0);
+ resolveText(app.run('JSON.stringify(schemaPayload())'));await app.settle();assert.equal(app.el('appConfirmDialog').open,true);app.run('addColumn()');assert.equal(app.run('JSON.stringify(state)'),before);app.el('appConfirmCancel').click();await pending;assert.equal(app.run('replacementBusy'),false);assert.equal(app.run('JSON.stringify(state)'),before);assert.equal(app.document.activeElement,app.el('loadSchemaButton'));
+});
+test('invalid file restore retains current work with persistent translated recovery',async()=>{
+ const app=setup(),before=app.run('JSON.stringify(state)');await app.run('loadSchemaFile')({size:5,text:async()=>'{bad'});assert.equal(app.run('JSON.stringify(state)'),before);assert.equal(app.run('replacementBusy'),false);assert.equal(app.el('errorBanner').classList.contains('show'),true);app.el('languageButton').click();assert.match(app.el('errorText').textContent,/読み込めません/);assert.equal(app.run('JSON.stringify(state)'),before);
+});
+test('both download paths remove anchors and revoke URLs on thrown click while preserving current output',()=>{
+ const app=setup();app.el('generateButton').click();app.complete();const preview=app.run('JSON.stringify(generatedPreviewRows)');app.options.downloadFailure=true;app.el('saveOutputButton').click();app.complete();assert.match(app.el('exportStatus').textContent,/could not|failed/i);assert.equal(app.document.querySelectorAll('a').filter(a=>a.download).length,0);assert.ok(app.revoked.length>0);app.el('languageButton').click();assert.match(app.el('exportStatus').textContent,/失敗|保存できません|作成できません/);assert.equal(app.run('JSON.stringify(generatedPreviewRows)'),preview);
+ const revoked=app.revoked.length;app.el('saveSchemaButton').click();assert.equal(app.document.querySelectorAll('a').filter(a=>a.download).length,0);assert.equal(app.revoked.length,revoked+1);assert.equal(app.el('errorBanner').classList.contains('show'),true);
+});
+test('settings filename is editable, download status is accurate, and exported version-one schema semantics remain unchanged',async()=>{
+ const app=setup();app.input(app.el('schemaOutputName'),'my-settings.v2.json');app.el('saveSchemaButton').click();const download=app.downloads.at(-1);assert.equal(download.name,'my-settings.v2.json');const payload=JSON.parse(await download.blob.text());assert.equal(payload.version,1);assert.equal(payload.generator,'xmur3-mulberry32-v1');assert.equal(payload.seed,'edit-save-42');assert.equal(payload.rows,3);assert.equal(Object.hasOwn(payload,'generatedRows'),false);assert.match(app.el('appToastMessage').textContent,/Download started/);
+});
+test('open destructive confirmation relocalizes and does not overwrite failed persistence',async()=>{
+ const app=setup();app.options.writeFailure=true;app.input(app.el('seedInput'),'retained');app.el('resetButton').click();app.frame(0);assert.equal(app.document.activeElement,app.el('appConfirmCancel'));const before=app.run('JSON.stringify(state)');app.el('languageButton').click();assert.match(app.el('appConfirmTitle').textContent,/初期状態/);assert.match(app.el('settingsSaveStatus').textContent,/保存できません/);app.el('appConfirmCancel').click();await app.settle();assert.equal(app.run('JSON.stringify(state)'),before);assert.equal(app.run('storageStatus.settings.state'),'error');
+});
+test('Undo stays available while keyboard focused and restores the actual deleted column',()=>{
+ const app=setup(),name=app.run('state.columns[0].name');app.run('deleteColumn(0)');const undo=app.el('appToastAction');undo.focus();app.flushTimers();assert.equal(app.el('appToast').classList.contains('show'),true);undo.click();assert.equal(app.run('state.columns[0].name'),name);assert.equal(app.document.activeElement.closest('.column-row').dataset.columnId,String(app.run('state.columns[0].id')));
+});
+
 (async () => { let failed = 0; console.log('Behavior target: ' + filename); for (const item of tests) { try { await item.body(); console.log('PASS ' + item.name); } catch (error) { failed++; console.error('FAIL ' + item.name + '\n' + (error.stack || error)); } } console.log(`${tests.length - failed}/${tests.length} behavior tests passed`); process.exitCode = failed ? 1 : 0; })();

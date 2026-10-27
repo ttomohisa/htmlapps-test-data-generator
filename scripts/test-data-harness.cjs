@@ -13,7 +13,7 @@ function loadHtml(filename) {
 }
 function createApp(filename, options = {}) {
   const html = loadHtml(filename), frames = new Map(), timers = new Map(), storage = new Map(options.storage || []);
-  const downloads = [], revoked = [], blobs = new Map(), workers = [];
+  const writes=[],downloads = [], revoked = [], blobs = new Map(), workers = [];
   let frameId = 0, timerId = 0, now = 0, context;
   class Target {
     constructor() { this.listeners = new Map(); }
@@ -50,7 +50,7 @@ function createApp(filename, options = {}) {
     contains(el) { return this.children.some(child => child === el || child.contains(el)); }
     replaceChildren(...children) { this.textContent = ''; this.append(...children); }
     focus() { if (this.disabled) return; if (document.activeElement === this) return; const previous = document.activeElement; document.activeElement = this; if (previous) previous.dispatch('blur'); this.dispatch('focus'); }
-    click() { if (this.disabled) return; if (this.tagName === 'A' && this.download) downloads.push({ name: this.download, blob: blobs.get(this.href), href: this.href }); this.dispatch('click'); }
+    click() { if (this.disabled) return; if(this.tagName==='A'&&options.downloadFailure)throw Error('download denied');if (this.tagName === 'A' && this.download) downloads.push({ name: this.download, blob: blobs.get(this.href), href: this.href }); this.dispatch('click'); }
     showModal() { this.open = true; }
     close() { this.open = false; this.dispatch('close'); }
     setPointerCapture(id) { this.capture = id; }
@@ -94,7 +94,7 @@ function createApp(filename, options = {}) {
   document.body = document.querySelector('body'); document.head = document.querySelector('head');
   const window = new Target(); window.matchMedia = () => ({ matches: false }); window.scrollTo = () => {}; window.scrollY = 0;
   const setTimeout = fn => { timers.set(++timerId, fn); return timerId; }, clearTimeout = id => timers.delete(id);
-  const globals = { console, Blob, TextDecoder, TextEncoder, Uint8Array, HTMLElement: Element, document, window, navigator: { language: options.language || 'en', clipboard: { async writeText(text) { globals.clipboard = text; } } }, localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) }, crypto: require('node:crypto').webcrypto,
+  const globals = { console, Blob, TextDecoder, TextEncoder, Uint8Array, HTMLElement: Element, document, window, navigator: { languages:options.languages||[options.language||'en'],language: options.language || 'en', clipboard: { async writeText(text) { globals.clipboard = text; } } }, location:{href:options.url||'https://example.test/app.html'},history:{replaceState(state,title,url){globals.location.href=url}},localStorage: { getItem: key => {if(options.readFailure)throw Error('read denied');return storage.get(key) ?? null}, setItem: (key, value) => {writes.push([key,value]);if(options.writeFailure)throw Error('write denied');storage.set(key, value)} }, crypto: require('node:crypto').webcrypto,
     performance: { now: () => now }, requestAnimationFrame(fn) { frames.set(++frameId, fn); return frameId; }, cancelAnimationFrame(id) { frames.delete(id); }, setTimeout, clearTimeout,
     Worker: class { constructor() { workers.push(this); } postMessage(message) { this.message = message; } terminate() { this.terminated = true; } },
     URL: class TestURL extends URL { static createObjectURL(blob) { const url = 'blob:test-' + (blobs.size + 1); blobs.set(url, blob); return url; } static revokeObjectURL(url) { revoked.push(url); } }, atob: value => Buffer.from(value, 'base64').toString('binary'),
@@ -106,8 +106,8 @@ function createApp(filename, options = {}) {
   source = source.replace('__APP_CONFIG_JSON__', JSON.stringify(config)).replace('__BUILD_MANIFEST_JSON__', '{}').replace('__EMBEDDED_ASSET_BUNDLE_JSON__', '{}');
   // Test-only lexical access; the shipped app exposes no test API or mutable application state.
   source = source.replace(/\}\)\(\);\s*$/, 'globalThis.testRun = code => eval(code);\n})();');
-  context = vm.createContext(globals); vm.runInContext(source, context, { filename });
-  const app = { html, document, window, storage, frames, timers, downloads, revoked, globals, workers, run: code => context.testRun(code), el: id => document.getElementById(id),
+  context = vm.createContext(globals);vm.runInContext(fs.readFileSync(path.join(__dirname,'../components/ui-conventions.js'),'utf8'),context); vm.runInContext(source, context, { filename });
+  const app = { writes, options,html, document, window, storage, frames, timers, downloads, revoked, globals, workers, run: code => context.testRun(code), el: id => document.getElementById(id),
     complete(worker = workers.at(-1)) { const messages = []; const workerContext = vm.createContext({ self: { postMessage: message => messages.push(structuredClone(message)) }, URL, console, performance }); vm.runInContext('(' + app.run('generatorWorkerMain.toString()') + ')()', workerContext); workerContext.self.onmessage({ data: structuredClone(worker.message) }); for (const message of messages) worker.onmessage?.({ data: message }); return messages; },
     frame(time) { now = time; const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(fn => fn(time)); },
     flushTimers() { const callbacks = [...timers.values()]; timers.clear(); callbacks.forEach(fn => fn()); },

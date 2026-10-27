@@ -184,3 +184,11 @@ The following remain future candidates rather than v1.0.0 requirements:
 
 - Hide only the informational page footer at the existing smartphone breakpoint (520px); preserve functional bottom navigation/actions and Help controls.
 - The existing build-information disclosure is the final item inside the scrollable Help body, retaining its metadata IDs, population, and desktop/mobile availability.
+
+## Common UI conventions v1
+- Column settings/Seed and export preferences retain separate browser autosave states, errors and Retry controls. A corrupt/unreadable stored value is not silently replaced by ordinary edits. Current work and settings-file export remain available; confirmed reset/import can deliberately replace saved settings.
+- Generated rows remain tab-only and settings JSON contains no generated rows. Existing source-edit/regeneration invalidation remains: a visible notice explains that previous preview data is discarded.
+- File actions name the artifact and full-row scope. Settings JSON now accepts an editable filename; its version-one payload is unchanged. Anchor delivery reports Download started and always removes anchors/revokes URLs after errors.
+- Template/reset/import confirmation is Cancel-first and translates while open. Schema-file reading and confirmation lock schema mutations/new generation until the replacement transaction ends. Invalid/cancelled imports retain current work. Undo remains real and stays available while keyboard focused.
+- Language initialization follows URL/common/legacy/browser priority, performs no startup writes, preserves existing work, and reports screen-only selection if storage fails.
+- Export preferences now repopulate their existing controls at startup, preserving the stored format/filename/encoding/newline on reload.

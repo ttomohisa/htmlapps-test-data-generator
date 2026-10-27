@@ -108,3 +108,6 @@ Keep source in one HTML while it remains understandable. When an app grows subst
 - No runtime external resource.
 - Clear state ownership.
 - A build that fails on missing input.
+
+## Common UI v1 adapter
+The fixed JS/CSS and lock are embedded by scripts/embed-ui-conventions.ps1. App-owned storage domains track settings/export success and failure; language rendering never writes. Replacement locks cover asynchronous schema reads and confirmation before synchronous state/persistence application. Existing worker identity guards remain authoritative. Generated data invalidates on source edits as before; pure seed/serialization engines and version-one schemas are unchanged.

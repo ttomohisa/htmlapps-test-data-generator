@@ -254,3 +254,6 @@ mobileBar.setEnabled('save', true);
 ## WebRTCの接続成立ルール
 
 `webrtc-qr-pairing.html` ではPeerConnectionの `connected` だけをアプリ接続済みとして扱いません。指定した準備完了DataChannelが `open` になって初めて `onConnected` を発火します。独自Channel構成ではreliableな制御Channelを `readyChannelLabel` に指定します。
+
+## 共通UI v1
+固定版ui-conventions.js/cssをハッシュ検証してビルド時に埋め込みます。実行ボタンを明示的に指定し、処理中・無効状態を実処理と接続します。AppConfirmのcopyコールバックで表示中の確認を再翻訳し、AppToastのUndo期限はキーボードフォーカス中に停止します。保存とワーカー処理はアプリが管理します。

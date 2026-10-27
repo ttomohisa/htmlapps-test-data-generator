@@ -130,3 +130,6 @@ Application regression checks require Node.js 22 or newer (CI uses Node.js 24). 
 ### Help layout regression
 
 The normal repository check includes the dependency-free Help lifecycle and canonical-icon assertions in all release variants. For optional rendering checks, install development-only Python Playwright, then run `CHROMIUM_PATH=/path/to/chromium python scripts/test-data-help-browser.py` after building (use `--source` before building). The isolated loopback fixture checks desktop/phone geometry, page-scroll locking and restoration, keyboard reading, repeated dismissal, resizing, and unexpected runtime HTTP requests. This test dependency is not shipped with the application.
+
+### Saving and recovery
+Column settings/Seed and export preferences save in this browser separately. Failed saves stay visible with Retry; generated rows remain tab-only. Settings JSON has an editable filename and contains no generated rows. Downloads report “Download started.” Reset/import/template confirmations preserve work when cancelled; column deletion retains Undo while keyboard focused.

@@ -236,3 +236,6 @@ Useful mount options include `initialPage`, `pageTopTarget`, `pageTopOffset`, `o
 ## WebRTC application-ready rule
 
 For `webrtc-qr-pairing.html`, PeerConnection `connected` alone is not application-ready. The designated readiness DataChannel must also be `open`. Custom channel layouts set `readyChannelLabel` to a reliable control channel.
+
+## Common UI v1
+Vendored fixed ui-conventions.js/css are hash-checked and embedded at build time. Actions explicitly opt in; native busy/disabled states remain tied to app jobs. AppConfirm accepts an optional copy callback and refreshes open labels on language changes. AppToast pauses Undo expiry during keyboard focus. Storage, worker identities and replacement transactions remain app-owned.
