@@ -230,6 +230,10 @@
     .filename-input-wrap input { border-radius: 12px 0 0 12px; }
     .filename-extension { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-left: 0; border-radius: 0 12px 12px 0; background: var(--surface-muted); color: var(--muted); font-size: 12px; font-weight: 700; }
     .export-note { margin: 10px 0 0; }
+    .export-feedback { display: grid; gap: 8px; margin-top: 12px; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+    .export-feedback p { margin: 0; }
+    #outputScope { color: var(--muted); font-size: 12px; }
+    .export-feedback button { justify-self: start; max-width: 100%; white-space: normal; }
     .export-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 18px; margin-top: 16px; border-top: 1px solid var(--line); }
     .export-status { color: var(--muted); font-size: 12px; }
     .export-field[hidden] { display: none !important; }
@@ -618,13 +622,16 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
               <span data-i18n="cancelExport">保存を中止</span>
             </button>
-<p id="exportPrefsStatus" data-bk-save-status role="status" aria-live="polite"></p><button id="retryExportPrefs" type="button" data-bk-button data-bk-variant="secondary" data-i18n="retry" hidden></button>
-            <p id="outputScope" role="status" aria-live="polite"></p>
             <button class="button primary" data-bk-button data-bk-variant="primary" id="saveOutputButton" type="button" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
               <span id="saveOutputText">CSVを保存</span>
             </button>
           </div>
+        </div>
+        <div class="export-feedback">
+          <p id="exportPrefsStatus" data-bk-save-status role="status" aria-live="polite"></p>
+          <button id="retryExportPrefs" type="button" data-bk-button data-bk-variant="secondary" data-i18n="retry" hidden></button>
+          <p id="outputScope" role="status" aria-live="polite"></p>
         </div>
       </section>
     </div>

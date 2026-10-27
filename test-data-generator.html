@@ -230,6 +230,10 @@
     .filename-input-wrap input { border-radius: 12px 0 0 12px; }
     .filename-extension { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-left: 0; border-radius: 0 12px 12px 0; background: var(--surface-muted); color: var(--muted); font-size: 12px; font-weight: 700; }
     .export-note { margin: 10px 0 0; }
+    .export-feedback { display: grid; gap: 8px; margin-top: 12px; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+    .export-feedback p { margin: 0; }
+    #outputScope { color: var(--muted); font-size: 12px; }
+    .export-feedback button { justify-self: start; max-width: 100%; white-space: normal; }
     .export-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 18px; margin-top: 16px; border-top: 1px solid var(--line); }
     .export-status { color: var(--muted); font-size: 12px; }
     .export-field[hidden] { display: none !important; }
@@ -728,13 +732,16 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
               <span data-i18n="cancelExport">保存を中止</span>
             </button>
-<p id="exportPrefsStatus" data-bk-save-status role="status" aria-live="polite"></p><button id="retryExportPrefs" type="button" data-bk-button data-bk-variant="secondary" data-i18n="retry" hidden></button>
-            <p id="outputScope" role="status" aria-live="polite"></p>
             <button class="button primary" data-bk-button data-bk-variant="primary" id="saveOutputButton" type="button" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
               <span id="saveOutputText">CSVを保存</span>
             </button>
           </div>
+        </div>
+        <div class="export-feedback">
+          <p id="exportPrefsStatus" data-bk-save-status role="status" aria-live="polite"></p>
+          <button id="retryExportPrefs" type="button" data-bk-button data-bk-variant="secondary" data-i18n="retry" hidden></button>
+          <p id="outputScope" role="status" aria-live="polite"></p>
         </div>
       </section>
     </div>
@@ -824,7 +831,7 @@
       'use strict';
 
       const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Test Data Generator","nameJa":"テストデータ生成","slug":"test-data-generator","version":"1.0.2","description":"Generate reproducible test data locally in the browser with 23 data types, deterministic Seed reproduction, missing/boundary/invalid values, templates, large-data background processing, and CSV / TSV / JSON / JSONL export.","descriptionJa":"23種類のデータ、Seedによる再現、欠損・境界・異常値、テンプレート、大量データのバックグラウンド処理、CSV / TSV / JSON / JSONL保存に対応した完全ローカル処理のテストデータ生成ツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-test-data-generator"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":25,"selfExtractWarningMb":12}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-27T13:02:57.9119199Z","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.0.2"},"dependencies":[]};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-27T13:33:17.3829724Z","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.0.2"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
