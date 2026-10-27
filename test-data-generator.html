@@ -517,6 +517,7 @@
             <p class="panel-description" data-i18n="generationSettingsBody">件数、Seed、テスト配合を指定します。v1.0.0では最大1,000,000件です。</p>
           </div>
         </div>
+        <p id="schemaFileStatus" data-bk-save-status role="status" aria-live="polite"></p>
         <p id="settingsSaveStatus" data-bk-save-status role="status" aria-live="polite"></p>
         <button id="retrySettings" type="button" data-bk-button data-bk-variant="secondary" data-i18n="retry" hidden></button>
         <p id="languageStatus" role="status" aria-live="polite"></p>
@@ -823,7 +824,7 @@
       'use strict';
 
       const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Test Data Generator","nameJa":"テストデータ生成","slug":"test-data-generator","version":"1.0.2","description":"Generate reproducible test data locally in the browser with 23 data types, deterministic Seed reproduction, missing/boundary/invalid values, templates, large-data background processing, and CSV / TSV / JSON / JSONL export.","descriptionJa":"23種類のデータ、Seedによる再現、欠損・境界・異常値、テンプレート、大量データのバックグラウンド処理、CSV / TSV / JSON / JSONL保存に対応した完全ローカル処理のテストデータ生成ツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-test-data-generator"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":25,"selfExtractWarningMb":12}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-27T12:25:37.1497246Z","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.0.2"},"dependencies":[]};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-27T13:02:57.9119199Z","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.0.2"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -1010,7 +1011,7 @@
       const PREVIEW_LIMIT = 20;
       const PREVIEW_COPY_MAX_BYTES = 1024 * 1024;
       const storageStatus={settings:{state:'dirty',time:'',blocked:false},export:{state:'dirty',time:'',blocked:false}};
-      let languageFailure=false, sourceGeneration=0,undoEpoch=0, replacementBusy=false, exportFailure=false, schemaFailure='', exportNotice=null, currentErrorKey='',lastGenerationProgress=null,lastExportProgress=null;
+      let languageFailure=false, sourceGeneration=0,undoEpoch=0, replacementBusy=false, exportFailure=false, schemaFailure='',schemaDownloadFailure=false, exportNotice=null, currentErrorKey='',lastGenerationProgress=null,lastExportProgress=null;
       const replacementControls=new Map();
       let outputFilename = 'test-data';
       let exportPrefs = loadExportPrefs();
@@ -1059,16 +1060,17 @@
 
       const AppToast = (() => {
         const root = $('#appToast'); const message = $('#appToastMessage'); const action = $('#appToastAction');
-        let timer = 0; let actionHandler = null;
-        function dismiss() { if(root.contains(document.activeElement)&&actionHandler){timer=window.setTimeout(dismiss,5000);return;}clearTimeout(timer); timer = 0; root.classList.remove('show'); actionHandler = null; }
-        function show({ message: text = '', actionLabel = '', onAction = null, duration = 3200, tone = 'default' } = {}) {
-          clearTimeout(timer); message.textContent = String(text); root.dataset.tone = tone; actionHandler = typeof onAction === 'function' ? onAction : null;
-          action.textContent = actionLabel || ''; action.hidden = !actionHandler || !actionLabel; root.classList.add('show');
+        let timer = 0; let actionHandler = null;let currentCopy=null;
+        function dismiss() { if(root.contains(document.activeElement)&&actionHandler){timer=window.setTimeout(dismiss,5000);return;}clearTimeout(timer); timer = 0; root.classList.remove('show'); actionHandler = null;currentCopy=null; }
+        function show({ message: text = '', actionLabel = '', onAction = null, duration = 3200, tone = 'default',copy=null } = {}) {
+          currentCopy=copy;clearTimeout(timer); message.textContent = String(text); root.dataset.tone = tone; actionHandler = typeof onAction === 'function' ? onAction : null;
+          action.textContent = actionLabel || '';refresh();action.hidden = !actionHandler || !action.textContent; root.classList.add('show');
           if (duration > 0) timer = window.setTimeout(dismiss, duration); return Object.freeze({ dismiss });
         }
+        function refresh(){if(!currentCopy)return;const c=currentCopy();message.textContent=c.message;action.textContent=c.actionLabel||'';}
         action.addEventListener('focus',()=>{clearTimeout(timer);timer=0;});action.addEventListener('blur',()=>{if(actionHandler)timer=window.setTimeout(dismiss,5000);});
         action.addEventListener('click', () => { const handler = actionHandler;actionHandler=null; dismiss(); if (handler) handler(); });
-        return Object.freeze({ show, dismiss });
+        return Object.freeze({ show, dismiss,refresh });
       })();
       window.AppToast = AppToast;
 
@@ -1084,11 +1086,12 @@
           BrowserKittyUI.setSaveStatus(el,{mode:'autosave',state:record.state,language,time:record.time});el.textContent=translate(domain==='settings'?'settingsScope':'prefsScope')+' '+el.textContent+(record.blocked?' '+translate('storageUnreadable'):'');
           $(domain==='settings'?'#retrySettings':'#retryExportPrefs').hidden=record.state!=='error';
         }
-        $('#languageStatus').textContent=languageFailure?BrowserKittyUI.text('languageSessionOnly',language):'';
+        $('#languageStatus').textContent=languageFailure?BrowserKittyUI.text('languageSessionOnly',language):'';renderSchemaStatus();
       }
+      function renderSchemaStatus(){const status=$('#schemaFileStatus');status.textContent=[schemaDownloadFailure?translate('schemaExportFailed'):'',schemaFailure?translate(schemaFailure):''].filter(Boolean).join(' ');status.setAttribute('data-bk-save-status',status.textContent?'error':'saved');}
       function retryStorage(domain){
         const record=storageStatus[domain];if(replacementBusy)return;
-        if(record.blocked){try{const raw=localStorage.getItem(storageKeys[domain]);const parsed=raw===null?null:JSON.parse(raw);if(parsed&&(domain==='settings'?!Array.isArray(parsed.columns):typeof parsed!=='object'))throw Error('invalid');record.blocked=false;}catch{renderStorageStatus();return;}}
+        if(record.blocked){try{const raw=localStorage.getItem(storageKeys[domain]);if(raw!==null)parseStoredDomain(domain,raw);record.blocked=false;}catch{renderStorageStatus();return;}}
         if(domain==='settings')saveSettings();else saveExportPrefs();
       }
       function setReplacementBusy(busy){
@@ -1099,11 +1102,12 @@
       }
       function downloadBlob(blob,filename){const url=URL.createObjectURL(blob),link=document.createElement('a');try{link.href=url;link.download=filename;link.hidden=true;document.body.append(link);link.click();}finally{link.remove();URL.revokeObjectURL(url);}}
 
+      function parseStoredDomain(domain,raw){const parsed=JSON.parse(raw);if(!parsed||typeof parsed!=='object'||Array.isArray(parsed)||(domain==='settings'&&!Array.isArray(parsed.columns)))throw Error('invalid');return parsed;}
       function loadExportPrefs() {
         const fallback = { format: 'csv', filename: 'test-data', encoding: 'utf8', newline: 'lf' };
-        const raw = readStorage(storageKeys.export); if (!raw) return fallback;
+        const raw = readStorage(storageKeys.export); if (raw===null) return fallback;
         try {
-          const parsed = JSON.parse(raw);if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw Error('invalid');storageStatus.export.state='saved';
+          const parsed=parseStoredDomain('export',raw);storageStatus.export.state='saved';
           return {
             format: ['csv','tsv','json','jsonl'].includes(parsed.format) ? parsed.format : fallback.format,
             filename: typeof parsed.filename === 'string' && parsed.filename.trim() ? parsed.filename.trim().slice(0,120) : fallback.filename,
@@ -1182,9 +1186,9 @@
         return column;
       }
       function loadSettings() {
-        const raw = readStorage(storageKeys.settings); if (!raw) return null;
+        const raw = readStorage(storageKeys.settings); if (raw===null) return null;
         try {
-          const parsed = JSON.parse(raw); if (!Array.isArray(parsed.columns)) throw Error('invalid');storageStatus.settings.state='saved';
+          const parsed=parseStoredDomain('settings',raw);storageStatus.settings.state='saved';
           return { rowCount: Number.isInteger(parsed.rowCount) ? parsed.rowCount : 100, seed: typeof parsed.seed === 'string' ? parsed.seed.slice(0,128) : '', columns: parsed.columns.map(normalizeLoadedColumn) };
         } catch {storageStatus.settings.state='error';storageStatus.settings.blocked=true;return null;}
       }
@@ -1416,7 +1420,7 @@
         const deletionGeneration=undoEpoch;const [removed] = state.columns.splice(index, 1); invalidateAfterChange();
         const neighbor = state.columns[Math.min(index, state.columns.length - 1)];
         renderColumns({ id: neighbor?.id, attribute: 'data-role', value: 'name' });
-        AppToast.show({ message: format('deleted', { name: removed.name || translate('columnName') }), actionLabel: translate('undo'), duration: 5000, onAction: () => {
+        AppToast.show({copy:()=>({message:format('deleted',{name:removed.name||translate('columnName')}),actionLabel:translate('undo')}), duration: 5000, onAction: () => {
           if(replacementBusy||undoEpoch!==deletionGeneration||state.columns.some(c=>c.id===removed.id)||state.columns.length>=200)return;state.columns.splice(Math.min(index, state.columns.length), 0, removed); invalidateAfterChange(); renderColumns({ id: removed.id, attribute: 'data-role', value: 'name' }); AppToast.show({ message: translate('undone') });
         }});
       }
@@ -2133,8 +2137,8 @@
         state.rowCount = Number($('#rowCount').value); state.seed = String($('#seedInput').value ?? '').trim(); saveSettings();
         const error = validate(); if (error) { setError(error); return; }
         const filename=sanitizeFilenameBase($('#schemaOutputName').value)+'.json';
-        try {const text=JSON.stringify(schemaPayload(),null,2);downloadBlob(new Blob([text],{type:'application/json;charset=utf-8'}),filename);schemaFailure='';setError('');AppToast.show({message:format('downloadNotice',{name:filename,format:'JSON',count:state.columns.length}),tone:'success'});}
-        catch{schemaFailure='schemaExportFailed';setError(translate(schemaFailure));}
+        try {const text=JSON.stringify(schemaPayload(),null,2);downloadBlob(new Blob([text],{type:'application/json;charset=utf-8'}),filename);schemaDownloadFailure=false;if(currentErrorKey==='schemaExportFailed'||currentErrorKey.startsWith('error'))setError('');renderSchemaStatus();AppToast.show({message:format('downloadNotice',{name:filename,format:'JSON',count:state.columns.length}),tone:'success'});}
+        catch{schemaDownloadFailure=true;setError(translate('schemaExportFailed'));renderSchemaStatus();}
       }
       function parseSchemaFile(text) {
         const parsed = JSON.parse(text);
@@ -2180,7 +2184,7 @@
           $('#generateStatus').textContent = format('generated', { count: new Intl.NumberFormat(language).format(generatedRowCount) });
         }
         if (lastGeneratedSeed) $('#seedHelp').textContent = `${translate('usedSeedLabel')} ${lastGeneratedSeed}`; else $('#seedHelp').textContent = translate('seedHelp');
-        updateExportUI();renderStorageStatus();AppConfirm.refresh();if(currentErrorKey)setError(translate(currentErrorKey));if(generationBusy&&lastGenerationProgress)handleGenerationProgress(lastGenerationProgress);if(exportBusy&&lastExportProgress)handleExportProgress(lastExportProgress.message,lastExportProgress.formatName);
+        updateExportUI();renderStorageStatus();AppConfirm.refresh();AppToast.refresh();if(currentErrorKey)setError(translate(currentErrorKey));if(generationBusy&&lastGenerationProgress)handleGenerationProgress(lastGenerationProgress);if(exportBusy&&lastExportProgress)handleExportProgress(lastExportProgress.message,lastExportProgress.formatName);
       }
 
       $('#languageButton').addEventListener('click', () => { language = language === 'ja' ? 'en' : 'ja'; languageFailure=!BrowserKittyUI.chooseLanguage(language).persisted; applyLanguage(); });
@@ -2259,7 +2263,7 @@
       $('#resetButton').addEventListener('click', async () => {
         if(replacementBusy)return;const generation=sourceGeneration;setReplacementBusy(true);try{
         const ok=await AppConfirm.ask({copy:()=>({title:translate('resetConfirmTitle'),message:translate('resetConfirmBody'),confirmLabel:translate('resetConfirmAction')}),tone:'danger'});
-        if (!ok||generation!==sourceGeneration) return;storageStatus.settings.blocked=false;sourceGeneration++;schemaFailure=''; state = createInitialState(); lastGeneratedSeed = ''; generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 }; $('#rowCount').value = String(state.rowCount); $('#seedInput').value = state.seed; $('#seedHelp').textContent = translate('seedHelp'); $('#regenerateButton').disabled = true; saveSettings(); setError(''); renderColumns(); updatePresetUI(); clearGenerated(); $('#generateStatus').textContent = translate('readyToGenerate'); AppToast.show({ message: translate('resetDone') });
+        if (!ok||generation!==sourceGeneration) return;storageStatus.settings.blocked=false;sourceGeneration++;undoEpoch++;schemaFailure=''; state = createInitialState(); lastGeneratedSeed = ''; generatedPreviewRows = []; generatedPreviewMeta = []; generatedRowCount = 0; generatedSnapshot = null; generatedTestCounts = { missing: 0, boundary: 0, invalid: 0 }; $('#rowCount').value = String(state.rowCount); $('#seedInput').value = state.seed; $('#seedHelp').textContent = translate('seedHelp'); $('#regenerateButton').disabled = true; saveSettings(); setError(''); renderColumns(); updatePresetUI(); clearGenerated(); $('#generateStatus').textContent = translate('readyToGenerate'); AppToast.show({ message: translate('resetDone') });
         }finally{setReplacementBusy(false);$('#resetButton').focus({preventScroll:true});}
       });
 
