@@ -64,7 +64,7 @@
     .version-badge {
       display: inline-flex; align-items: center; margin-left: 7px; padding: 1px 6px;
       border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface-muted);
-      font-size: 10px; font-weight: 650; vertical-align: 2px;
+      font-size: 11px; font-weight: 650; vertical-align: 2px;
     }
     .header-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
     .language-button, .header-icon-button {
@@ -80,9 +80,9 @@
     .page-intro h1 { margin: 0; font-size: clamp(24px,3vw,28px); line-height: 1.24; letter-spacing: -.03em; }
     .page-intro p { margin: 6px 0 0; max-width: 760px; color: var(--muted); font-size: 13px; }
     .local-badge {
-      display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; margin-top: 3px; padding: 7px 10px;
-      border: 1px solid color-mix(in srgb,var(--accent) 24%,var(--line)); border-radius: 999px;
-      color: var(--accent); background: var(--accent-soft); font-size: 12px; font-weight: 700; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; margin-top: 3px; padding: 7px 0;
+      border: 0; border-radius: 0;
+      color: var(--accent); background: transparent; font-size: 12px; font-weight: 500; white-space: nowrap;
     }
     .local-badge svg { width: 15px; height: 15px; }
     .app-grid { display: grid; gap: 18px; min-width: 0; }
@@ -291,6 +291,8 @@
     .icon-button { display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; }
     .icon-button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
     .icon-button svg { width: 18px; height: 18px; }
+    .dialog-close { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 9px; background: transparent; cursor: pointer; }
+    .dialog-close svg { width: 18px; height: 18px; }
     .app-confirm-dialog { width: min(420px,calc(100% - 24px)); max-width: 100%; }
     .app-confirm-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px 13px; border-bottom: 1px solid var(--line); }
     .app-confirm-title { margin: 0; font-size: 17px; }
@@ -661,8 +663,8 @@
   <dialog id="helpDialog" aria-labelledby="helpDialogTitle">
     <div class="dialog-header">
       <h2 id="helpDialogTitle" data-i18n="helpTitle">使い方と注意事項</h2>
-      <button class="icon-button" id="closeHelpButton" type="button" data-i18n-aria-label="close" aria-label="閉じる">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      <button class="dialog-close" id="closeHelpButton" type="button" data-i18n-aria-label="close" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
       </button>
     </div>
     <div class="dialog-body" id="helpBody" tabindex="0" role="region" aria-labelledby="helpDialogTitle">
@@ -789,7 +791,7 @@
           deleted: '「{name}」を削除しました。', undo: '元に戻す', undone: '元に戻しました。', added: '列を追加しました。', duplicated: '「{name}」を複製しました。', resetDone: '初期状態に戻しました。',
           confirmTitle: '確認', confirmAction: '実行する', cancel: 'キャンセル', resetConfirmTitle: '列設定を初期状態に戻しますか？', resetConfirmBody: '現在の列設定と生成結果を消して、最初の設定に戻します。', resetConfirmAction: '初期状態に戻す',
           helpBasicsTitle: '基本操作', helpStep1: '生成件数を指定します。', helpStep2: '列名とデータの種類を設定します。列は追加・複製・削除・並べ替えでき、テンプレートからまとめて設定できます。', helpStep3: '数値設定は空欄にせず入力し、「データを生成」を押します。設定・Seedを変更したら、保存する前にもう一度生成してください。', helpStep4: 'プレビュー横の「プレビューをJSONでコピー」で先頭20件までをコピーできます。全件は保存形式とファイル名を選んで保存します。CSV / TSV / JSON / JSONLの拡張子は選んだ形式に合わせ、空欄の名前には test-data を使います。', helpTypesTitle: 'v1.0.0で使える種類', helpTypesBody: '基本型に加え、日本人氏名、ふりがな、メールアドレス、電話番号、郵便番号、都道府県、市区町村、日本風住所、会社名に対応しています。日本語の各列はv1.0.0でも独立生成です。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: '設定と生成処理はブラウザー内で完結し、サーバーへ送信しません。コピーを押した場合のみ、プレビューのJSONを端末のクリップボードへ書き込みます。クリップボードは他のアプリや端末の同期機能から利用される場合があります。', helpNotesTitle: '注意事項', helpNoteStorage: '列設定はブラウザー内に保存されます。ブラウザーのサイトデータを削除すると設定も消える場合があります。', helpNotePreview: 'プレビューとJSONコピーは先頭20件のみです。コピーは1 MiBまでで、超過時は省略せずファイル保存を案内します。自動コピーが使えない場合は手動コピー用画面を開きます。最大1,000,000件まで指定できます。大量処理はバックグラウンドで進み、生成・保存を途中で中止できます。端末保護のため、生成件数 × 列数は10,000,000セル以下に制限しています。', helpNoteRoadmap: '同じ設定・件数・Seedでは同じ結果を再生成できます。列ごとに欠損・境界・異常値の割合を設定でき、プリセットで全列へまとめて適用できます。7種類のテンプレートから列構成を始めることもできます。設定ファイルには生成済みデータは含まれません。', helpOffline: '必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。',
-          buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数', footer: '完全内包HTMLとして生成'
+          buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数', footer: 'テストデータの生成はブラウザー内で完結'
         },
         en: {
           brandMeta: 'Generate test data in your browser', helpReading: 'Scroll within this panel to read. Close, Escape, or a click outside returns to your place in the app.', helpTitle: 'How to use & notes', close: 'Close',
@@ -806,7 +808,7 @@
           deleted: 'Deleted “{name}”.', undo: 'Undo', undone: 'Restored.', added: 'Column added.', duplicated: 'Duplicated “{name}”.', resetDone: 'Settings reset.',
           confirmTitle: 'Confirm', confirmAction: 'Continue', cancel: 'Cancel', resetConfirmTitle: 'Reset the column settings?', resetConfirmBody: 'This clears the current column settings and generated result, then restores the initial setup.', resetConfirmAction: 'Reset settings',
           helpBasicsTitle: 'Basics', helpStep1: 'Choose how many rows to generate.', helpStep2: 'Set column names and data types. You can add, duplicate, delete, and reorder columns, or start from a template.', helpStep3: 'Fill in numeric settings, then select Generate data. After changing settings or Seed, generate again before saving.', helpStep4: 'Use Copy preview as JSON beside the preview to copy up to the first 20 rows. To save all rows, choose CSV, TSV, JSON, or JSONL and a filename. Known extensions follow the selected format; blank names use test-data.', helpTypesTitle: 'Types in v1.0.0', helpTypesBody: 'In addition to the basic types, Japanese name, kana name, email, phone, postal code, prefecture, city/ward, Japanese-style address, and company name are available. Japanese columns are generated independently in v1.0.0.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Settings and generation stay in your browser without server uploads. Selecting Copy writes preview JSON to your device clipboard, which other apps or device clipboard syncing may access.', helpNotesTitle: 'Notes', helpNoteStorage: 'Column settings are saved in browser storage. Clearing site data may remove them.', helpNotePreview: 'Preview and JSON copy include only the first 20 rows. Copy is limited to 1 MiB; larger JSON must be saved as a file and is never truncated. If automatic copying is unavailable, select the JSON in the manual-copy dialog. Generation accepts up to 1,000,000 rows. Large jobs run in the background and generation or saving can be cancelled. To protect the device, rows × columns is limited to 10,000,000 cells.', helpNoteRoadmap: 'The same settings, row count, and Seed reproduce the same result. Set missing, boundary, and invalid rates per column or apply a preset across all columns. You can also start from one of seven column templates. Settings files do not contain generated rows.', helpOffline: 'Required code is embedded in the distributable HTML and the app makes no runtime network request.',
-          buildInfo: 'Build information', appVersion: 'App version', builtAt: 'Built at', dependencies: 'Embedded dependencies', footer: 'Generated as one self-contained HTML file'
+          buildInfo: 'Build information', appVersion: 'App version', builtAt: 'Built at', dependencies: 'Embedded dependencies', footer: 'Test data generation stays in the browser'
         }
       };
 
