@@ -580,6 +580,7 @@
               <option value="tsv">TSV</option>
               <option value="json">JSON</option>
               <option value="jsonl">JSONL</option>
+              <option value="parquet">Parquet</option>
             </select>
           </label>
           <label class="field">
@@ -594,6 +595,8 @@
             <select id="encodingSelect">
               <option value="utf8">UTF-8</option>
               <option value="utf8bom">UTF-8 BOM</option>
+              <option value="sjis">Shift_JIS（Windows-31J）</option>
+              <option value="utf16le">UTF-16 LE（BOM）</option>
             </select>
           </label>
           <label class="field">
@@ -940,9 +943,9 @@
         try {
           const parsed = JSON.parse(raw);
           return {
-            format: ['csv','tsv','json','jsonl'].includes(parsed.format) ? parsed.format : fallback.format,
+            format: ['csv','tsv','json','jsonl','parquet'].includes(parsed.format) ? parsed.format : fallback.format,
             filename: typeof parsed.filename === 'string' && parsed.filename.trim() ? parsed.filename.trim().slice(0,120) : fallback.filename,
-            encoding: ['utf8','utf8bom'].includes(parsed.encoding) ? parsed.encoding : fallback.encoding,
+            encoding: ['utf8','utf8bom','sjis','utf16le'].includes(parsed.encoding) ? parsed.encoding : fallback.encoding,
             newline: ['lf','crlf'].includes(parsed.newline) ? parsed.newline : fallback.newline
           };
         } catch { return fallback; }
@@ -1970,11 +1973,11 @@
         }
       }
       function formatLabel(formatName) { return String(formatName || '').toUpperCase(); }
-      function exportExtension(formatName) { return ({ csv: '.csv', tsv: '.tsv', json: '.json', jsonl: '.jsonl' })[formatName] || '.txt'; }
-      function exportMime(formatName) { return ({ csv: 'text/csv;charset=utf-8', tsv: 'text/tab-separated-values;charset=utf-8', json: 'application/json;charset=utf-8', jsonl: 'application/x-ndjson;charset=utf-8' })[formatName] || 'text/plain;charset=utf-8'; }
+      function exportExtension(formatName) { return ({ csv: '.csv', tsv: '.tsv', json: '.json', jsonl: '.jsonl', parquet: '.parquet' })[formatName] || '.txt'; }
+      function exportMime(formatName, encoding = 'utf8') { const charset = ({ sjis: 'shift_jis', utf16le: 'utf-16le' })[encoding] || 'utf-8'; const type = ({ csv: 'text/csv', tsv: 'text/tab-separated-values', json: 'application/json', jsonl: 'application/x-ndjson', parquet: 'application/vnd.apache.parquet' })[formatName] || 'text/plain'; return type + (formatName === 'parquet' ? '' : ';charset=' + (['csv','tsv'].includes(formatName) ? charset : 'utf-8')); }
       function sanitizeFilenameBase(value) {
         const cleaned = String(value ?? '').trim().replace(/[\\/:*?"<>|\u0000-\u001f\u007f]/g, '-').replace(/[. ]+$/g, '');
-        return cleaned.replace(/(?:\.(?:csv|tsv|jsonl?))+$/i, '').slice(0,120).replace(/[. ]+$/g, '') || 'test-data';
+        return cleaned.replace(/(?:\.(?:csv|tsv|jsonl?|parquet))+$/i, '').slice(0,120).replace(/[. ]+$/g, '') || 'test-data';
       }
       function updateExportUI() {
         updatePreviewCopyUI();
@@ -1994,32 +1997,34 @@
         if (base !== $('#outputNameInput').value.trim()) $('#outputNameInput').value = base;
         outputFilename = base; exportPrefs.filename = base; writeStorage(storageKeys.export, JSON.stringify(exportPrefs));
         const formatName = $('#exportFormat').value; const newline = $('#newlineSelect').value === 'crlf' ? '\r\n' : '\n';
-        const bom = ['csv','tsv'].includes(formatName) && $('#encodingSelect').value === 'utf8bom' ? '\ufeff' : '';
-        exportParts = bom ? [bom] : []; let exportBytes = bom ? 3 : 0; const encoder = new TextEncoder(); setExportBusy(true); $('#exportProgress').hidden = false; $('#exportProgress').value = 0; $('#exportStatus').textContent = format('exportPreparing', { format: formatLabel(formatName) });
+        const outputEncoding = ['csv','tsv'].includes(formatName) ? $('#encodingSelect').value : 'utf8';
+        const bom = outputEncoding === 'utf8bom' ? '\ufeff' : outputEncoding === 'utf16le' ? new Uint8Array([0xff, 0xfe]) : null;
+        exportParts = bom ? [bom] : []; let exportBytes = outputEncoding === 'utf8bom' ? 3 : outputEncoding === 'utf16le' ? 2 : 0; const encoder = new TextEncoder(); setExportBusy(true); $('#exportProgress').hidden = false; $('#exportProgress').value = 0; $('#exportStatus').textContent = format('exportPreparing', { format: formatLabel(formatName) });
         let worker;
         try { worker = createGeneratorWorker(); } catch { exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); return; }
         exportWorker = worker;
         worker.onmessage = event => {
           if (worker !== exportWorker) return; const message = event.data || {};
           if (message.type === 'chunk') {
-            const text = String(message.text || ''), nextBytes = encoder.encode(text).byteLength;
+            const part = message.bytes instanceof Uint8Array ? message.bytes : String(message.text || '');
+            const nextBytes = part instanceof Uint8Array ? part.byteLength : encoder.encode(part).byteLength;
             if (!canAppendExportBytes(exportBytes, nextBytes)) {
               worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true;
               updateExportUI(); $('#exportStatus').textContent = translate('exportTooLarge');
               AppToast.show({ message: translate('exportTooLarge') }); return;
             }
-            exportBytes += nextBytes; exportParts.push(text); return;
+            exportBytes += nextBytes; exportParts.push(part); return;
           }
           if (message.type === 'progress') { handleExportProgress(message, formatName); return; }
           if (message.type === 'error') {
             worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true;
-            const key = message.message === 'export-too-large' ? 'exportTooLarge' : 'exportFailed';
+            const key = message.message === 'export-too-large' ? 'exportTooLarge' : message.message === 'encoding-unrepresentable' ? 'encodingUnrepresentable' : 'exportFailed';
             updateExportUI(); $('#exportStatus').textContent = translate(key); AppToast.show({ message: translate(key) }); return;
           }
           if (message.type !== 'complete' || message.task !== 'export') return;
           worker.terminate(); exportWorker = null;
           try {
-            const blob = new Blob(exportParts, { type: exportMime(formatName) }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); const filename = `${base}${exportExtension(formatName)}`;
+            const blob = new Blob(exportParts, { type: exportMime(formatName, outputEncoding) }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); const filename = `${base}${exportExtension(formatName)}`;
             link.href = url; link.download = filename; link.hidden = true; document.body.append(link); link.click(); link.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 1000);
             AppToast.show({ message: format('savedFile', { format: formatLabel(formatName), name: filename }), tone: 'success' });
           } catch { AppToast.show({ message: translate('exportFailed') }); }
@@ -2028,7 +2033,7 @@
         worker.onerror = () => {
           if (worker !== exportWorker) return; worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); updateExportUI();
         };
-        worker.postMessage({ task: 'export', snapshot: generatedSnapshot, options: { format: formatName, newline, maxBytes: EXPORT_MAX_BYTES }, generatorData: workerGeneratorData() });
+        worker.postMessage({ task: 'export', snapshot: generatedSnapshot, options: { format: formatName, newline, encoding: outputEncoding, maxBytes: EXPORT_MAX_BYTES }, generatorData: workerGeneratorData() });
       }
 
       function schemaPayload() {
