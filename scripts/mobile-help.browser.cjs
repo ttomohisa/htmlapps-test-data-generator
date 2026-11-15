@@ -169,6 +169,26 @@ async function main() {
         }
       }
     }
+    // Regress the formerly overflowing medium-desktop editor, outside the immutable baseline comparisons.
+    for (const language of ['ja', 'en']) for (const width of [1024, 1180]) {
+      const context = await browser.newContext({ viewport: { width, height: 768 }, locale: language, reducedMotion: 'reduce' });
+      try {
+        const page = await context.newPage(), errors = [];
+        page.on('pageerror', error => errors.push(error.message));
+        await page.goto(pathToFileURL(path.resolve(__dirname, '..', 'dist/index.html')).href);
+        await setLanguage(page, language);
+        const geometry = await readPageGeometry(page);
+        const editorFits = await page.locator('.column-row').first().evaluate(el => {
+          const rect = el.getBoundingClientRect(), panel = el.closest('.panel'), parent = panel.getBoundingClientRect();
+          return el.scrollWidth <= el.clientWidth + 1 && panel.scrollWidth <= panel.clientWidth + 1
+            && rect.left >= parent.left && rect.right <= parent.right + 1;
+        });
+        assert.ok(editorFits, language + ' ' + width + ': editor must fit the parent panel');
+        assert.ok(geometry.maximumHorizontalScroll <= 1, language + ' ' + width + ': no page horizontal scroll');
+        assert.deepEqual(errors, [], language + ' ' + width + ': no runtime errors');
+        console.log('PASS medium-desktop editor ' + language + ' ' + width + 'px');
+      } finally { await context.close(); }
+    }
   } finally {
     fs.rmSync(baselineDirectory, { recursive: true, force: true });
     await browser.close();
