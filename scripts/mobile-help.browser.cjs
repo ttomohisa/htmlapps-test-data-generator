@@ -120,7 +120,7 @@ async function main() {
             assert.equal(await page.locator('#heroTitle').innerText(),
               language === 'ja' ? 'テストデータを作成' : 'Create test data', label + ': practical hero wording');
             assert.ok((await page.locator('[data-i18n="generationSettingsBody"]').textContent()).includes('1,000,000'), label + ': visible row ceiling');
-            assert.doesNotMatch(await page.locator('[data-i18n="generationSettingsBody"]').textContent(), /v1\\.0\\.0/, label + ': no outdated release prefix');
+            assert.doesNotMatch(await page.locator('[data-i18n="generationSettingsBody"]').textContent(), new RegExp('v1[.]0[.]0'), label + ': no outdated release prefix');
             assert.equal(await page.locator('[data-i18n="helpReading"]').count(), 0, label + ': no redundant help reading guide');
             const body = page.locator('#helpDialog .dialog-body');
             assert.ok(await body.evaluate(el => el.lastElementChild.contains(document.querySelector('#buildVersion'))), label + ': build is final body child');
