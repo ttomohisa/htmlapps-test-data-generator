@@ -1385,9 +1385,11 @@
         return Number(value.toFixed(precision));
       }
       function decimalPlaces(value) {
-        const text = String(value); if (/e-/i.test(text)) return Math.min(12, Number(text.split(/e-/i)[1]) || 0);
-        return (text.split('.')[1] || '').length;
-      }
+          const text = String(value);
+          const scientific = text.match(/^-?\d+(?:\.(\d+))?e([+-]?\d+)$/i);
+          if (scientific) return Math.max(0, (scientific[1] || '').length - Number(scientific[2]));
+          return (text.split('.')[1] || '').length;
+        }
       function pick(items) { return items[randomInteger(0, items.length - 1)]; }
       function katakanaToHiragana(value) { return String(value).replace(/[ァ-ヶ]/g, char => String.fromCharCode(char.charCodeAt(0) - 0x60)); }
       function randomJapanesePerson() { return { surname: pick(japaneseSurnames), given: pick(japaneseGivenNames) }; }
@@ -1578,7 +1580,9 @@
           return format === 'space' ? iso.slice(0,19).replace('T',' ') : iso;
         }
         function decimalPlaces(value) {
-          const text = String(value); if (/e-/i.test(text)) return Math.min(12, Number(text.split(/e-/i)[1]) || 0);
+          const text = String(value);
+          const scientific = text.match(/^-?\d+(?:\.(\d+))?e([+-]?\d+)$/i);
+          if (scientific) return Math.max(0, (scientific[1] || '').length - Number(scientific[2]));
           return (text.split('.')[1] || '').length;
         }
         function steppedMoney(min, max, step) {
