@@ -1147,7 +1147,7 @@
       function validMoneyRange(min, max, step) {
         if (!Number.isFinite(min) || !Number.isFinite(max) || !Number.isFinite(step) || min > max || step <= 0) return false;
         const range = (max - min) / step;
-        return Number.isFinite(range) && range >= 0 && range <= Number.MAX_SAFE_INTEGER && decimalPlaces(step) <= 12;
+        return Number.isFinite(range) && range >= 0 && range <= Number.MAX_SAFE_INTEGER && Math.max(decimalPlaces(min), decimalPlaces(max), decimalPlaces(step)) <= 12;
       }
       function canAppendExportBytes(used, next, limit = EXPORT_MAX_BYTES) {
         return Number.isSafeInteger(used) && Number.isSafeInteger(next) && next <= limit - used;
