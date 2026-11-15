@@ -79,6 +79,12 @@ v1.0.0では日本語列同士は独立して生成します。たとえば「�
 
 Content Security Policyでは `connect-src 'none'` を設定しています。
 
+## リリース
+
+PRを `main` にマージすると、GitHub Actionsでビルドと検査を行います。`app.config.json` に指定したバージョン（例：`1.0.3`）のタグがまだなければ、`v1.0.3` を作成し、GitHub Releaseに通常版と自己解凍版のHTMLを添付します。同じバージョンのタグ・Releaseは重複作成しません。新しいリリースには、マージ前にバージョン更新が必要です。
+
+スマートフォンでは画面を簡潔にするため、ヒーローの「完全ローカル処理」表示を省いています。実行時の外部通信を行わない仕様に変更はありません。
+
 ## 開発
 
 `htmlapps-template` の単一HTMLアプリ構成に準拠しています。変更前に [AGENTS.md](AGENTS.md) と [APP_SPEC.md](APP_SPEC.md) を確認してください。
