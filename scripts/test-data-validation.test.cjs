@@ -57,6 +57,13 @@ test('sequence rejects row-count overflow before the worker serializes Infinity 
   assert.deepEqual(JSON.parse(safe.run('JSON.stringify(generatedPreviewRows)')).map(row => row.value),
     [9007199254740987, 9007199254740988, 9007199254740989, 9007199254740990]);
 });
+test('non-integer row counts show a validation error without throwing from BigInt', () => {
+  const app = setup();
+  app.input(app.el('rowCount'), '1.5');
+  assert.doesNotThrow(() => app.el('generateButton').click());
+  assert.equal(app.workers.length, 0);
+  assert.ok(app.el('errorBanner').classList.contains('show'));
+});
 test('date and datetime parsers reject normalized impossible dates and accept leap days', () => {
   const app = setup();
   assert.ok(Number.isNaN(app.run('parseDateOnly("2026-02-30")')));
