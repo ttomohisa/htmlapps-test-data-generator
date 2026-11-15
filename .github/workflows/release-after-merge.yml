@@ -21,7 +21,7 @@ jobs:
       - name: Checkout merged main
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Set up Node.js
@@ -51,8 +51,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Unable to check remote tags." }
           $tagExists = $remoteTag.Count -gt 0
           $tagSha = if ($tagExists) { ($remoteTag[0] -split '\s+')[0] } else { '' }
-          $releaseTag = gh release view $tag --json tagName --jq .tagName 2>$null
-          $releaseExists = $LASTEXITCODE -eq 0
+          $releaseExists = $false
+          if ($tagExists) {
+            # The GitHub CLI returns exit code 1 for a missing release.
+            $null = gh release view $tag --json tagName --jq .tagName 2>$null
+            $releaseExists = $LASTEXITCODE -eq 0
+          }
           if ($tagExists -and $tagSha -ne $headSha) {
             Write-Host "$tag already points to an earlier version commit. No new release for unchanged app.config.json."
             "publish=false" >> $env:GITHUB_OUTPUT
