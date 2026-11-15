@@ -13,7 +13,7 @@ function setup(rows = 3) {
 function configure(app, kind, settings) {
   app.run('state.columns = [newColumn(' + JSON.stringify(kind) + ', "value")]; renderColumns()');
   for (const [key, value] of Object.entries(settings)) {
-    const input = app.document.querySelector('.column-row [data-setting="' + key + '"]');
+    const input = app.document.querySelector('.column-row').querySelector('[data-setting="' + key + '"]');
     assert.ok(input, kind + '.' + key + ' input exists');
     app.input(input, String(value));
   }
