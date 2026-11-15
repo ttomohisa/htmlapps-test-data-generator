@@ -113,8 +113,8 @@ async function main() {
               primaryGradient: getComputedStyle(document.querySelector('#generateButton')).backgroundImage,
               presetUnderline: getComputedStyle(document.querySelector('[data-preset="normal"]')).borderBottomWidth
             }));
-            assert.equal(design.panelRadius, '0px', label + ': flat sections');
-            assert.equal(design.panelShadow, 'none', label + ': no decorative card shadow');
+            assert.equal(design.panelRadius, width <= 520 ? '14px' : '16px', label + ': large section cards retain rounded corners');
+            assert.equal(design.panelShadow, 'none', label + ': large section cards have no decorative shadow');
             assert.equal(design.rowRadius, '0px', label + ': column editors use rows');
             assert.equal(design.rowShadow, 'none', label + ': no inner card shadow');
             assert.equal(design.primaryGradient, 'none', label + ': flat primary action');
