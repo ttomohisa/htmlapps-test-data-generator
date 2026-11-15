@@ -182,7 +182,7 @@ The following remain future candidates rather than v1.0.0 requirements:
 
 ## Shared mobile footer and Help build information
 
-- Hide only the informational page footer at the existing smartphone breakpoint (520px); preserve functional bottom navigation/actions and Help controls.
+- Hide the informational footer and the hero's local-processing badge at the smartphone breakpoint (520px); preserve functional controls, accessibility, and Help.
 - The existing build-information disclosure is the final item inside the scrollable Help body, retaining its metadata IDs, population, and desktop/mobile availability.
 
 ## 16. v1.0.3 validity and resource limits
@@ -194,3 +194,11 @@ The following remain future candidates rather than v1.0.0 requirements:
 - A single generated file is limited to 128 MiB UTF-8, checked in the Worker before posting and checked again when assembling chunks in the page. Exceeding the limit terminates export, clears incomplete chunks, and shows a localized message; generation, settings and preview remain available. This limit does not affect the separate 1 MiB preview-copy cap.
 - Medium-width desktop layouts switch to the existing two-column editor at 1180 px, preventing the five-column editor from overflowing around 1024 px. New-column suggestions avoid collisions with existing names.
 - Every release variant must pass the numeric, date, imported-settings and export-size regression suite. Chromium checks include 1024 px and 1180 px editor widths in Japanese and English.
+
+## 17. Minimal editor presentation and release automation
+
+- Keep the core four-section workflow (generation settings, columns, preview, save) while removing decorative card borders, gradients and nested shadows. Use thin separators, text-like secondary actions and one solid brand-green primary action per workflow step. Column editors have simple row dividers instead of independent rounded cards.
+- Presets are horizontal text tabs with a clear underline for the active choice, including smartphone widths. On narrow phones, generation/save action groups stack vertically to avoid clipping. Focus styles, status communication, error backgrounds, dialogs and Undo remain accessible.
+- Use factual, concise hero text in Japanese and English. Remove the Help reading/dismissal instruction and version-specific labels from general usage text; omit device-clipboard sync details from the visible Help copy while keeping the fact that clipboard copying occurs only when requested. The Hero 'Fully local processing' badge is hidden at <=520px but the same CSP and privacy behavior remain.
+- On a push to the main branch (including PR merges), the release workflow builds and verifies the current source, reads the stable SemVer from app.config.json, creates the corresponding vX.Y.Z tag if missing, and publishes a GitHub Release with both standalone HTML variants. Existing tags/releases are not overwritten. Unchanged versions do not produce a second release. Workflow dispatch allows manual retry.
+- The release workflow itself, responsive visibility, the Help copy and bilingual hero must have automated regression checks. A real merged commit is still required to exercise the privileged tagging and release creation steps.
