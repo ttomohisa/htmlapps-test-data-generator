@@ -4,7 +4,7 @@
 
 - **Name:** Test Data Generator / テストデータ生成
 - **Repository:** `ttomohisa/htmlapps-test-data-generator`
-- **Current version:** `1.0.2`
+- **Current version:** `1.0.3`
 - **Purpose:** Generate reproducible test data locally in the browser, including normal, missing, boundary, and invalid values.
 - **Release artifacts:** `dist/index.html` and `dist/index.self-extract.html`
 
@@ -120,7 +120,7 @@ v1.0.0 does not introduce a new schema-file field for templates: after a templat
 
 ## 11. Acceptance criteria
 
-- `app.config.json` and visible build information report `1.0.2`.
+- `app.config.json` and visible build information report `1.0.3`.
 - Header language switching shows the target language as `EN` in Japanese and `JA` in English, with localized aria-label/title (`英語に切り替え` / `Switch to Japanese`). The visible `vX.Y.Z` badge matches `app.config.json`; privacy remains `完全ローカル処理` / `Fully local processing`.
 - Seed placeholder remains `42`.
 - All 23 data types generate successfully in one schema.
@@ -184,3 +184,13 @@ The following remain future candidates rather than v1.0.0 requirements:
 
 - Hide only the informational page footer at the existing smartphone breakpoint (520px); preserve functional bottom navigation/actions and Help controls.
 - The existing build-information disclosure is the final item inside the scrollable Help body, retaining its metadata IDs, population, and desktop/mobile availability.
+
+## 16. v1.0.3 validity and resource limits
+
+- Whole-number types accept only JavaScript safe integers. Sequence generation validates the final row using integer arithmetic before starting the Worker, so it cannot silently emit repeated or non-finite JSON values.
+- Decimal columns must contain at least one value expressible with the chosen decimal places inside the selected inclusive interval. Binary floating-point rounding of exact decimal endpoints must not accidentally exclude them.
+- Date-only and local date/time inputs must represent real calendar dates; imported settings containing impossible calendar dates or unsupported choice values are rejected instead of silently normalized.
+- Money steps include grid-aligned upper endpoints despite floating-point division rounding (for example, 0 through 0.3 by 0.1).
+- A single generated file is limited to 128 MiB UTF-8, checked in the Worker before posting and checked again when assembling chunks in the page. Exceeding the limit terminates export, clears incomplete chunks, and shows a localized message; generation, settings and preview remain available. This limit does not affect the separate 1 MiB preview-copy cap.
+- Medium-width desktop layouts switch to the existing two-column editor at 1180 px, preventing the five-column editor from overflowing around 1024 px. New-column suggestions avoid collisions with existing names.
+- Every release variant must pass the numeric, date, imported-settings and export-size regression suite. Chromium checks include 1024 px and 1180 px editor widths in Japanese and English.
