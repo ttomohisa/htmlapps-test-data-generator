@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Replace decorative section/column cards and raised buttons with flatter editor rows, separators, text presets, and a solid primary action; preserve all generation and export controls.
+- Keep one large, restrained card around each major section while simplifying nested column rows, text presets, and button styles; preserve all generation and export controls.
 - Simplify the bilingual hero and Help copy, remove version prefixes from general usage limits, hide the local-processing hero label on smartphones, and stack narrow-screen action buttons.
 - Add a main-branch release workflow to build/verify, create a SemVer tag, and publish both standalone HTML variants to GitHub Releases after merging a version-bump PR; avoid duplicate releases.
 
