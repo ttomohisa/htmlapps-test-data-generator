@@ -101,6 +101,14 @@ test('money steps include the 0.3 endpoint when stepping by 0.1', async () => {
   assert.ok(result.some(row => row.value === 0.3), 'upper endpoint is not lost to floating-point quotient rounding');
   assert.ok(result.every(row => [0, 0.1, 0.2, 0.3].includes(row.value)));
 });
+test('money preserves scientific-notation values with supported precision', () => {
+  const app = setup(100);
+  configure(app, 'money', { min: 0, max: 2.46e-8, step: 1.23e-8 });
+  generate(app);
+  const values = JSON.parse(app.run('JSON.stringify(generatedPreviewRows)')).map(row => row.value);
+  assert.ok(values.includes(2.46e-8));
+  assert.ok(values.every(value => [0, 1.23e-8, 2.46e-8].includes(value)));
+});
 test('money rejects a step count that cannot be represented safely', () => {
   const app = setup();
   configure(app, 'money', { min: 0, max: 10000000, step: 1e-12 });
