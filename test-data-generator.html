@@ -377,7 +377,7 @@
           </svg>
         </div>
         <div class="brand-copy">
-          <p class="brand-name"><span id="brandName">Test Data Generator</span><span class="version-badge" id="versionBadge">v1.0.3</span></p>
+          <p class="brand-name"><span id="brandName">Test Data Generator</span><span class="version-badge" id="versionBadge">v1.1.0</span></p>
           <p class="brand-meta" data-i18n="brandMeta">ブラウザーだけでテストデータを生成</p>
         </div>
       </div>
@@ -394,7 +394,7 @@
     <section class="page-intro" aria-labelledby="heroTitle">
       <div>
         <h1 id="heroTitle" data-i18n="introTitle">テストデータを作成</h1>
-        <p data-i18n="lead">列と件数を設定して、CSV・TSV・JSON・JSONLで保存。欠損値や異常値も混ぜられます。</p>
+        <p data-i18n="lead">列と件数を設定して、CSV・TSV・JSON・JSONL・Parquetで保存。欠損値や異常値も混ぜられます。</p>
       </div>
       <div class="local-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg>
@@ -599,7 +599,7 @@
               <option value="utf16le">UTF-16 LE（BOM）</option>
             </select>
           </label>
-          <label class="field">
+          <label class="field" id="newlineField">
             <span class="field-label" data-i18n="newlineLabel">改行</span>
             <select id="newlineSelect">
               <option value="lf">LF</option>
@@ -709,8 +709,8 @@
     (() => {
       'use strict';
 
-      const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Test Data Generator","nameJa":"テストデータ生成","slug":"test-data-generator","version":"1.0.3","description":"Generate reproducible test data locally in the browser with 23 data types, deterministic Seed reproduction, missing/boundary/invalid values, templates, large-data background processing, and CSV / TSV / JSON / JSONL export.","descriptionJa":"23種類のデータ、Seedによる再現、欠損・境界・異常値、テンプレート、大量データのバックグラウンド処理、CSV / TSV / JSON / JSONL保存に対応した完全ローカル処理のテストデータ生成ツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-test-data-generator"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":25,"selfExtractWarningMb":12}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-11-13T16:50:28.7416150Z","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.0.3"},"dependencies":[]};
+      const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Test Data Generator","nameJa":"テストデータ生成","slug":"test-data-generator","version":"1.1.0","description":"Generate reproducible test data locally with 23 data types, missing/boundary/invalid values, templates, CSV / TSV / JSON / JSONL / Parquet export, and UTF-8 / Windows-31J / UTF-16 LE text encoding.","descriptionJa":"23種類のデータ、Seedによる再現、欠損・境界・異常値、テンプレート、CSV・TSV・JSON・JSONL・Parquet保存、UTF-8・Shift_JIS・UTF-16 LEの文字コードに対応したブラウザー内のテストデータ生成ツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-test-data-generator"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":25,"selfExtractWarningMb":12}}};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-11-13T16:50:28.7416150Z","app":{"name":"Test Data Generator","slug":"test-data-generator","version":"1.1.0"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -783,36 +783,36 @@
       const translations = {
         ja: {
           brandMeta: 'ブラウザーだけでテストデータを生成', helpTitle: '使い方と注意事項', close: '閉じる',
-          introTitle: 'テストデータを作成', lead: '列と件数を設定して、CSV・TSV・JSON・JSONLで保存。欠損値や異常値も混ぜられます。', localBadge: '完全ローカル処理',
+          introTitle: 'テストデータを作成', lead: '列と件数を設定して、CSV・TSV・JSON・JSONL・Parquetで保存。欠損値や異常値も混ぜられます。', localBadge: '完全ローカル処理',
           generationSettingsTitle: '生成設定', generationSettingsBody: '件数、Seed、テスト配合を指定します。最大1,000,000件です。', rowCountLabel: '生成件数', rowCountHelp: '1〜1,000,000件（列数に応じて安全上限があります）', seedLabel: 'Seed', seedHelp: '空欄なら生成時にSeedを自動作成します。', randomSeed: 'Seedを変更', randomSeedShort: '変更', regenerateSameSeed: '同じSeedでもう一度生成', usedSeedLabel: '今回のSeed:', saveSchema: '設定ファイルを保存', loadSchema: '設定ファイルを読み込む', schemaSaved: '設定ファイルを作成しました：{name}', schemaLoaded: '設定ファイルを読み込みました。', schemaLoadTitle: '設定ファイルを読み込みますか？', schemaLoadBody: '現在の列設定・件数・Seedを、読み込んだ設定で置き換えます。生成結果は消去されます。', schemaLoadAction: '読み込む', schemaInvalid: 'この設定ファイルは読み込めません。Test Data Generatorの設定ファイルか確認してください。', schemaTooLarge: '設定ファイルが大きすぎます。1 MB以下のJSONファイルを選んでください。', settingsSavedNote: '列設定とSeedは、このブラウザー内に保存されます。生成したデータ自体は自動保存しません。', testPresetLabel: 'テスト配合', presetNormal: '通常', presetLight: '軽くテスト', presetStrict: '厳しめテスト', presetCustom: '現在：カスタム', testPresetHelp: '全列へまとめて適用します。列ごとに割合を調整できます。', presetApplied: '「{name}」を全列に適用しました。', templateLabel: 'テンプレート', templateChoose: 'テンプレートを選択', templateUser: 'ユーザー', templateCustomer: '顧客', templateEmployee: '社員', templateProduct: '商品', templateOrder: '注文', templateInquiry: '問い合わせ', templateAccessLog: 'アクセスログ', applyTemplate: '適用', templateHelp: 'よく使う列構成をまとめて設定します。現在の列は置き換わります。', templateConfirmTitle: 'テンプレートを適用しますか？', templateConfirmBody: '現在の列設定を「{name}」テンプレートで置き換えます。生成結果も消去されます。', templateConfirmAction: 'テンプレートを適用', templateApplied: '「{name}」テンプレートを適用しました。',
           columnsTitle: '列設定', columnsBody: '列名、データの種類、生成方法を設定します。', reset: '初期状態に戻す', columnName: '列名', dataType: 'データの種類', typeSettings: '設定', testValues: 'テスト値', operations: '操作', addColumn: '列を追加',
           emptyColumnsTitle: '列がありません', emptyColumnsBody: '生成したいデータの列を追加してください。', readyToGenerate: '設定後に「データを生成」を押してください。', generate: 'データを生成', generationProgressLabel: '生成の進捗', cancelGeneration: '生成を中止', generationPreparing: '生成の準備をしています…', generatingProgress: '{done} / {total}件（{percent}%）', generationCancelled: '生成を中止しました。',
           copyPreview: 'プレビューをJSONでコピー', copyPreviewScope: '全{total}件のうち先頭{count}件のみ（JSON）', copyPreviewEmpty: '生成後、先頭20件までをコピーできます。', copyPreviewPending: 'JSONをコピーしています…', copyPreviewCopied: '全{total}件のうち先頭{count}件のJSONをコピーしました。', copyPreviewTooLarge: 'プレビューのJSONが1 MiBを超えています。値は省略しません。JSONをファイルとして保存してください。', copyPreviewManualTitle: 'JSONを手動でコピー', copyPreviewManualInstructions: '自動コピーを利用できません。選択されたJSONをコピーしてください（Ctrl+C / Command+C、または端末のコピーメニュー）。', copyPreviewManual: 'JSONを選択して手動でコピーできます。', copyPreviewRetry: '自動コピーを利用できません。開いている画面を閉じ、もう一度コピーを押すとJSONを選択できます。',
-          previewTitle: 'プレビュー', previewBody: '生成結果の先頭20件を確認できます。', previewEmptyTitle: 'まだデータを生成していません', previewEmptyBody: '列を設定して「データを生成」を押すと、ここに結果が表示されます。', outputTitle: '保存', outputBody: '生成したデータをファイルとして保存します。', outputFormatLabel: '形式', outputFilenameLabel: 'ファイル名', outputFilenameHelp: '拡張子は選んだ形式に合わせます。空欄なら test-data を使います。', encodingLabel: '文字コード', newlineLabel: '改行', exportReadyAfterGenerate: 'データを生成すると保存できます。', exportReady: '{count}件を{format}で保存できます。', saveFormat: '{format}を保存', savedFile: '{format}を作成しました：{name}', exportProgressLabel: '保存の進捗', cancelExport: '保存を中止', exportPreparing: '{format}を準備しています…', exportProgress: '{format}を作成中：{done} / {total}件（{percent}%）', exportCancelled: '保存を中止しました。', exportFailed: 'ファイルを作成できませんでした。もう一度お試しください。', exportTooLarge: '出力が128 MiBを超えました。件数や列数、文字列の長さを減らしてください。', futureNote: 'テンプレートから列を始めたり、Seed・欠損・境界・異常値を組み合わせてCSV / TSV / JSON / JSONLとして保存できます。',
+          previewTitle: 'プレビュー', previewBody: '生成結果の先頭20件を確認できます。', previewEmptyTitle: 'まだデータを生成していません', previewEmptyBody: '列を設定して「データを生成」を押すと、ここに結果が表示されます。', outputTitle: '保存', outputBody: '生成したデータをファイルとして保存します。', outputFormatLabel: '形式', outputFilenameLabel: 'ファイル名', outputFilenameHelp: '拡張子は選んだ形式に合わせます。空欄なら test-data を使います。', encodingLabel: '文字コード', newlineLabel: '改行', exportReadyAfterGenerate: 'データを生成すると保存できます。', exportReady: '{count}件を{format}で保存できます。', saveFormat: '{format}を保存', savedFile: '{format}を作成しました：{name}', exportProgressLabel: '保存の進捗', cancelExport: '保存を中止', exportPreparing: '{format}を準備しています…', exportProgress: '{format}を作成中：{done} / {total}件（{percent}%）', exportCancelled: '保存を中止しました。', exportFailed: 'ファイルを作成できませんでした。もう一度お試しください。', encodingUnrepresentable: 'Shift_JISで保存できない文字が含まれています。UTF-8・UTF-16 LEを選ぶか、文字を変更してください。', exportTooLarge: '出力が128 MiBを超えました。件数や列数、文字列の長さを減らしてください。', futureNote: 'テンプレートから列を始めたり、Seed・欠損・境界・異常値を組み合わせてCSV / TSV / JSON / JSONLとして保存できます。',
           typeGroupBasic: '基本', typeGroupJapanese: '日本語データ', typeSequence: '連番', typeInteger: '整数', typeDecimal: '小数', typeBoolean: '真偽値', typeUuid: 'UUID', typeString: 'ランダム文字列', typeChoice: '選択肢', typeFixed: '固定値', typeDate: '日付', typeDatetime: '日時', typeMoney: '金額', typePercent: 'パーセント', typeUrl: 'URL', typeIpv4: 'IPv4', typeJaName: '日本人氏名', typeJaKana: 'ふりがな', typeEmail: 'メールアドレス', typePhone: '電話番号', typePostal: '郵便番号', typePrefecture: '都道府県', typeCity: '市区町村', typeJaAddress: '日本風住所', typeCompany: '会社名', namePart: '氏名の範囲', nameFull: '姓名', nameSurname: '姓のみ', nameGiven: '名のみ', kanaScript: '表記', kanaHiragana: 'ひらがな', kanaKatakana: 'カタカナ', emailDomain: 'ドメイン', phoneKind: '種類', phoneMixed: '混在', phoneMobile: '携帯電話', phoneLandline: '固定電話', start: '開始値', step: '増分', min: '最小値', max: '最大値', decimals: '小数桁数', length: '文字数', fixedValue: '値', booleanFormat: '出力形式', booleanTrueFalse: 'true / false', booleanOneZero: '1 / 0', booleanYesNo: 'YES / NO', choices: '候補（1行1項目）', startDate: '開始日', endDate: '終了日', dateFormat: '日付形式', dateDash: 'YYYY-MM-DD', dateSlash: 'YYYY/MM/DD', startDatetime: '開始日時', endDatetime: '終了日時', datetimeFormat: '日時形式', datetimeIso: 'ISO 8601', datetimeSpace: 'YYYY-MM-DD HH:mm:ss', moneyStep: '刻み', percentRange: '範囲', percent100: '0〜100', percent1: '0〜1', urlBase: 'ベースURL',
           moveUp: '上へ移動', moveDown: '下へ移動', duplicateColumn: '列を複製', deleteColumn: '列を削除', columnsCount: '{count}列', generatedCount: '{count}件生成', previewLimit: '先頭{count}件を表示', missingRate: '欠損 %', boundaryRate: '境界 %', invalidRate: '異常 %', boundaryUnavailable: 'この種類は境界値なし', statusMissing: '欠損', statusBoundary: '境界', statusInvalid: '異常', missingDisplay: '(空)', testSummary: '欠損 {missing} / 境界 {boundary} / 異常 {invalid}',
           generating: '生成しています…', generated: '{count}件生成しました。', workerUnavailable: 'このブラウザーでは大量生成用の処理を開始できませんでした。', settingsChanged: '設定を変更しました。もう一度生成してください。', seedChanged: 'Seedを変更しました。もう一度生成してください。',
           errorRows: '生成件数は1〜1,000,000の整数で入力してください。', errorCells: '生成件数 × 列数は10,000,000セル以下にしてください。列数か生成件数を減らしてください。', errorNoColumns: '列を1つ以上追加してください。', errorEmptyName: '列名が空の列があります。', errorDuplicateName: '同じ列名が使用されています。列名は重複しないようにしてください。', errorOptions: '選択式の設定値を確認してください。設定ファイルに無効な値が含まれている可能性があります。', errorSequence: '連番の開始値と増分は安全な整数範囲で入力してください。件数を含めた最終値も範囲内にしてください。', errorInteger: '整数の最小値と最大値を確認してください。最小値は最大値以下にしてください。', errorDecimal: '小数の範囲と小数桁数を確認してください。小数桁数は0〜10です。', errorString: 'ランダム文字列の文字数は1〜128の整数で入力してください。', errorChoice: '選択肢を1つ以上入力してください。1行を1項目として扱います。', errorDate: '日付の開始日と終了日を確認してください。開始日は終了日以前にしてください。', errorDatetime: '日時の開始日時と終了日時を確認してください。開始日時は終了日時以前にしてください。', errorMoney: '金額の最小値・最大値・刻みを確認してください。刻みは0より大きく、小数は12桁以内にしてください。', errorPercent: 'パーセントの小数桁数は0〜6の整数で入力してください。', errorUrl: 'ベースURLは http:// または https:// で始まる有効なURLを入力してください。', errorEmail: 'メールアドレスのドメインを確認してください。例: example.com', errorTestRates: 'テスト値の割合は0〜100の整数で、合計が100%以下になるようにしてください。',
           deleted: '「{name}」を削除しました。', undo: '元に戻す', undone: '元に戻しました。', added: '列を追加しました。', duplicated: '「{name}」を複製しました。', resetDone: '初期状態に戻しました。',
           confirmTitle: '確認', confirmAction: '実行する', cancel: 'キャンセル', resetConfirmTitle: '列設定を初期状態に戻しますか？', resetConfirmBody: '現在の列設定と生成結果を消して、最初の設定に戻します。', resetConfirmAction: '初期状態に戻す',
-          helpBasicsTitle: '基本操作', helpStep1: '生成件数を指定します。', helpStep2: '列名とデータの種類を設定します。列は追加・複製・削除・並べ替えでき、テンプレートからまとめて設定できます。', helpStep3: '数値設定は空欄にせず入力し、「データを生成」を押します。設定・Seedを変更したら、保存する前にもう一度生成してください。', helpStep4: 'プレビュー横の「プレビューをJSONでコピー」で先頭20件までをコピーできます。全件は保存形式とファイル名を選んで保存します。CSV / TSV / JSON / JSONLの拡張子は選んだ形式に合わせ、空欄の名前には test-data を使います。', helpTypesTitle: 'データの種類', helpTypesBody: '基本型に加え、日本人氏名、ふりがな、メールアドレス、電話番号、郵便番号、都道府県、市区町村、日本風住所、会社名に対応しています。日本語の各列は独立して生成されます。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: '設定と生成処理はブラウザー内で完結し、サーバーへ送信しません。コピーを押した場合のみ、プレビューのJSONを端末のクリップボードへ書き込みます。', helpNotesTitle: '注意事項', helpNoteStorage: '列設定はブラウザー内に保存されます。ブラウザーのサイトデータを削除すると設定も消える場合があります。', helpNotePreview: 'プレビューとJSONコピーは先頭20件のみです。コピーは1 MiBまでで、超過時は省略せずファイル保存を案内します。自動コピーが使えない場合は手動コピー用画面を開きます。最大1,000,000件まで指定できます。大量処理はバックグラウンドで進み、生成・保存を途中で中止できます。端末保護のため、生成件数 × 列数は10,000,000セル以下、1ファイルの出力は128 MiB以下に制限しています。', helpNoteRoadmap: '同じ設定・件数・Seedでは同じ結果を再生成できます。列ごとに欠損・境界・異常値の割合を設定でき、プリセットで全列へまとめて適用できます。7種類のテンプレートから列構成を始めることもできます。設定ファイルには生成済みデータは含まれません。', helpOffline: '必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。',
+          helpBasicsTitle: '基本操作', helpStep1: '生成件数を指定します。', helpStep2: '列名とデータの種類を設定します。列は追加・複製・削除・並べ替えでき、テンプレートからまとめて設定できます。', helpStep3: '数値設定は空欄にせず入力し、「データを生成」を押します。設定・Seedを変更したら、保存する前にもう一度生成してください。', helpStep4: 'プレビュー横の「プレビューをJSONでコピー」で先頭20件までをコピーできます。全件は保存形式とファイル名を選んで保存します。CSV / TSV / JSON / JSONL / Parquetの拡張子は選んだ形式に合わせ、空欄の名前には test-data を使います。', helpTypesTitle: 'データの種類', helpTypesBody: '基本型に加え、日本人氏名、ふりがな、メールアドレス、電話番号、郵便番号、都道府県、市区町村、日本風住所、会社名に対応しています。日本語の各列は独立して生成されます。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: '設定と生成処理はブラウザー内で完結し、サーバーへ送信しません。コピーを押した場合のみ、プレビューのJSONを端末のクリップボードへ書き込みます。', helpNotesTitle: '注意事項', helpNoteStorage: '列設定はブラウザー内に保存されます。ブラウザーのサイトデータを削除すると設定も消える場合があります。', helpNotePreview: 'プレビューとJSONコピーは先頭20件のみです。コピーは1 MiBまでで、超過時は省略せずファイル保存を案内します。自動コピーが使えない場合は手動コピー用画面を開きます。最大1,000,000件まで指定できます。大量処理はバックグラウンドで進み、生成・保存を途中で中止できます。端末保護のため、生成件数 × 列数は10,000,000セル以下、1ファイルの出力は128 MiB以下に制限しています。', helpNoteRoadmap: '同じ設定・件数・Seedでは同じ結果を再生成できます。列ごとに欠損・境界・異常値の割合を設定でき、プリセットで全列へまとめて適用できます。7種類のテンプレートから列構成を始めることもできます。設定ファイルには生成済みデータは含まれません。', helpOffline: '必要なコードは配布用HTMLに内包され、実行時の外部通信は行いません。',
           buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数', footer: 'テストデータの生成はブラウザー内で完結'
         },
         en: {
           brandMeta: 'Generate test data in your browser', helpTitle: 'How to use & notes', close: 'Close',
-          introTitle: 'Create test data', lead: 'Set rows and columns, then save as CSV, TSV, JSON, or JSONL. Add missing or invalid values when needed.', localBadge: 'Fully local processing',
+          introTitle: 'Create test data', lead: 'Set rows and columns, then save as CSV, TSV, JSON, JSONL, or Parquet. Add missing or invalid values when needed.', localBadge: 'Fully local processing',
           generationSettingsTitle: 'Generation settings', generationSettingsBody: 'Choose the row count, Seed, and test mix. Up to 1,000,000 rows.', rowCountLabel: 'Rows', rowCountHelp: '1 to 1,000,000 rows (a safe cell limit also applies)', seedLabel: 'Seed', seedHelp: 'Leave blank to create a Seed automatically when generating.', randomSeed: 'Change Seed', randomSeedShort: 'Change', regenerateSameSeed: 'Generate again with same Seed', usedSeedLabel: 'Seed used:', saveSchema: 'Save settings file', loadSchema: 'Load settings file', schemaSaved: 'Created settings file: {name}', schemaLoaded: 'Loaded the settings file.', schemaLoadTitle: 'Load this settings file?', schemaLoadBody: 'This replaces the current columns, row count, and Seed. The generated result will be cleared.', schemaLoadAction: 'Load settings', schemaInvalid: 'This settings file could not be loaded. Check that it was created by Test Data Generator.', schemaTooLarge: 'The settings file is too large. Choose a JSON file no larger than 1 MB.', settingsSavedNote: 'Column settings and Seed are saved in this browser. Generated rows are not saved automatically.', testPresetLabel: 'Test mix', presetNormal: 'Normal', presetLight: 'Light test', presetStrict: 'Stricter test', presetCustom: 'Current: Custom', testPresetHelp: 'Apply a mix to all columns, then fine-tune each column if needed.', presetApplied: 'Applied “{name}” to all columns.', templateLabel: 'Template', templateChoose: 'Choose a template', templateUser: 'User', templateCustomer: 'Customer', templateEmployee: 'Employee', templateProduct: 'Product', templateOrder: 'Order', templateInquiry: 'Inquiry', templateAccessLog: 'Access log', applyTemplate: 'Apply', templateHelp: 'Set up a common column layout at once. This replaces the current columns.', templateConfirmTitle: 'Apply this template?', templateConfirmBody: 'This replaces the current columns with the “{name}” template and clears the generated result.', templateConfirmAction: 'Apply template', templateApplied: 'Applied the “{name}” template.',
           columnsTitle: 'Columns', columnsBody: 'Set each column name, data type, and generation settings.', reset: 'Reset settings', columnName: 'Column name', dataType: 'Data type', typeSettings: 'Settings', testValues: 'Test values', operations: 'Actions', addColumn: 'Add column',
           emptyColumnsTitle: 'No columns', emptyColumnsBody: 'Add at least one column to generate data.', readyToGenerate: 'Configure the columns, then select Generate data.', generate: 'Generate data', generationProgressLabel: 'Generation progress', cancelGeneration: 'Cancel generation', generationPreparing: 'Preparing generation…', generatingProgress: '{done} / {total} rows ({percent}%)', generationCancelled: 'Generation cancelled.',
           copyPreview: 'Copy preview as JSON', copyPreviewScope: 'First {count} of {total} rows only (JSON)', copyPreviewEmpty: 'Generate data to copy up to the first 20 rows.', copyPreviewPending: 'Copying JSON…', copyPreviewCopied: 'Copied JSON for the first {count} of {total} rows.', copyPreviewTooLarge: 'Preview JSON exceeds 1 MiB. Values are never truncated. Save a JSON file instead.', copyPreviewManualTitle: 'Copy JSON manually', copyPreviewManualInstructions: 'Automatic copying is unavailable. Copy the selected JSON with Ctrl+C / Command+C or your device’s Copy menu.', copyPreviewManual: 'Select the JSON to copy it manually.', copyPreviewRetry: 'Automatic copying is unavailable. Close the open dialog and select Copy again to select the JSON.',
-          previewTitle: 'Preview', previewBody: 'Review the first 20 generated rows.', previewEmptyTitle: 'No data generated yet', previewEmptyBody: 'Configure the columns and select Generate data to see the result here.', outputTitle: 'Save', outputBody: 'Save the generated data as a file.', outputFormatLabel: 'Format', outputFilenameLabel: 'Filename', outputFilenameHelp: 'The extension follows the selected format. Blank names use test-data.', encodingLabel: 'Encoding', newlineLabel: 'Line endings', exportReadyAfterGenerate: 'Generate data before saving.', exportReady: '{count} rows are ready to save as {format}.', saveFormat: 'Save {format}', savedFile: 'Created {format}: {name}', exportProgressLabel: 'Save progress', cancelExport: 'Cancel save', exportPreparing: 'Preparing {format}…', exportProgress: 'Creating {format}: {done} / {total} rows ({percent}%)', exportCancelled: 'Save cancelled.', exportFailed: 'Could not create the file. Please try again.', exportTooLarge: 'Output exceeds 128 MiB. Reduce the number of rows, columns, or text length.', futureNote: 'Start from a template, combine deterministic Seed data with missing, boundary, and invalid values, then save as CSV, TSV, JSON, or JSONL.',
+          previewTitle: 'Preview', previewBody: 'Review the first 20 generated rows.', previewEmptyTitle: 'No data generated yet', previewEmptyBody: 'Configure the columns and select Generate data to see the result here.', outputTitle: 'Save', outputBody: 'Save the generated data as a file.', outputFormatLabel: 'Format', outputFilenameLabel: 'Filename', outputFilenameHelp: 'The extension follows the selected format. Blank names use test-data.', encodingLabel: 'Encoding', newlineLabel: 'Line endings', exportReadyAfterGenerate: 'Generate data before saving.', exportReady: '{count} rows are ready to save as {format}.', saveFormat: 'Save {format}', savedFile: 'Created {format}: {name}', exportProgressLabel: 'Save progress', cancelExport: 'Cancel save', exportPreparing: 'Preparing {format}…', exportProgress: 'Creating {format}: {done} / {total} rows ({percent}%)', exportCancelled: 'Save cancelled.', exportFailed: 'Could not create the file. Please try again.', encodingUnrepresentable: 'Some characters cannot be saved in Shift_JIS. Choose UTF-8 or UTF-16 LE, or change the text.', exportTooLarge: 'Output exceeds 128 MiB. Reduce the number of rows, columns, or text length.', futureNote: 'Start from a template, combine deterministic Seed data with missing, boundary, and invalid values, then save as CSV, TSV, JSON, or JSONL.',
           typeGroupBasic: 'Basic', typeGroupJapanese: 'Japanese data', typeSequence: 'Sequence', typeInteger: 'Integer', typeDecimal: 'Decimal', typeBoolean: 'Boolean', typeUuid: 'UUID', typeString: 'Random string', typeChoice: 'Choice', typeFixed: 'Fixed value', typeDate: 'Date', typeDatetime: 'Date & time', typeMoney: 'Money', typePercent: 'Percent', typeUrl: 'URL', typeIpv4: 'IPv4', typeJaName: 'Japanese name', typeJaKana: 'Japanese kana name', typeEmail: 'Email address', typePhone: 'Phone number', typePostal: 'Postal code', typePrefecture: 'Prefecture', typeCity: 'City / ward', typeJaAddress: 'Japanese-style address', typeCompany: 'Company name', namePart: 'Name part', nameFull: 'Full name', nameSurname: 'Surname only', nameGiven: 'Given name only', kanaScript: 'Script', kanaHiragana: 'Hiragana', kanaKatakana: 'Katakana', emailDomain: 'Domain', phoneKind: 'Type', phoneMixed: 'Mixed', phoneMobile: 'Mobile', phoneLandline: 'Landline', start: 'Start', step: 'Step', min: 'Min', max: 'Max', decimals: 'Decimal places', length: 'Length', fixedValue: 'Value', booleanFormat: 'Output format', booleanTrueFalse: 'true / false', booleanOneZero: '1 / 0', booleanYesNo: 'YES / NO', choices: 'Choices (one per line)', startDate: 'Start date', endDate: 'End date', dateFormat: 'Date format', dateDash: 'YYYY-MM-DD', dateSlash: 'YYYY/MM/DD', startDatetime: 'Start date/time', endDatetime: 'End date/time', datetimeFormat: 'Date/time format', datetimeIso: 'ISO 8601', datetimeSpace: 'YYYY-MM-DD HH:mm:ss', moneyStep: 'Step', percentRange: 'Range', percent100: '0–100', percent1: '0–1', urlBase: 'Base URL',
           moveUp: 'Move up', moveDown: 'Move down', duplicateColumn: 'Duplicate column', deleteColumn: 'Delete column', columnsCount: '{count} columns', generatedCount: '{count} rows generated', previewLimit: 'Showing first {count}', missingRate: 'Missing %', boundaryRate: 'Boundary %', invalidRate: 'Invalid %', boundaryUnavailable: 'No boundary values for this type', statusMissing: 'Missing', statusBoundary: 'Boundary', statusInvalid: 'Invalid', missingDisplay: '(empty)', testSummary: 'Missing {missing} / Boundary {boundary} / Invalid {invalid}',
           generating: 'Generating…', generated: 'Generated {count} rows.', workerUnavailable: 'This browser could not start the background generator.', settingsChanged: 'Settings changed. Generate again to refresh the preview.', seedChanged: 'Seed changed. Generate again to refresh the preview.',
           errorRows: 'Enter a whole-number row count from 1 to 1,000,000.', errorCells: 'Rows × columns must be 10,000,000 cells or fewer. Reduce the row count or number of columns.', errorNoColumns: 'Add at least one column.', errorEmptyName: 'A column name is empty.', errorDuplicateName: 'Column names must be unique.', errorOptions: 'Check the selected settings. A settings file may contain an unsupported option.', errorSequence: 'Use safe integers for sequence start and step. The final row must also stay in the safe integer range.', errorInteger: 'Check the integer range. Min must be less than or equal to max.', errorDecimal: 'Check the decimal range and decimal places. Decimal places must be from 0 to 10.', errorString: 'Random string length must be a whole number from 1 to 128.', errorChoice: 'Enter at least one choice. Each non-empty line is treated as one value.', errorDate: 'Check the start and end dates. Start must be on or before end.', errorDatetime: 'Check the start and end date/times. Start must be on or before end.', errorMoney: 'Check money min, max, and step. Step must be positive and decimal precision must not exceed 12 places.', errorPercent: 'Percent decimal places must be a whole number from 0 to 6.', errorUrl: 'Enter a valid base URL beginning with http:// or https://.', errorEmail: 'Check the email domain. Example: example.com', errorTestRates: 'Test-value rates must be whole numbers from 0 to 100 and total no more than 100%.',
           deleted: 'Deleted “{name}”.', undo: 'Undo', undone: 'Restored.', added: 'Column added.', duplicated: 'Duplicated “{name}”.', resetDone: 'Settings reset.',
           confirmTitle: 'Confirm', confirmAction: 'Continue', cancel: 'Cancel', resetConfirmTitle: 'Reset the column settings?', resetConfirmBody: 'This clears the current column settings and generated result, then restores the initial setup.', resetConfirmAction: 'Reset settings',
-          helpBasicsTitle: 'Basics', helpStep1: 'Choose how many rows to generate.', helpStep2: 'Set column names and data types. You can add, duplicate, delete, and reorder columns, or start from a template.', helpStep3: 'Fill in numeric settings, then select Generate data. After changing settings or Seed, generate again before saving.', helpStep4: 'Use Copy preview as JSON beside the preview to copy up to the first 20 rows. To save all rows, choose CSV, TSV, JSON, or JSONL and a filename. Known extensions follow the selected format; blank names use test-data.', helpTypesTitle: 'Data types', helpTypesBody: 'In addition to the basic types, Japanese name, kana name, email, phone, postal code, prefecture, city/ward, Japanese-style address, and company name are available. Japanese columns are generated independently.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Settings and generation stay in your browser without server uploads. Selecting Copy writes preview JSON to your device clipboard', helpNotesTitle: 'Notes', helpNoteStorage: 'Column settings are saved in browser storage. Clearing site data may remove them.', helpNotePreview: 'Preview and JSON copy include only the first 20 rows. Copy is limited to 1 MiB; larger JSON must be saved as a file and is never truncated. If automatic copying is unavailable, select the JSON in the manual-copy dialog. Generation accepts up to 1,000,000 rows. Large jobs run in the background and generation or saving can be cancelled. To protect the device, rows × columns is limited to 10,000,000 cells and each exported file to 128 MiB.', helpNoteRoadmap: 'The same settings, row count, and Seed reproduce the same result. Set missing, boundary, and invalid rates per column or apply a preset across all columns. You can also start from one of seven column templates. Settings files do not contain generated rows.', helpOffline: 'Required code is embedded in the distributable HTML and the app makes no runtime network request.',
+          helpBasicsTitle: 'Basics', helpStep1: 'Choose how many rows to generate.', helpStep2: 'Set column names and data types. You can add, duplicate, delete, and reorder columns, or start from a template.', helpStep3: 'Fill in numeric settings, then select Generate data. After changing settings or Seed, generate again before saving.', helpStep4: 'Use Copy preview as JSON beside the preview to copy up to the first 20 rows. To save all rows, choose CSV, TSV, JSON, JSONL, or Parquet and a filename. Known extensions follow the selected format; blank names use test-data.', helpTypesTitle: 'Data types', helpTypesBody: 'In addition to the basic types, Japanese name, kana name, email, phone, postal code, prefecture, city/ward, Japanese-style address, and company name are available. Japanese columns are generated independently.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Settings and generation stay in your browser without server uploads. Selecting Copy writes preview JSON to your device clipboard', helpNotesTitle: 'Notes', helpNoteStorage: 'Column settings are saved in browser storage. Clearing site data may remove them.', helpNotePreview: 'Preview and JSON copy include only the first 20 rows. Copy is limited to 1 MiB; larger JSON must be saved as a file and is never truncated. If automatic copying is unavailable, select the JSON in the manual-copy dialog. Generation accepts up to 1,000,000 rows. Large jobs run in the background and generation or saving can be cancelled. To protect the device, rows × columns is limited to 10,000,000 cells and each exported file to 128 MiB.', helpNoteRoadmap: 'The same settings, row count, and Seed reproduce the same result. Set missing, boundary, and invalid rates per column or apply a preset across all columns. You can also start from one of seven column templates. Settings files do not contain generated rows.', helpOffline: 'Required code is embedded in the distributable HTML and the app makes no runtime network request.',
           buildInfo: 'Build information', appVersion: 'App version', builtAt: 'Built at', dependencies: 'Embedded dependencies', footer: 'Test data generation stays in the browser'
         }
       };
@@ -1765,14 +1765,213 @@
           const pretty = JSON.stringify(row, null, 2).split('\n').map(line => `  ${line}`).join(newline);
           return `${rowIndex ? ',' : ''}${newline}${pretty}`;
         }
+
+        // Character conversion stays inside the export Worker. The inverse map is
+        // constructed from the browser's standard Shift_JIS decoder (Windows-31J).
+        // Never replace an unrepresentable character silently with a question mark.
+        let shiftJisEncodeMap = null;
+        function shiftJisMap() {
+          if (shiftJisEncodeMap) return shiftJisEncodeMap;
+          const decoder = new TextDecoder('shift_jis', { fatal: true });
+          const map = new Map();
+          const register = bytes => {
+            try {
+              const character = decoder.decode(Uint8Array.from(bytes));
+              if (character && !character.includes('\ufffd') && [...character].length === 1 && !map.has(character)) map.set(character, Uint8Array.from(bytes));
+            } catch { /* The byte combination is not a valid Windows-31J character. */ }
+          };
+          for (let value = 0; value <= 0x7f; value += 1) register([value]);
+          for (let value = 0xa1; value <= 0xdf; value += 1) register([value]);
+          for (let lead = 0x81; lead <= 0xfc; lead += 1) {
+            if (lead > 0x9f && lead < 0xe0) continue;
+            for (let trail = 0x40; trail <= 0xfc; trail += 1) {
+              if (trail === 0x7f) continue;
+              register([lead, trail]);
+            }
+          }
+          shiftJisEncodeMap = map; return map;
+        }
+        function encodeTextBytes(text, encoding) {
+          if (encoding === 'utf16le') {
+            const bytes = new Uint8Array(text.length * 2);
+            for (let index = 0; index < text.length; index += 1) {
+              const code = text.charCodeAt(index);
+              bytes[index * 2] = code & 255; bytes[index * 2 + 1] = code >> 8;
+            }
+            return bytes;
+          }
+          if (encoding === 'sjis') {
+            const map = shiftJisMap(), list = []; let size = 0;
+            for (const char of text) {
+              const encoded = map.get(char);
+              if (!encoded) throw new Error('encoding-unrepresentable');
+              list.push(encoded); size += encoded.length;
+            }
+            const bytes = new Uint8Array(size); let pos = 0;
+            for (const item of list) { bytes.set(item, pos); pos += item.length; }
+            return bytes;
+          }
+          return new TextEncoder().encode(text);
+        }
+
+        // Parquet 1.x: uncompressed PLAIN values, RLE definition levels,
+        // nullable flat columns, and Thrift Compact metadata. Entirely local.
+        function parquetCompact(fields) {
+          const out = [], utf8 = new TextEncoder();
+          const put = bytes => { for (const byte of bytes) out.push(byte); };
+          const varint = number => {
+            let value = BigInt(number);
+            if (value < 0n) throw new Error('parquet-varint');
+            while (value >= 128n) { out.push(Number(value & 127n) | 128); value >>= 7n; }
+            out.push(Number(value));
+          };
+          const zigzag = value => { const n = BigInt(value); varint(n < 0n ? (-n << 1n) - 1n : n << 1n); };
+          const typeCode = { bool: 1, i32: 5, i64: 6, binary: 8, struct: 12, list: 9 };
+          const valueOf = (kind, value) => {
+            if (kind === 'i32' || kind === 'i64') zigzag(value);
+            else if (kind === 'binary') { const bytes = utf8.encode(String(value)); varint(bytes.length); put(bytes); }
+            else if (kind === 'struct') put(parquetCompact(value));
+            else if (kind === 'list') {
+              const [entryKind, entries] = value;
+              const size = entries.length, itemType = typeCode[entryKind];
+              out.push((Math.min(size, 15) << 4) | itemType);
+              if (size >= 15) varint(size);
+              for (const entry of entries) valueOf(entryKind, entry);
+            } else throw new Error('parquet-type');
+          };
+          let last = 0;
+          for (const [id, kind, value] of fields) {
+            const delta = id - last;
+            if (delta > 0 && delta <= 15) out.push((delta << 4) | (kind === 'bool' ? (value ? 1 : 2) : typeCode[kind]));
+            else { out.push(kind === 'bool' ? (value ? 1 : 2) : typeCode[kind]); zigzag(id); }
+            if (kind !== 'bool') valueOf(kind, value);
+            last = id;
+          }
+          out.push(0);
+          return Uint8Array.from(out);
+        }
+        function parquetJoined(parts, length = parts.reduce((total, item) => total + item.length, 0)) {
+          const result = new Uint8Array(length); let offset = 0;
+          for (const item of parts) { result.set(item, offset); offset += item.length; }
+          return result;
+        }
+        function parquetLE32(number) {
+          const bytes = new Uint8Array(4);
+          new DataView(bytes.buffer).setUint32(0, number, true); return bytes;
+        }
+        function parquetColumnKind(column) {
+          if ((column.type === 'sequence' || column.type === 'integer') && !Number(column.test?.invalid)) return { physical: 2, kind: 'int64' };
+          if (['sequence','integer','decimal','money','percent'].includes(column.type)) return { physical: 5, kind: 'double' };
+          if (column.type === 'boolean' && column.settings?.format === 'true_false' && !Number(column.test?.invalid)) return { physical: 0, kind: 'boolean' };
+          if (column.type === 'boolean' && column.settings?.format === 'one_zero' && !Number(column.test?.invalid)) return { physical: 2, kind: 'int64' };
+          return { physical: 6, kind: 'string' };
+        }
+        function parquetColumnPage(values, kind) {
+          const level = [], valueParts = [], utf8 = new TextEncoder();
+          let i = 0;
+          // Hybrid RLE levels: a length-prefixed stream of (runLength << 1, level).
+          while (i < values.length) {
+            const present = values[i] !== null && values[i] !== undefined ? 1 : 0;
+            let j = i + 1;
+            while (j < values.length && (values[j] != null ? 1 : 0) === present) j += 1;
+            let header = (j - i) * 2;
+            while (header >= 128) { level.push((header & 127) | 128); header = Math.floor(header / 128); }
+            level.push(header, present); i = j;
+          }
+          const levelBytes = parquetJoined([parquetLE32(level.length), Uint8Array.from(level)]);
+          if (kind === 'boolean') {
+            const present = values.filter(value => value != null);
+            const bytes = new Uint8Array(Math.ceil(present.length / 8));
+            present.forEach((value, index) => { if (value) bytes[index >> 3] |= 1 << (index & 7); });
+            valueParts.push(bytes);
+          } else if (kind === 'int64' || kind === 'double') {
+            const present = values.filter(value => value != null), bytes = new Uint8Array(present.length * 8);
+            const view = new DataView(bytes.buffer);
+            present.forEach((value, index) => {
+              if (kind === 'int64') view.setBigInt64(index * 8, BigInt(value), true);
+              else { if (!Number.isFinite(Number(value))) throw new Error('parquet-nonfinite'); view.setFloat64(index * 8, Number(value), true); }
+            });
+            valueParts.push(bytes);
+          } else {
+            for (const value of values) {
+              if (value == null) continue;
+              const bytes = utf8.encode(String(value));
+              valueParts.push(parquetLE32(bytes.length), bytes);
+            }
+          }
+          const body = parquetJoined([levelBytes, ...valueParts]);
+          const pageHead = parquetCompact([
+            [1,'i32',0], [2,'i32',body.length], [3,'i32',body.length],
+            [5,'struct',[[1,'i32',values.length],[2,'i32',0],[3,'i32',3],[4,'i32',3]]]
+          ]);
+          return parquetJoined([pageHead,body]);
+        }
+        function exportParquet(snapshot, modesByColumn, limit) {
+          const cols = snapshot.columns, kinds = cols.map(parquetColumnKind);
+          let bytesWritten = 0;
+          const send = bytes => {
+            bytesWritten += bytes.byteLength;
+            if (bytesWritten > limit) throw new Error('export-too-large');
+            self.postMessage({ type: 'chunk', bytes }, [bytes.buffer]);
+          };
+          const magic = Uint8Array.from([80,65,82,49]);
+          send(magic);
+          const groups = [];
+          const groupSize = Math.max(64, Math.min(4096, Math.floor(65536 / cols.length)));
+          const interval = progressInterval(snapshot.rowCount);
+          for (let start = 0; start < snapshot.rowCount; start += groupSize) {
+            const count = Math.min(groupSize, snapshot.rowCount - start);
+            const columnValues = cols.map(() => []);
+            for (let index = 0; index < count; index += 1) {
+              const rowIndex = start + index;
+              for (let c = 0; c < cols.length; c += 1) {
+                columnValues[c].push(specialValueFor(cols[c],rowIndex,snapshot.rowCount,modeAt(modesByColumn[c],rowIndex)));
+              }
+              if ((rowIndex + 1) % interval === 0) postProgress(rowIndex + 1, snapshot.rowCount);
+            }
+            const chunkMetas = []; let groupBytes = 0;
+            for (let c = 0; c < cols.length; c += 1) {
+              const column = cols[c], {physical,kind} = kinds[c];
+              const offset = bytesWritten;
+              const page = parquetColumnPage(columnValues[c],kind);
+              const size = page.byteLength; send(page); groupBytes += size;
+              const columnMetadata = [
+                [1,'i32',physical], [2,'list',['i32',[0,3]]],
+                [3,'list',['binary',[column.name]]], [4,'i32',0],
+                [5,'i64',count], [6,'i64',size], [7,'i64',size],
+                [9,'i64',offset]
+              ];
+              chunkMetas.push([[2,'i64',offset],[3,'struct',columnMetadata]]);
+            }
+            groups.push([[1,'list',['struct',chunkMetas]],[2,'i64',groupBytes],[3,'i64',count]]);
+            postProgress(start + count, snapshot.rowCount);
+          }
+          const schema = [[[4,'binary','schema'],[5,'i32',cols.length]]];
+          for (let c = 0; c < cols.length; c += 1) {
+            const fields = [[1,'i32',kinds[c].physical],[3,'i32',1],[4,'binary',cols[c].name]];
+            if (kinds[c].kind === 'string') fields.push([6,'i32',0]); // UTF8 converted_type
+            schema.push(fields);
+          }
+          const footer = parquetCompact([
+            [1,'i32',1], [2,'list',['struct',schema]], [3,'i64',snapshot.rowCount],
+            [4,'list',['struct',groups]], [6,'binary','Browser Kitty Test Data Generator']
+          ]);
+          send(footer); send(parquetLE32(footer.length)); send(Uint8Array.from([80,65,82,49]));
+          self.postMessage({ type: 'complete', task: 'export', rowCount: snapshot.rowCount });
+        }
+
         function exportRows(snapshot, options) {
           postProgress(0, snapshot.rowCount, 'prepare'); const modesByColumn = prepare(snapshot); const names = snapshot.columns.map(column => column.name); const formatName = options.format; const newline = options.newline;
           const limit = Math.min(128 * 1024 * 1024, Number(options.maxBytes) || 128 * 1024 * 1024);
           const encoder = new TextEncoder(); let writtenBytes = 0;
+          if (formatName === 'parquet') { exportParquet(snapshot, modesByColumn, limit); return; }
+          const textEncoding = ['csv','tsv'].includes(formatName) ? options.encoding : 'utf8';
           const sendChunk = text => {
-            writtenBytes += encoder.encode(text).byteLength;
+            const bytes = textEncoding === 'sjis' || textEncoding === 'utf16le' ? encodeTextBytes(text, textEncoding) : null;
+            writtenBytes += bytes ? bytes.byteLength : encoder.encode(text).byteLength;
             if (writtenBytes > limit) throw new Error('export-too-large');
-            self.postMessage({ type: 'chunk', text });
+            if (bytes) self.postMessage({ type: 'chunk', bytes }, [bytes.buffer]);
+            else self.postMessage({ type: 'chunk', text });
           };
           if (formatName === 'csv' || formatName === 'tsv') { const delimiter = formatName === 'csv' ? ',' : '\t'; sendChunk(names.map(name => delimitedCell(name, delimiter)).join(delimiter)); }
           else if (formatName === 'json') sendChunk('[');
@@ -1982,7 +2181,7 @@
       function updateExportUI() {
         updatePreviewCopyUI();
         const formatName = $('#exportFormat').value; const label = formatLabel(formatName); const count = new Intl.NumberFormat(language).format(generatedRowCount);
-        $('#outputExtension').textContent = exportExtension(formatName); $('#encodingField').hidden = !['csv','tsv'].includes(formatName); $('#saveOutputText').textContent = format('saveFormat', { format: label });
+        $('#outputExtension').textContent = exportExtension(formatName); $('#encodingField').hidden = !['csv','tsv'].includes(formatName); $('#newlineField').hidden = formatName === 'parquet'; $('#saveOutputText').textContent = format('saveFormat', { format: label });
         if (!exportBusy) $('#exportStatus').textContent = generatedRowCount ? format('exportReady', { count, format: label }) : translate('exportReadyAfterGenerate');
         $('#saveOutputButton').disabled = exportBusy || generationBusy || !generatedRowCount;
       }
