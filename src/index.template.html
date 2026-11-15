@@ -1964,10 +1964,14 @@
           postProgress(0, snapshot.rowCount, 'prepare'); const modesByColumn = prepare(snapshot); const names = snapshot.columns.map(column => column.name); const formatName = options.format; const newline = options.newline;
           const limit = Math.min(128 * 1024 * 1024, Number(options.maxBytes) || 128 * 1024 * 1024);
           const encoder = new TextEncoder(); let writtenBytes = 0;
+          if (formatName === 'parquet') { exportParquet(snapshot, modesByColumn, limit); return; }
+          const textEncoding = ['csv','tsv'].includes(formatName) ? options.encoding : 'utf8';
           const sendChunk = text => {
-            writtenBytes += encoder.encode(text).byteLength;
+            const bytes = textEncoding === 'sjis' || textEncoding === 'utf16le' ? encodeTextBytes(text, textEncoding) : null;
+            writtenBytes += bytes ? bytes.byteLength : encoder.encode(text).byteLength;
             if (writtenBytes > limit) throw new Error('export-too-large');
-            self.postMessage({ type: 'chunk', text });
+            if (bytes) self.postMessage({ type: 'chunk', bytes }, [bytes.buffer]);
+            else self.postMessage({ type: 'chunk', text });
           };
           if (formatName === 'csv' || formatName === 'tsv') { const delimiter = formatName === 'csv' ? ',' : '\t'; sendChunk(names.map(name => delimitedCell(name, delimiter)).join(delimiter)); }
           else if (formatName === 'json') sendChunk('[');
