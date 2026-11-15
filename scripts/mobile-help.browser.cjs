@@ -89,13 +89,17 @@ async function main() {
             assert.equal(await page.locator('html').getAttribute('lang'),language,label+': repeated language toggles');
             for(const id of ['buildVersion','builtAt','dependencyCount']){assert.equal(await page.locator('#'+id).count(),1,label+': unique metadata after toggles');assert.ok(!['','—','-'].includes((await page.locator('#'+id).textContent()).trim()),label+': populated metadata after toggles');}
             assert.equal(await page.locator('[data-i18n="localBadge"]').textContent(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
-            assert.ok(await page.locator('.local-badge').evaluate(el => {
-              const box = el.getBoundingClientRect();
-              const range = document.createRange();
-              range.selectNodeContents(el.querySelector('[data-i18n="localBadge"]'));
-              return box.left >= 0 && box.right <= innerWidth && el.scrollWidth <= el.clientWidth + 1
-                && [...range.getClientRects()].every(rect => rect.left >= box.left - 1 && rect.right <= box.right + 1 && rect.top >= box.top - 1 && rect.bottom <= box.bottom + 1);
-            }), label + ': badge text fits');
+            if (width <= 520) {
+              assert.equal(await page.locator('.local-badge').isVisible(), false, label + ': hide local badge on phones');
+            } else {
+              assert.ok(await page.locator('.local-badge').evaluate(el => {
+                const box = el.getBoundingClientRect();
+                const range = document.createRange();
+                range.selectNodeContents(el.querySelector('[data-i18n="localBadge"]'));
+                return box.left >= 0 && box.right <= innerWidth && el.scrollWidth <= el.clientWidth + 1
+                  && [...range.getClientRects()].every(rect => rect.left >= box.left - 1 && rect.right <= box.right + 1 && rect.top >= box.top - 1 && rect.bottom <= box.bottom + 1);
+              }), label + ': badge text fits');
+            }
             assert.equal(await page.locator('main #buildVersion').count(), 0, label);
             assert.equal(await page.locator('footer').isVisible(), width > 520, label);
             await prepareApp(page, width, label);
@@ -113,6 +117,11 @@ async function main() {
             }
 
             await page.locator('#helpButton').click();
+            assert.equal(await page.locator('#heroTitle').innerText(),
+              language === 'ja' ? 'テストデータを作成' : 'Create test data', label + ': practical hero wording');
+            assert.ok((await page.locator('[data-i18n="generationSettingsBody"]').textContent()).includes('1,000,000'), label + ': visible row ceiling');
+            assert.doesNotMatch(await page.locator('[data-i18n="generationSettingsBody"]').textContent(), /v1\\.0\\.0/, label + ': no outdated release prefix');
+            assert.equal(await page.locator('[data-i18n="helpReading"]').count(), 0, label + ': no redundant help reading guide');
             const body = page.locator('#helpDialog .dialog-body');
             assert.ok(await body.evaluate(el => el.lastElementChild.contains(document.querySelector('#buildVersion'))), label + ': build is final body child');
             assert.equal(await page.locator(buildSelector).count(), 1, label);
