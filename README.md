@@ -17,6 +17,8 @@ A local-first browser tool for generating reproducible test data. Along with nor
 ## Features
 
 - Set a row count from 1 to 1,000,000, with a 10,000,000-cell safety limit across rows × columns.
+- Exports are capped at **128 MiB per UTF-8 file** to reduce browser memory exhaustion; if the limit is reached, reduce the row count, columns, or value lengths and retry.
+- Numeric settings reject out-of-safe-range sequence values, fractional ranges with no representable decimal value, and invalid calendar dates in imported settings.
 - Run large generation in a Web Worker so the main UI remains responsive.
 - Show progress and allow cancellation for both generation and file creation.
 - Validate all rows in the worker while retaining only the first 20 rows in the page, then regenerate from the same Seed and settings when exporting.
