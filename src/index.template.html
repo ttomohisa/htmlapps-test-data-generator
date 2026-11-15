@@ -1140,7 +1140,7 @@
         return first <= last ? { first, last, scale } : null;
       }
       function validSequenceRange(start, step, rowCount) {
-        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(step)) return false;
+        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(step) || !Number.isInteger(rowCount) || rowCount < 1 || rowCount > MAX_ROWS) return false;
         const end = BigInt(start) + BigInt(step) * BigInt(rowCount - 1);
         return end >= BigInt(Number.MIN_SAFE_INTEGER) && end <= BigInt(Number.MAX_SAFE_INTEGER);
       }
