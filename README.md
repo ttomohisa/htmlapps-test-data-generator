@@ -81,6 +81,12 @@ Copy writes only after you select the Copy action. The system clipboard may be a
 
 The default Content Security Policy includes `connect-src 'none'`.
 
+## Release
+
+After a PR is merged into `main`, GitHub Actions builds and verifies both standalone HTML variants. If the version in `app.config.json` has no tag yet (for example `1.0.3`), it creates `v1.0.3` and a GitHub Release containing the readable and self-extracting HTML files. An existing tag or Release is not duplicated; bump the version before the next release.
+
+On phones, the informational "Fully local processing" hero label is hidden to reduce clutter. The no-runtime-network behavior is unchanged.
+
 ## Development
 
 The repository follows the `htmlapps-template` single-HTML application contract. Read [AGENTS.md](AGENTS.md) and [APP_SPEC.md](APP_SPEC.md) before changing the application.
