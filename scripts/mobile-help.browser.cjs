@@ -124,13 +124,9 @@ async function main() {
             const pageGeometry = await readPageGeometry(page);
             const baseline = baselineMeasurements.get(`${language}-${width}-${height}`);
             console.log('PAGE_GEOMETRY ' + label + ' ' + JSON.stringify(pageGeometry));
-            if (baseline.document <= width) {
-              assert.ok(pageGeometry.document <= width, label + ': page width');
-            } else {
-              // Only identical pre-existing main-control overflow is allowed. New offenders or worse widths fail.
-              assert.deepEqual(pageGeometry, baseline, label + ': unchanged immutable-base main-control geometry');
-              assert.ok(pageGeometry.offenders.every(el => ['generate-actions', 'export-button-group'].includes(el.owner)), label + ': overflow is attributed only to existing generation/export controls');
-              console.log('KNOWN_BASELINE_MAIN_OVERFLOW ' + label);
+            assert.ok(pageGeometry.maximumHorizontalScroll <= 1, label + ': no page-level horizontal scroll');
+            if (baseline.maximumHorizontalScroll > 1) {
+              console.log('FIXED_BASELINE_OVERFLOW ' + label + ': ' + baseline.maximumHorizontalScroll + 'px -> ' + pageGeometry.maximumHorizontalScroll + 'px');
             }
 
             await page.locator('#helpButton').click();
