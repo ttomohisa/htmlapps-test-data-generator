@@ -105,6 +105,9 @@ test('money rejects a step count that cannot be represented safely', () => {
   const app = setup();
   configure(app, 'money', { min: 0, max: 10000000, step: 1e-12 });
   expectRejected(app);
+  const finerThanExportPrecision = setup();
+  configure(finerThanExportPrecision, 'money', { min: 1e-13, max: 1e-13, step: 1 });
+  expectRejected(finerThanExportPrecision);
 });
 test('export byte guard is inclusive and blocks oversized Worker output without downloading', () => {
   const app = setup();
