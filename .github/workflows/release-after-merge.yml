@@ -33,6 +33,14 @@ jobs:
         shell: pwsh
         run: ./scripts/check-repository.ps1
 
+      - name: Install pinned independent Parquet reader (CI only)
+        shell: pwsh
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund hyparquet@1.33.0
+
+      - name: Verify Parquet is readable with an independent implementation
+        shell: pwsh
+        run: node scripts/parquet-interop.test.cjs dist/index.html
+
       - name: Determine SemVer tag and release state
         id: version
         shell: pwsh
