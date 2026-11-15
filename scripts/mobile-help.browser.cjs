@@ -63,6 +63,39 @@ async function smoke(page,results,file){
  await page.locator('#exportFormat').selectOption('json');await page.locator('#outputNameInput').fill('mobile-help-data');
  const pending=page.waitForEvent('download');await page.locator('#saveOutputButton').click();const download=await pending;assert.equal(download.suggestedFilename(),'mobile-help-data.json');
  const target=path.join(results,file.includes('self-extract')?'synthetic-loader.json':'synthetic-readable.json');await download.saveAs(target);const rows=JSON.parse(fs.readFileSync(target,'utf8'));assert.equal(rows.length,3);assert.ok(Object.keys(rows[0]).length>0);
+
+ // Exercise all new download code paths in a real Chromium Worker (not a DOM mock).
+ await page.locator('#exportFormat').selectOption('parquet');
+ assert.equal(await page.locator('#encodingField').isVisible(),false);
+ assert.equal(await page.locator('#newlineField').isVisible(),false);
+ const parquetPending=page.waitForEvent('download');
+ await page.locator('#saveOutputButton').click();
+ const parquetDownload=await parquetPending;
+ assert.equal(parquetDownload.suggestedFilename(),'mobile-help-data.parquet');
+ const parquetTarget=path.join(results,file.includes('self-extract')?'synthetic-loader.parquet':'synthetic-readable.parquet');
+ await parquetDownload.saveAs(parquetTarget);
+ const parquetBytes=fs.readFileSync(parquetTarget);
+ assert.equal(parquetBytes.subarray(0,4).toString('ascii'),'PAR1');
+ assert.equal(parquetBytes.subarray(-4).toString('ascii'),'PAR1');
+ await page.locator('#exportFormat').selectOption('csv');
+ await page.locator('#encodingSelect').selectOption('sjis');
+ const sjisPending=page.waitForEvent('download');
+ await page.locator('#saveOutputButton').click();
+ const sjisDownload=await sjisPending;
+ const sjisTarget=path.join(results,'synthetic-shift-jis.csv');
+ await sjisDownload.saveAs(sjisTarget);
+ const sjisText=new TextDecoder('shift_jis',{fatal:true}).decode(fs.readFileSync(sjisTarget));
+ assert.match(sjisText,/\r?\n/);
+ assert.ok(sjisText.length>20);
+ await page.locator('#encodingSelect').selectOption('utf16le');
+ const utf16Pending=page.waitForEvent('download');
+ await page.locator('#saveOutputButton').click();
+ const utf16Download=await utf16Pending;
+ const utf16Target=path.join(results,'synthetic-utf16le.csv');
+ await utf16Download.saveAs(utf16Target);
+ const utf16Bytes=fs.readFileSync(utf16Target);
+ assert.deepEqual([...utf16Bytes.subarray(0,2)],[255,254]);
+ assert.match(new TextDecoder('utf-16le',{fatal:true}).decode(utf16Bytes),/\r?\n/);
  console.log('PASS synthetic seeded data to edited-name JSON '+file);
 }
 
