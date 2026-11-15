@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Replace decorative section/column cards and raised buttons with flatter editor rows, separators, text presets, and a solid primary action; preserve all generation and export controls.
+- Simplify the bilingual hero and Help copy, remove version prefixes from general usage limits, hide the local-processing hero label on smartphones, and stack narrow-screen action buttons.
+- Add a main-branch release workflow to build/verify, create a SemVer tag, and publish both standalone HTML variants to GitHub Releases after merging a version-bump PR; avoid duplicate releases.
+
+
 - v1.0.3: Reject unsafe integer sequences, impossible calendar dates, unrepresentable decimal ranges, and unsupported settings-file options.
 - Correct the 0.1-step money endpoint rounding and avoid default column-name collisions.
 - Bound in-memory UTF-8 exports to 128 MiB with a localized failure state before the Worker generates unbounded output.
