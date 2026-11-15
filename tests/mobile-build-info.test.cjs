@@ -12,11 +12,11 @@ test('existing build block is unique and the last Help scroll-body item',()=>{
  assert.match(body.slice(body.indexOf(originalBuild)+originalBuild.length),/^\s*(?:<!--[^]*?-->\s*)?$/);
  for(const id of ["buildVersion", "builtAt", "dependencyCount"])assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
 });
-test('only the informational footer is hidden at the existing phone breakpoint',()=>{
+test('informational footer and local-processing badge are hidden at the phone breakpoint',()=>{
  const css=html.match(/<style>([\s\S]*?)<\/style>/)[1];
  const start=css.search(/@media\s*\(max-width:\s*520px\)\s*\{/);assert.ok(start>=0);
  const open=css.indexOf('{',start);let depth=1,end=open+1;for(;end<css.length&&depth;end++){if(css[end]==='{')depth++;if(css[end]==='}')depth--;}
- assert.match(css.slice(open+1,end-1),/(?:^|})\s*footer\s*\{\s*display:\s*none\s*;?\s*\}/);
+ assert.match(css.slice(open+1,end-1),/(?:^|})\s*footer\s*,\s*\.local-badge\s*\{\s*display:\s*none\s*;?\s*\}/);
 });
 test('keyboard disclosure clicks do not close Help; genuine backdrop clicks still do',()=>{
  const handler=html.match(/helpDialog\.addEventListener\('click',\s*event\s*=>\s*\{(.*?)\}\);/)[1];
