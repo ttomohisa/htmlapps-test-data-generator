@@ -104,6 +104,23 @@ async function main() {
             assert.equal(await page.locator('footer').isVisible(), width > 520, label);
             await prepareApp(page, width, label);
 
+            const design = await page.evaluate(() => ({
+              panelRadius: getComputedStyle(document.querySelector('.panel')).borderRadius,
+              panelShadow: getComputedStyle(document.querySelector('.panel')).boxShadow,
+              rowRadius: getComputedStyle(document.querySelector('.column-row')).borderRadius,
+              rowShadow: getComputedStyle(document.querySelector('.column-row')).boxShadow,
+              primaryGradient: getComputedStyle(document.querySelector('#generateButton')).backgroundImage,
+              presetUnderline: getComputedStyle(document.querySelector('[data-preset="normal"]')).borderBottomWidth
+            }));
+            assert.equal(design.panelRadius, '0px', label + ': flat sections');
+            assert.equal(design.panelShadow, 'none', label + ': no decorative card shadow');
+            assert.equal(design.rowRadius, '0px', label + ': column editors use rows');
+            assert.equal(design.rowShadow, 'none', label + ': no inner card shadow');
+            assert.equal(design.primaryGradient, 'none', label + ': flat primary action');
+            assert.equal(design.presetUnderline, '2px', label + ': selected preset underline');
+            if (file === 'dist/index.html' && [1360, 360].includes(width)) {
+              await page.screenshot({ path: path.join(results, `editor-${language}-${width}.png`), fullPage: true });
+            }
             const pageGeometry = await readPageGeometry(page);
             const baseline = baselineMeasurements.get(`${language}-${width}-${height}`);
             console.log('PAGE_GEOMETRY ' + label + ' ' + JSON.stringify(pageGeometry));
