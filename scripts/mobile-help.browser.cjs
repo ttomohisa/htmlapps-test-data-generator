@@ -91,6 +91,7 @@ async function main() {
             assert.equal(await page.locator('[data-i18n="localBadge"]').textContent(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
             if (width <= 520) {
               assert.equal(await page.locator('.local-badge').isVisible(), false, label + ': hide local badge on phones');
+              assert.ok(await page.locator('.generate-bar .process-status').evaluate(el => el.getBoundingClientRect().height <= 120), label + ': mobile progress status does not reserve excessive height');
             } else {
               assert.ok(await page.locator('.local-badge').evaluate(el => {
                 const box = el.getBoundingClientRect();
