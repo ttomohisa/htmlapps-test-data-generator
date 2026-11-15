@@ -1758,8 +1758,15 @@
         }
         function exportRows(snapshot, options) {
           postProgress(0, snapshot.rowCount, 'prepare'); const modesByColumn = prepare(snapshot); const names = snapshot.columns.map(column => column.name); const formatName = options.format; const newline = options.newline;
-          if (formatName === 'csv' || formatName === 'tsv') { const delimiter = formatName === 'csv' ? ',' : '\t'; self.postMessage({ type: 'chunk', text: names.map(name => delimitedCell(name, delimiter)).join(delimiter) }); }
-          else if (formatName === 'json') self.postMessage({ type: 'chunk', text: '[' });
+          const limit = Math.min(128 * 1024 * 1024, Number(options.maxBytes) || 128 * 1024 * 1024);
+          const encoder = new TextEncoder(); let writtenBytes = 0;
+          const sendChunk = text => {
+            writtenBytes += encoder.encode(text).byteLength;
+            if (writtenBytes > limit) throw new Error('export-too-large');
+            self.postMessage({ type: 'chunk', text });
+          };
+          if (formatName === 'csv' || formatName === 'tsv') { const delimiter = formatName === 'csv' ? ',' : '\t'; sendChunk(names.map(name => delimitedCell(name, delimiter)).join(delimiter)); }
+          else if (formatName === 'json') sendChunk('[');
           let buffer = ''; const interval = progressInterval(snapshot.rowCount); const flushThreshold = 512 * 1024;
           for (let rowIndex = 0; rowIndex < snapshot.rowCount; rowIndex += 1) {
             const row = Object.create(null);
@@ -1767,11 +1774,11 @@
               const column = snapshot.columns[columnIndex]; row[column.name] = specialValueFor(column,rowIndex,snapshot.rowCount,modeAt(modesByColumn[columnIndex], rowIndex));
             }
             buffer += serializeRow(row,names,formatName,newline,rowIndex);
-            if (buffer.length >= flushThreshold) { self.postMessage({ type: 'chunk', text: buffer }); buffer = ''; }
+            if (buffer.length >= flushThreshold) { sendChunk(buffer); buffer = ''; }
             if ((rowIndex + 1) % interval === 0 || rowIndex + 1 === snapshot.rowCount) postProgress(rowIndex + 1, snapshot.rowCount);
           }
-          if (buffer) self.postMessage({ type: 'chunk', text: buffer });
-          if (formatName === 'json') self.postMessage({ type: 'chunk', text: `${newline}]` });
+          if (buffer) sendChunk(buffer);
+          if (formatName === 'json') sendChunk(`${newline}]`);
           self.postMessage({ type: 'complete', task: 'export', rowCount: snapshot.rowCount });
         }
         self.onmessage = event => {
@@ -1999,7 +2006,9 @@
           }
           if (message.type === 'progress') { handleExportProgress(message, formatName); return; }
           if (message.type === 'error') {
-            worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); updateExportUI(); return;
+            worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true;
+            const key = message.message === 'export-too-large' ? 'exportTooLarge' : 'exportFailed';
+            updateExportUI(); $('#exportStatus').textContent = translate(key); AppToast.show({ message: translate(key) }); return;
           }
           if (message.type !== 'complete' || message.task !== 'export') return;
           worker.terminate(); exportWorker = null;
@@ -2013,7 +2022,7 @@
         worker.onerror = () => {
           if (worker !== exportWorker) return; worker.terminate(); exportWorker = null; exportParts = []; setExportBusy(false); $('#exportProgress').hidden = true; AppToast.show({ message: translate('exportFailed') }); updateExportUI();
         };
-        worker.postMessage({ task: 'export', snapshot: generatedSnapshot, options: { format: formatName, newline }, generatorData: workerGeneratorData() });
+        worker.postMessage({ task: 'export', snapshot: generatedSnapshot, options: { format: formatName, newline, maxBytes: EXPORT_MAX_BYTES }, generatorData: workerGeneratorData() });
       }
 
       function schemaPayload() {
@@ -2032,7 +2041,7 @@
         const text = JSON.stringify(schemaPayload(), null, 2);
         const blob = new Blob([text], { type: 'application/json;charset=utf-8' }); const url = URL.createObjectURL(blob);
         const link = document.createElement('a'); const filename = 'test-data-schema.json'; link.href = url; link.download = filename; link.hidden = true; document.body.append(link); link.click(); link.remove();
-        window.setTimeout(() => URL.revokeObjectURL(url), 0);
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
         AppToast.show({ message: format('schemaSaved', { name: filename }), tone: 'success' });
       }
       function parseSchemaFile(text) {
