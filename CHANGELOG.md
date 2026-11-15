@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- v1.0.3: Reject unsafe integer sequences, impossible calendar dates, unrepresentable decimal ranges, and unsupported settings-file options.
+- Correct the 0.1-step money endpoint rounding and avoid default column-name collisions.
+- Bound in-memory UTF-8 exports to 128 MiB with a localized failure state before the Worker generates unbounded output.
+- Use the stacked editor at 1180 px and below; add release-variant behavior tests and medium-width Chromium checks.
+
+
 - Hide the informational page footer at the existing smartphone breakpoint and move the unchanged build information to the end of Help. Preserve native disclosure and dialog dismissal.
 
 - Bump the patch version to v1.0.2.
