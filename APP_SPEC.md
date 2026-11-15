@@ -4,7 +4,7 @@
 
 - **Name:** Test Data Generator / テストデータ生成
 - **Repository:** `ttomohisa/htmlapps-test-data-generator`
-- **Current version:** `1.0.3`
+- **Current version:** `1.1.0`
 - **Purpose:** Generate reproducible test data locally in the browser, including normal, missing, boundary, and invalid values.
 - **Release artifacts:** `dist/index.html` and `dist/index.self-extract.html`
 
@@ -202,3 +202,12 @@ The following remain future candidates rather than v1.0.0 requirements:
 - Use factual, concise hero text in Japanese and English. Remove the Help reading/dismissal instruction and version-specific labels from general usage text; omit device-clipboard sync details from the visible Help copy while keeping the fact that clipboard copying occurs only when requested. The Hero 'Fully local processing' badge is hidden at <=520px but the same CSP and privacy behavior remain.
 - On a push to the main branch (including PR merges), the release workflow builds and verifies the current source, reads the stable SemVer from app.config.json, creates the corresponding vX.Y.Z tag if missing, and publishes a GitHub Release with both standalone HTML variants. Existing tags/releases are not overwritten. Unchanged versions do not produce a second release. Workflow dispatch allows manual retry.
 - The release workflow itself, responsive visibility, the Help copy and bilingual hero must have automated regression checks. A real merged commit is still required to exercise the privileged tagging and release creation steps.
+
+## 18. v1.1.0 Parquet and text encodings
+
+- Restore the original translucent warm-gray header and rounded, bordered version badge while keeping the major cards and warm-gray page background.
+- Add Parquet v1 as a local Worker export using uncompressed PLAIN pages, RLE definition levels, optional flat columns, and UTF-8 strings. Normally integral fields use INT64, decimal fields DOUBLE, plain true/false fields BOOLEAN; formatted date/time columns remain strings. Columns with malformed test cases use representable string/numeric types. Output MIME is `application/vnd.apache.parquet`, extension `.parquet`.
+- Process bounded-size row groups and emit column chunks to the page without retaining the full dataset in RAM. Preserve the 128 MiB output guard, generation cancellation, local-only runtime and byte-for-byte Seed determinism.
+- For CSV and TSV allow UTF-8, UTF-8 with BOM, Windows-31J (Shift_JIS), and UTF-16 LE with BOM. The Shift_JIS encoder maps native decoder results and rejects unrepresentable Unicode rather than replacing it. Existing quoting/newline settings remain valid across encodings.
+- JSON and JSONL remain UTF-8. Hide the encoding selector for JSON, JSONL, and Parquet; hide line-ending selector for Parquet. Parquet string values are UTF-8.
+- Test every standalone variant for output bytes, MIME/extension, encoded Japanese characters, BOM, no-data-loss failure, deterministic Parquet files and file-size limits. Independently decode Parquet with a pinned, CI-only hyparquet reader prior to release.
