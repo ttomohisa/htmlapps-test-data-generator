@@ -9,7 +9,7 @@ assert.deepEqual(fs.readFileSync(path.join(root, 'test-data-generator.html')), r
 assert.equal(loadHtml(path.join(root, 'dist/index.self-extract.html')), readable.toString('utf8'), 'self-extract payload must equal readable artifact');
 const check = fs.readFileSync(path.join(root, 'scripts/check-repository.ps1'), 'utf8');
 assert.match(check, /test-data-behavior\.test\.cjs/);
-assert.match(check, /test-data-validation\\.test\\.cjs/);
+assert.match(check, /test-data-validation\.test\.cjs/);
 assert.match(check, /test-data-release\.test\.cjs/);
 assert.match(check, /LASTEXITCODE/);
 for (const workflow of ['build-standalone.yml', 'deploy-pages.yml', 'preview.yml']) {
