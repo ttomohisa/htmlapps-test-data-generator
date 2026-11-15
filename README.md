@@ -45,8 +45,8 @@ A local-first browser tool for generating reproducible test data. Along with nor
 - Preview the first 20 rows without rendering the full dataset into the DOM.
 - Copy those preview rows as JSON with the first-N-of-M scope shown, up to 1 MiB without truncation. Clipboard restrictions offer a selectable manual-copy dialog.
 - Preserve literal column names such as `__proto__` in preview and all exports.
-- Save the generated dataset as CSV, TSV, JSON, or JSONL.
-- Choose UTF-8 or UTF-8 BOM for CSV / TSV and LF / CRLF line endings.
+- Save the generated dataset as CSV, TSV, JSON, JSONL, or Parquet.
+- Choose UTF-8, UTF-8 BOM, Windows-31J / Shift_JIS, or UTF-16 LE (with BOM) for CSV / TSV and LF / CRLF line endings.
 - Set the output filename while the extension follows the selected format automatically.
 - Preserve commas, tabs, double quotes, and line breaks correctly in delimited exports.
 - Persist column settings locally when browser storage is available.
@@ -72,6 +72,14 @@ Use the header Help button for instructions and notes. Help stays near the top o
 Numeric settings are required; enter `0` explicitly where allowed. Editing settings or Seed cancels pending work and requires regeneration before saving. Keyboard focus stays with a moved column or changed type; Delete moves to a neighboring name and Undo returns to the restored name.
 
 Known filename extensions are normalized to the selected format (`sample.csv` becomes `sample.json` when saving JSON). Blank names use `test-data`.
+
+## Formats and character encodings
+
+Parquet (`.parquet`) is available alongside CSV, TSV, JSON and JSONL. Parquet preserves nullable typed columns: normally INT64 for integral fields, DOUBLE for decimals/money, BOOLEAN for plain booleans, and UTF-8 strings for text and date/time representations. When malformed test examples would create mixed value types in one column, a representable string or numeric type is used instead. Parquet output is uncompressed.
+
+For CSV and TSV only, choose UTF-8 (default), UTF-8 with BOM, Windows-31J / Shift_JIS, or UTF-16 LE with BOM. Characters that cannot be encoded in Shift_JIS fail the export without silent replacement. JSON and JSONL remain UTF-8; Parquet stores UTF-8 strings. Line endings are not configurable for Parquet.
+
+The existing limits of 1,000,000 rows, 10,000,000 cells and 128 MiB per output file remain, as do cancellable generation and deterministic Seed output.
 
 ## Privacy
 
