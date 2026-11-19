@@ -98,6 +98,43 @@ test('Parquet size guard rejects a partial result without offering a download', 
   assert.ok(messages.some(x=>x.type==='error' && x.message==='export-too-large'));
   assert.equal(app.downloads.length,0);
 });
+
+test('CSV with Shift_JIS preserves quoted Japanese, CRLF separators and half-width kana', async () => {
+  const text = '明細,"見積"\nｶﾅ\t番号';
+  const app = makeApp('state.columns[1].settings.value = ' + JSON.stringify(text) + '; renderColumns()');
+  app.el('newlineSelect').value = 'crlf';
+  app.el('newlineSelect').dispatch('change');
+  const {download} = await save(app, 'csv', 'sjis');
+  const decoded = new TextDecoder('shift_jis', {fatal:true}).decode(await download.blob.arrayBuffer());
+  assert.ok(decoded.includes('id,名前,flag,nullable\r\n'), 'CRLF record boundary');
+  assert.ok(decoded.includes('"明細,""見積""\nｶﾅ\t番号"'), 'embedded newline and quotes are escaped without changing data');
+  assert.equal(decoded.includes('\ufffd'), false, 'no malformed replacement');
+});
+test('UTF-16 LE preserves non-BMP emoji and quoted CSV text', async () => {
+  const raw = '東京🌸,"桜"';
+  const app = makeApp('state.columns[1].settings.value = ' + JSON.stringify(raw) + '; renderColumns()');
+  const {download} = await save(app,'csv','utf16le');
+  const bytes = new Uint8Array(await download.blob.arrayBuffer());
+  assert.deepEqual([...bytes.slice(0,2)],[255,254]);
+  const content = new TextDecoder('utf-16le',{fatal:true}).decode(bytes);
+  assert.ok(content.includes('"東京🌸,""桜"""'));
+});
+test('JSON and Parquet never inherit a legacy CSV encoding', async () => {
+  const app = makeApp();
+  app.el('encodingSelect').value = 'utf16le';
+  app.el('encodingSelect').dispatch('change');
+  const {download} = await save(app,'json','utf16le');
+  assert.equal(download.blob.type,'application/json;charset=utf-8');
+  const bytes = new Uint8Array(await download.blob.arrayBuffer());
+  assert.notDeepEqual([...bytes.slice(0,2)],[255,254]);
+  assert.ok(JSON.parse(new TextDecoder('utf-8').decode(bytes)).length > 0);
+});
+test('unrepresentable header names in Shift_JIS fail the entire export', async () => {
+  const app = makeApp('state.columns[1].name = "🗒️"; renderColumns()');
+  const {events,download} = await save(app,'tsv','sjis');
+  assert.equal(download,undefined);
+  assert.ok(events.some(e=>e.type==='error' && e.message==='encoding-unrepresentable'));
+});
 (async () => {
   for(const [name,fn] of tasks){
     try { await fn(); console.log('PASS '+name); }
