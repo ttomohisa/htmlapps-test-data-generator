@@ -17,6 +17,8 @@ A local-first browser tool for generating reproducible test data. Along with nor
 ## Features
 
 - Set a row count from 1 to 1,000,000, with a 10,000,000-cell safety limit across rows × columns.
+- Exports are capped at **128 MiB per UTF-8 file** to reduce browser memory exhaustion; if the limit is reached, reduce the row count, columns, or value lengths and retry.
+- Numeric settings reject out-of-safe-range sequence values, fractional ranges with no representable decimal value, and invalid calendar dates in imported settings.
 - Run large generation in a Web Worker so the main UI remains responsive.
 - Show progress and allow cancellation for both generation and file creation.
 - Validate all rows in the worker while retaining only the first 20 rows in the page, then regenerate from the same Seed and settings when exporting.
@@ -43,8 +45,8 @@ A local-first browser tool for generating reproducible test data. Along with nor
 - Preview the first 20 rows without rendering the full dataset into the DOM.
 - Copy those preview rows as JSON with the first-N-of-M scope shown, up to 1 MiB without truncation. Clipboard restrictions offer a selectable manual-copy dialog.
 - Preserve literal column names such as `__proto__` in preview and all exports.
-- Save the generated dataset as CSV, TSV, JSON, or JSONL.
-- Choose UTF-8 or UTF-8 BOM for CSV / TSV and LF / CRLF line endings.
+- Save the generated dataset as CSV, TSV, JSON, JSONL, or Parquet.
+- Choose UTF-8, UTF-8 BOM, Windows-31J / Shift_JIS, or UTF-16 LE (with BOM) for CSV / TSV and LF / CRLF line endings.
 - Set the output filename while the extension follows the selected format automatically.
 - Preserve commas, tabs, double quotes, and line breaks correctly in delimited exports.
 - Persist column settings locally when browser storage is available.
@@ -71,6 +73,14 @@ Numeric settings are required; enter `0` explicitly where allowed. Editing setti
 
 Known filename extensions are normalized to the selected format (`sample.csv` becomes `sample.json` when saving JSON). Blank names use `test-data`.
 
+## Formats and character encodings
+
+Parquet (`.parquet`) is available alongside CSV, TSV, JSON and JSONL. Parquet preserves nullable typed columns: normally INT64 for integral fields, DOUBLE for decimals/money, BOOLEAN for plain booleans, and UTF-8 strings for text and date/time representations. When malformed test examples would create mixed value types in one column, a representable string or numeric type is used instead. Parquet output is uncompressed.
+
+For CSV and TSV only, choose UTF-8 (default), UTF-8 with BOM, Windows-31J / Shift_JIS, or UTF-16 LE with BOM. Characters that cannot be encoded in Shift_JIS fail the export without silent replacement. JSON and JSONL remain UTF-8; Parquet stores UTF-8 strings. Line endings are not configurable for Parquet.
+
+The existing limits of 1,000,000 rows, 10,000,000 cells and 128 MiB per output file remain, as do cancellable generation and deterministic Seed output.
+
 ## Privacy
 
 Generation runs entirely in the browser. The app does not upload column settings or generated rows, and it does not use analytics or telemetry. Japanese dictionaries are embedded in the HTML. Column settings and Seed may be saved in local browser storage so they can be restored after reload. Generated rows are not stored automatically. Settings files contain configuration only and are created locally.
@@ -78,6 +88,12 @@ Generation runs entirely in the browser. The app does not upload column settings
 Copy writes only after you select the Copy action. The system clipboard may be accessible to other apps or device clipboard syncing; the app does not upload the copied JSON.
 
 The default Content Security Policy includes `connect-src 'none'`.
+
+## Release
+
+After a PR is merged into `main`, GitHub Actions builds and verifies both standalone HTML variants. If the version in `app.config.json` has no tag yet (for example `1.0.3`), it creates `v1.0.3` and a GitHub Release containing the readable and self-extracting HTML files. An existing tag or Release is not duplicated; bump the version before the next release.
+
+On phones, the informational "Fully local processing" hero label is hidden to reduce clutter. The no-runtime-network behavior is unchanged.
 
 ## Development
 

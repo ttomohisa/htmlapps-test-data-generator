@@ -255,6 +255,16 @@ foreach ($target in @("src/index.template.html", "dist/index.html", "dist/index.
   & node (Join-Path $Root "scripts/test-data-behavior.test.cjs") (Join-Path $Root $target)
   if ($LASTEXITCODE -ne 0) { throw "Application regression tests failed: $target" }
 }
+foreach ($target in @("src/index.template.html", "dist/index.html", "dist/index.self-extract.html", "test-data-generator.html")) {
+  & node (Join-Path $Root "scripts/test-data-validation.test.cjs") (Join-Path $Root $target)
+  if ($LASTEXITCODE -ne 0) { throw "Numeric/date/output regression tests failed: $target" }
+}
+foreach ($target in @("src/index.template.html", "dist/index.html", "dist/index.self-extract.html", "test-data-generator.html")) {
+  & node (Join-Path $Root "scripts/test-data-formats.test.cjs") (Join-Path $Root $target)
+  if ($LASTEXITCODE -ne 0) { throw "Parquet and character encoding tests failed: $target" }
+}
+& node --test (Join-Path $Root "tests/release-workflow.test.cjs")
+if ($LASTEXITCODE -ne 0) { throw "Release workflow and editor copy checks failed." }
 & node (Join-Path $Root "scripts/test-data-release.test.cjs")
 if ($LASTEXITCODE -ne 0) { throw "Release parity checks failed." }
 Write-Host "[OK] Application and release checks passed." -ForegroundColor Green

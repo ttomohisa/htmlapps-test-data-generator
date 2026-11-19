@@ -1,0 +1,101 @@
+name: Release after merge
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: test-data-generator-release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout merged main
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Build and verify both single-HTML variants
+        shell: pwsh
+        run: ./scripts/check-repository.ps1
+
+      - name: Install pinned independent Parquet reader (CI only)
+        shell: pwsh
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund hyparquet@1.33.0
+
+      - name: Verify Parquet is readable with an independent implementation
+        shell: pwsh
+        run: node scripts/parquet-interop.test.cjs dist/index.html
+
+      - name: Determine SemVer tag and release state
+        id: version
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = [string]((Get-Content -Raw -Encoding UTF8 app.config.json | ConvertFrom-Json).version)
+          if ($version -notmatch '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$') {
+            throw "app.config.json must contain a stable SemVer version (major.minor.patch)."
+          }
+          $tag = "v$version"
+          $headSha = (git rev-parse HEAD).Trim()
+          if ($LASTEXITCODE -ne 0) { throw "Unable to read HEAD." }
+          $remoteTag = @(git ls-remote --tags --refs origin "refs/tags/$tag")
+          if ($LASTEXITCODE -ne 0) { throw "Unable to check remote tags." }
+          $tagExists = $remoteTag.Count -gt 0
+          $tagSha = if ($tagExists) { ($remoteTag[0] -split '\s+')[0] } else { '' }
+          $releaseExists = $false
+          if ($tagExists) {
+            # The GitHub CLI returns exit code 1 for a missing release.
+            $null = gh release view $tag --json tagName --jq .tagName 2>$null
+            $releaseExists = $LASTEXITCODE -eq 0
+          }
+          if ($tagExists -and $tagSha -ne $headSha) {
+            Write-Host "$tag already points to an earlier version commit. No new release for unchanged app.config.json."
+            "publish=false" >> $env:GITHUB_OUTPUT
+          } elseif ($releaseExists) {
+            Write-Host "GitHub Release $tag already exists. Skipping duplicate."
+            "publish=false" >> $env:GITHUB_OUTPUT
+          } else {
+            "publish=true" >> $env:GITHUB_OUTPUT
+            "create_tag=$(-not $tagExists)".ToLowerInvariant() >> $env:GITHUB_OUTPUT
+          }
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Create immutable version tag when needed
+        if: steps.version.outputs.publish == 'true' && steps.version.outputs.create_tag == 'true'
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.version.outputs.tag }}"
+          git tag $tag
+          if ($LASTEXITCODE -ne 0) { throw "Failed to create $tag." }
+          git push origin "refs/tags/$tag"
+          if ($LASTEXITCODE -ne 0) { throw "Failed to push $tag." }
+
+      - name: Publish GitHub Release with standalone HTML files
+        if: steps.version.outputs.publish == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ steps.version.outputs.tag }}"
+          Copy-Item dist/index.html dist/test-data-generator.html
+          Copy-Item dist/index.self-extract.html dist/test-data-generator.self-extract.html
+          gh release create $tag dist/test-data-generator.html dist/test-data-generator.self-extract.html `
+            --verify-tag --title "Test Data Generator $tag" --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw "Failed to publish GitHub Release $tag." }

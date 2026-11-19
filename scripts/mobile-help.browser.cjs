@@ -60,9 +60,47 @@ async function prepareApp(page,width,label){
 async function smoke(page,results,file){
  await page.locator('#rowCount').fill('3');await page.locator('#seedInput').fill('mobile-help-regression');await page.locator('#generateButton').click();
  await page.waitForFunction(()=>!document.querySelector('#saveOutputButton').disabled);
+ await page.waitForFunction(() => {
+   const preview = document.querySelector('#previewSection').getBoundingClientRect();
+   const headerHeight = document.querySelector('.app-header').getBoundingClientRect().height;
+   return preview.top >= headerHeight - 3 && preview.top <= headerHeight + 24;
+ });
  await page.locator('#exportFormat').selectOption('json');await page.locator('#outputNameInput').fill('mobile-help-data');
  const pending=page.waitForEvent('download');await page.locator('#saveOutputButton').click();const download=await pending;assert.equal(download.suggestedFilename(),'mobile-help-data.json');
  const target=path.join(results,file.includes('self-extract')?'synthetic-loader.json':'synthetic-readable.json');await download.saveAs(target);const rows=JSON.parse(fs.readFileSync(target,'utf8'));assert.equal(rows.length,3);assert.ok(Object.keys(rows[0]).length>0);
+
+ // Exercise all new download code paths in a real Chromium Worker (not a DOM mock).
+ await page.locator('#exportFormat').selectOption('parquet');
+ assert.equal(await page.locator('#encodingField').isVisible(),false);
+ assert.equal(await page.locator('#newlineField').isVisible(),false);
+ const parquetPending=page.waitForEvent('download');
+ await page.locator('#saveOutputButton').click();
+ const parquetDownload=await parquetPending;
+ assert.equal(parquetDownload.suggestedFilename(),'mobile-help-data.parquet');
+ const parquetTarget=path.join(results,file.includes('self-extract')?'synthetic-loader.parquet':'synthetic-readable.parquet');
+ await parquetDownload.saveAs(parquetTarget);
+ const parquetBytes=fs.readFileSync(parquetTarget);
+ assert.equal(parquetBytes.subarray(0,4).toString('ascii'),'PAR1');
+ assert.equal(parquetBytes.subarray(-4).toString('ascii'),'PAR1');
+ await page.locator('#exportFormat').selectOption('csv');
+ await page.locator('#encodingSelect').selectOption('sjis');
+ const sjisPending=page.waitForEvent('download');
+ await page.locator('#saveOutputButton').click();
+ const sjisDownload=await sjisPending;
+ const sjisTarget=path.join(results,'synthetic-shift-jis.csv');
+ await sjisDownload.saveAs(sjisTarget);
+ const sjisText=new TextDecoder('shift_jis',{fatal:true}).decode(fs.readFileSync(sjisTarget));
+ assert.match(sjisText,/\r?\n/);
+ assert.ok(sjisText.length>20);
+ await page.locator('#encodingSelect').selectOption('utf16le');
+ const utf16Pending=page.waitForEvent('download');
+ await page.locator('#saveOutputButton').click();
+ const utf16Download=await utf16Pending;
+ const utf16Target=path.join(results,'synthetic-utf16le.csv');
+ await utf16Download.saveAs(utf16Target);
+ const utf16Bytes=fs.readFileSync(utf16Target);
+ assert.deepEqual([...utf16Bytes.subarray(0,2)],[255,254]);
+ assert.match(new TextDecoder('utf-16le',{fatal:true}).decode(utf16Bytes),/\r?\n/);
  console.log('PASS synthetic seeded data to edited-name JSON '+file);
 }
 
@@ -89,30 +127,54 @@ async function main() {
             assert.equal(await page.locator('html').getAttribute('lang'),language,label+': repeated language toggles');
             for(const id of ['buildVersion','builtAt','dependencyCount']){assert.equal(await page.locator('#'+id).count(),1,label+': unique metadata after toggles');assert.ok(!['','—','-'].includes((await page.locator('#'+id).textContent()).trim()),label+': populated metadata after toggles');}
             assert.equal(await page.locator('[data-i18n="localBadge"]').textContent(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
-            assert.ok(await page.locator('.local-badge').evaluate(el => {
-              const box = el.getBoundingClientRect();
-              const range = document.createRange();
-              range.selectNodeContents(el.querySelector('[data-i18n="localBadge"]'));
-              return box.left >= 0 && box.right <= innerWidth && el.scrollWidth <= el.clientWidth + 1
-                && [...range.getClientRects()].every(rect => rect.left >= box.left - 1 && rect.right <= box.right + 1 && rect.top >= box.top - 1 && rect.bottom <= box.bottom + 1);
-            }), label + ': badge text fits');
+            if (width <= 520) {
+              assert.equal(await page.locator('.local-badge').isVisible(), false, label + ': hide local badge on phones');
+              assert.ok(await page.locator('.generate-bar .process-status').evaluate(el => el.getBoundingClientRect().height <= 120), label + ': mobile progress status does not reserve excessive height');
+            } else {
+              assert.ok(await page.locator('.local-badge').evaluate(el => {
+                const box = el.getBoundingClientRect();
+                const range = document.createRange();
+                range.selectNodeContents(el.querySelector('[data-i18n="localBadge"]'));
+                return box.left >= 0 && box.right <= innerWidth && el.scrollWidth <= el.clientWidth + 1
+                  && [...range.getClientRects()].every(rect => rect.left >= box.left - 1 && rect.right <= box.right + 1 && rect.top >= box.top - 1 && rect.bottom <= box.bottom + 1);
+              }), label + ': badge text fits');
+            }
             assert.equal(await page.locator('main #buildVersion').count(), 0, label);
             assert.equal(await page.locator('footer').isVisible(), width > 520, label);
             await prepareApp(page, width, label);
 
+            const design = await page.evaluate(() => ({
+              panelRadius: getComputedStyle(document.querySelector('.panel')).borderRadius,
+              panelShadow: getComputedStyle(document.querySelector('.panel')).boxShadow,
+              rowRadius: getComputedStyle(document.querySelector('.column-row')).borderRadius,
+              rowShadow: getComputedStyle(document.querySelector('.column-row')).boxShadow,
+              primaryGradient: getComputedStyle(document.querySelector('#generateButton')).backgroundImage,
+              presetUnderline: getComputedStyle(document.querySelector('[data-preset="normal"]')).borderBottomWidth
+            }));
+            assert.equal(design.panelRadius, width <= 520 ? '14px' : '16px', label + ': large section cards retain rounded corners');
+            assert.equal(design.panelShadow, 'none', label + ': large section cards have no decorative shadow');
+            assert.equal(design.rowRadius, '0px', label + ': column editors use rows');
+            assert.equal(design.rowShadow, 'none', label + ': no inner card shadow');
+            assert.equal(design.primaryGradient, 'none', label + ': flat primary action');
+            assert.equal(design.presetUnderline, '2px', label + ': selected preset underline');
+            if (file === 'dist/index.html' && [1360, 360].includes(width)) {
+              await page.screenshot({ path: path.join(results, `editor-${language}-${width}.png`), fullPage: true });
+            }
             const pageGeometry = await readPageGeometry(page);
             const baseline = baselineMeasurements.get(`${language}-${width}-${height}`);
             console.log('PAGE_GEOMETRY ' + label + ' ' + JSON.stringify(pageGeometry));
-            if (baseline.document <= width) {
-              assert.ok(pageGeometry.document <= width, label + ': page width');
-            } else {
-              // Only identical pre-existing main-control overflow is allowed. New offenders or worse widths fail.
-              assert.deepEqual(pageGeometry, baseline, label + ': unchanged immutable-base main-control geometry');
-              assert.ok(pageGeometry.offenders.every(el => ['generate-actions', 'export-button-group'].includes(el.owner)), label + ': overflow is attributed only to existing generation/export controls');
-              console.log('KNOWN_BASELINE_MAIN_OVERFLOW ' + label);
+            assert.ok(pageGeometry.maximumHorizontalScroll <= 1, label + ': no page-level horizontal scroll');
+            if (baseline.maximumHorizontalScroll > 1) {
+              console.log('FIXED_BASELINE_OVERFLOW ' + label + ': ' + baseline.maximumHorizontalScroll + 'px -> ' + pageGeometry.maximumHorizontalScroll + 'px');
             }
 
             await page.locator('#helpButton').click();
+            assert.equal(await page.locator('#heroTitle').count(), 0, label + ': redundant hero heading removed');
+            assert.equal(await page.locator('[data-i18n="previewBody"]').count(), 0, label + ': redundant preview description removed');
+            assert.ok((await page.locator('[data-i18n="lead"]').innerText()).length > 10, label + ': useful brief introduction remains');
+            assert.ok((await page.locator('[data-i18n="generationSettingsBody"]').textContent()).includes('1,000,000'), label + ': visible row ceiling');
+            assert.doesNotMatch(await page.locator('[data-i18n="generationSettingsBody"]').textContent(), new RegExp('v1[.]0[.]0'), label + ': no outdated release prefix');
+            assert.equal(await page.locator('[data-i18n="helpReading"]').count(), 0, label + ': no redundant help reading guide');
             const body = page.locator('#helpDialog .dialog-body');
             assert.ok(await body.evaluate(el => el.lastElementChild.contains(document.querySelector('#buildVersion'))), label + ': build is final body child');
             assert.equal(await page.locator(buildSelector).count(), 1, label);
@@ -168,6 +230,26 @@ async function main() {
           }
         }
       }
+    }
+    // Regress the formerly overflowing medium-desktop editor, outside the immutable baseline comparisons.
+    for (const language of ['ja', 'en']) for (const width of [1024, 1180]) {
+      const context = await browser.newContext({ viewport: { width, height: 768 }, locale: language, reducedMotion: 'reduce' });
+      try {
+        const page = await context.newPage(), errors = [];
+        page.on('pageerror', error => errors.push(error.message));
+        await page.goto(pathToFileURL(path.resolve(__dirname, '..', 'dist/index.html')).href);
+        await setLanguage(page, language);
+        const geometry = await readPageGeometry(page);
+        const editorFits = await page.locator('.column-row').first().evaluate(el => {
+          const rect = el.getBoundingClientRect(), panel = el.closest('.panel'), parent = panel.getBoundingClientRect();
+          return el.scrollWidth <= el.clientWidth + 1 && panel.scrollWidth <= panel.clientWidth + 1
+            && rect.left >= parent.left && rect.right <= parent.right + 1;
+        });
+        assert.ok(editorFits, language + ' ' + width + ': editor must fit the parent panel');
+        assert.ok(geometry.maximumHorizontalScroll <= 1, language + ' ' + width + ': no page horizontal scroll');
+        assert.deepEqual(errors, [], language + ' ' + width + ': no runtime errors');
+        console.log('PASS medium-desktop editor ' + language + ' ' + width + 'px');
+      } finally { await context.close(); }
     }
   } finally {
     fs.rmSync(baselineDirectory, { recursive: true, force: true });

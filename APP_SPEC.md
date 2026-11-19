@@ -4,7 +4,7 @@
 
 - **Name:** Test Data Generator / テストデータ生成
 - **Repository:** `ttomohisa/htmlapps-test-data-generator`
-- **Current version:** `1.0.2`
+- **Current version:** `1.1.0`
 - **Purpose:** Generate reproducible test data locally in the browser, including normal, missing, boundary, and invalid values.
 - **Release artifacts:** `dist/index.html` and `dist/index.self-extract.html`
 
@@ -120,7 +120,7 @@ v1.0.0 does not introduce a new schema-file field for templates: after a templat
 
 ## 11. Acceptance criteria
 
-- `app.config.json` and visible build information report `1.0.2`.
+- `app.config.json` and visible build information report `1.0.3`.
 - Header language switching shows the target language as `EN` in Japanese and `JA` in English, with localized aria-label/title (`英語に切り替え` / `Switch to Japanese`). The visible `vX.Y.Z` badge matches `app.config.json`; privacy remains `完全ローカル処理` / `Fully local processing`.
 - Seed placeholder remains `42`.
 - All 23 data types generate successfully in one schema.
@@ -182,5 +182,32 @@ The following remain future candidates rather than v1.0.0 requirements:
 
 ## Shared mobile footer and Help build information
 
-- Hide only the informational page footer at the existing smartphone breakpoint (520px); preserve functional bottom navigation/actions and Help controls.
+- Hide the informational footer and the hero's local-processing badge at the smartphone breakpoint (520px); preserve functional controls, accessibility, and Help.
 - The existing build-information disclosure is the final item inside the scrollable Help body, retaining its metadata IDs, population, and desktop/mobile availability.
+
+## 16. v1.0.3 validity and resource limits
+
+- Whole-number types accept only JavaScript safe integers. Sequence generation validates the final row using integer arithmetic before starting the Worker, so it cannot silently emit repeated or non-finite JSON values.
+- Decimal columns must contain at least one value expressible with the chosen decimal places inside the selected inclusive interval. Binary floating-point rounding of exact decimal endpoints must not accidentally exclude them.
+- Date-only and local date/time inputs must represent real calendar dates; imported settings containing impossible calendar dates or unsupported choice values are rejected instead of silently normalized.
+- Money steps include grid-aligned upper endpoints despite floating-point division rounding (for example, 0 through 0.3 by 0.1). Values and steps with more than 12 decimal places are rejected rather than silently rounded by the export formatter.
+- A single generated file is limited to 128 MiB UTF-8, checked in the Worker before posting and checked again when assembling chunks in the page. Exceeding the limit terminates export, clears incomplete chunks, and shows a localized message; generation, settings and preview remain available. This limit does not affect the separate 1 MiB preview-copy cap.
+- Medium-width desktop layouts switch to the existing two-column editor at 1180 px, preventing the five-column editor from overflowing around 1024 px. New-column suggestions avoid collisions with existing names.
+- Every release variant must pass the numeric, date, imported-settings and export-size regression suite. Chromium checks include 1024 px and 1180 px editor widths in Japanese and English.
+
+## 17. Minimal editor presentation and release automation
+
+- Keep the core four-section workflow (generation settings, columns, preview, save) while retaining a clear rounded border around each of the four major sections. Remove gradients and nested shadows. Use thin separators, text-like secondary actions and one solid brand-green primary action per workflow step. Column editors have simple row dividers instead of independent rounded cards.
+- Presets are horizontal text tabs with a clear underline for the active choice, including smartphone widths. On narrow phones, generation/save action groups stack vertically to avoid clipping. Focus styles, status communication, error backgrounds, dialogs and Undo remain accessible.
+- Use factual, concise hero text in Japanese and English. Remove the Help reading/dismissal instruction and version-specific labels from general usage text; omit device-clipboard sync details from the visible Help copy while keeping the fact that clipboard copying occurs only when requested. The Hero 'Fully local processing' badge is hidden at <=520px but the same CSP and privacy behavior remain.
+- On a push to the main branch (including PR merges), the release workflow builds and verifies the current source, reads the stable SemVer from app.config.json, creates the corresponding vX.Y.Z tag if missing, and publishes a GitHub Release with both standalone HTML variants. Existing tags/releases are not overwritten. Unchanged versions do not produce a second release. Workflow dispatch allows manual retry.
+- The release workflow itself, responsive visibility, the Help copy and bilingual hero must have automated regression checks. A real merged commit is still required to exercise the privileged tagging and release creation steps.
+
+## 18. v1.1.0 Parquet and text encodings
+
+- Restore the original translucent warm-gray header and rounded, bordered version badge while keeping the major cards and warm-gray page background.
+- Add Parquet v1 as a local Worker export using uncompressed PLAIN pages, RLE definition levels, optional flat columns, and UTF-8 strings. Normally integral fields use INT64, decimal fields DOUBLE, plain true/false fields BOOLEAN; formatted date/time columns remain strings. Columns with malformed test cases use representable string/numeric types. Output MIME is `application/vnd.apache.parquet`, extension `.parquet`.
+- Process bounded-size row groups and emit column chunks to the page without retaining the full dataset in RAM. Preserve the 128 MiB output guard, generation cancellation, local-only runtime and byte-for-byte Seed determinism.
+- For CSV and TSV allow UTF-8, UTF-8 with BOM, Windows-31J (Shift_JIS), and UTF-16 LE with BOM. The Shift_JIS encoder maps native decoder results and rejects unrepresentable Unicode rather than replacing it. Existing quoting/newline settings remain valid across encodings.
+- JSON and JSONL remain UTF-8. Hide the encoding selector for JSON, JSONL, and Parquet; hide line-ending selector for Parquet. Parquet string values are UTF-8.
+- Test every standalone variant for output bytes, MIME/extension, encoded Japanese characters, BOM, no-data-loss failure, deterministic Parquet files and file-size limits. Independently decode Parquet with a pinned, CI-only hyparquet reader prior to release.

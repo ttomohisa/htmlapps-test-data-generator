@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Remove unnecessary default filename explanations in the Japanese and English save controls and Help, without changing filename fallback behavior.
+- Keep a visually hidden, localized main heading for assistive technology after simplifying the hero.
+- Add independent Parquet interoperability tests for all 23 types and malformed samples, expanded Shift_JIS/UTF-16 encoding checks, and mobile Firefox/WebKit offline smoke tests.
+
+- Remove the redundant hero title and preview subtitle in Japanese and English while keeping the concise introduction and preview row-count indicator.
+- After successful generation or same-Seed regeneration, move the viewport to the preview, with a sticky-header offset and reduced-motion support. Validation errors, failed workers and cancellations do not navigate.
+
+
+- v1.1.0: Restore the original translucent header and rounded version badge.
+- Add local Parquet export with typed nullable columns and deterministic row-group output (currently uncompressed).
+- Add Shift_JIS / Windows-31J and UTF-16 LE with BOM to CSV and TSV exports; reject unrepresentable Shift_JIS characters rather than silently replacing them. JSON / JSONL remain UTF-8.
+- Add independent Parquet interoperability checks and format/encoding regression tests across standalone builds.
+
+
+- Keep one large, restrained card around each major section while simplifying nested column rows, text presets, and button styles; preserve all generation and export controls.
+- Simplify the bilingual hero and Help copy, remove version prefixes from general usage limits, hide the local-processing hero label on smartphones, and stack narrow-screen action buttons.
+- Add a main-branch release workflow to build/verify, create a SemVer tag, and publish both standalone HTML variants to GitHub Releases after merging a version-bump PR; avoid duplicate releases.
+
+
+- v1.0.3: Reject unsafe integer sequences, impossible calendar dates, unrepresentable decimal ranges, and unsupported settings-file options.
+- Correct the 0.1-step money endpoint rounding and avoid default column-name collisions.
+- Bound in-memory UTF-8 exports to 128 MiB with a localized failure state before the Worker generates unbounded output.
+- Use the stacked editor at 1180 px and below; add release-variant behavior tests and medium-width Chromium checks.
+
+
 - Hide the informational page footer at the existing smartphone breakpoint and move the unchanged build information to the end of Help. Preserve native disclosure and dialog dismissal.
 
 - Bump the patch version to v1.0.2.
