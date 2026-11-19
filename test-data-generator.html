@@ -391,6 +391,7 @@
   </header>
 
   <main class="main">
+    <h1 class="sr-only" id="accessiblePageTitle">テストデータ生成</h1>
     <div class="page-intro">
       <div>
         <p data-i18n="lead">列と件数を設定して、CSV・TSV・JSON・JSONL・Parquetで保存。欠損値や異常値も混ぜられます。</p>
@@ -2289,7 +2290,7 @@
         $('#languageButton').textContent = language === 'ja' ? 'EN' : 'JA';
         $('#languageButton').setAttribute('aria-label', language === 'ja' ? '英語に切り替え' : 'Switch to Japanese');
         $('#languageButton').title = language === 'ja' ? '英語に切り替え' : 'Switch to Japanese';
-        document.title = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name; $('#brandName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name; $('#footerName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;
+        document.title = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name; $('#brandName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name; $('#accessiblePageTitle').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name; $('#footerName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;
         renderColumns(); updatePresetUI();
         if (generatedRowCount) {
           renderPreview();
