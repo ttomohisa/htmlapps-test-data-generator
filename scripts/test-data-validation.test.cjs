@@ -52,7 +52,7 @@ test('the redundant hero heading and preview subtitle are absent in both languag
     const app = createApp(target, { language });
     assert.equal(app.el('heroTitle'), null);
     assert.equal(app.document.querySelector('[data-i18n="previewBody"]'), null);
-    assert.ok(app.document.querySelector('.page-intro [data-i18n="lead"]'));
+    assert.ok(app.document.querySelector('[data-i18n="lead"]'), 'the concise introduction remains');
     assert.equal(app.el('previewSection').getAttribute('aria-labelledby'), 'previewTitle');
   }
 });
