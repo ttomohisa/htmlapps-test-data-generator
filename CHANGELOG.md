@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Remove unnecessary default filename explanations in the Japanese and English save controls and Help, without changing filename fallback behavior.
+- Keep a visually hidden, localized main heading for assistive technology after simplifying the hero.
+- Add independent Parquet interoperability tests for all 23 types and malformed samples, expanded Shift_JIS/UTF-16 encoding checks, and mobile Firefox/WebKit offline smoke tests.
+
 - Remove the redundant hero title and preview subtitle in Japanese and English while keeping the concise introduction and preview row-count indicator.
 - After successful generation or same-Seed regeneration, move the viewport to the preview, with a sticky-header offset and reduced-motion support. Validation errors, failed workers and cancellations do not navigate.
 
