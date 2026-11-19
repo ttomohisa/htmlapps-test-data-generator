@@ -2076,7 +2076,7 @@
           renderPreview(); updateExportUI(); $('#seedHelp').textContent = `${translate('usedSeedLabel')} ${seed}`;
           $('#generateStatus').textContent = format('generated', { count: new Intl.NumberFormat(language).format(generatedRowCount) });
           // Navigate only after a successful generation, never on validation failure or cancellation.
-          $('#previewSection').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+          $('#previewSection').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
         };
         worker.onerror = () => {
           if (worker !== generationWorker) return; worker.terminate(); generationWorker = null; setGenerationBusy(false); $('#generateProgress').hidden = true; setError(translate('workerUnavailable'));
