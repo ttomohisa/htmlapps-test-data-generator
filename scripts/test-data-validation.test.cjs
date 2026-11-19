@@ -29,6 +29,33 @@ function expectRejected(app) {
   assert.equal(app.workers.length, 0, 'unsafe settings must not launch a worker');
   assert.ok(app.el('errorBanner').classList.contains('show'), 'invalid settings show a visible error');
 }
+test('successful generation scrolls to the preview, but invalid input and cancellation do not', () => {
+  const app = setup(3);
+  assert.equal(app.document.lastScrollIntoView, undefined);
+  generate(app);
+  assert.equal(app.document.lastScrollIntoView?.target, app.el('previewSection'));
+  assert.equal(app.document.lastScrollIntoView?.options.block, 'start');
+  assert.equal(app.document.lastScrollIntoView?.options.behavior, 'smooth');
+
+  const invalid = setup(3);
+  invalid.input(invalid.el('rowCount'), '0');
+  expectRejected(invalid);
+  assert.equal(invalid.document.lastScrollIntoView, undefined);
+
+  const cancelled = setup(3);
+  cancelled.el('generateButton').click();
+  cancelled.el('cancelGenerateButton').click();
+  assert.equal(cancelled.document.lastScrollIntoView, undefined);
+});
+test('the redundant hero heading and preview subtitle are absent in both languages', () => {
+  for (const language of ['ja', 'en']) {
+    const app = createApp(target, { language });
+    assert.equal(app.el('heroTitle'), null);
+    assert.equal(app.document.querySelector('[data-i18n="previewBody"]'), null);
+    assert.ok(app.document.querySelector('.page-intro [data-i18n="lead"]'));
+    assert.equal(app.el('previewSection').getAttribute('aria-labelledby'), 'previewTitle');
+  }
+});
 test('fractional interval with zero decimal places cannot silently generate outside the limits', () => {
   const app = setup();
   configure(app, 'decimal', { min: 0.1, max: 0.2, decimals: 0 });
