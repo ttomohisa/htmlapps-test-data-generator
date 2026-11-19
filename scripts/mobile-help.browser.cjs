@@ -60,6 +60,11 @@ async function prepareApp(page,width,label){
 async function smoke(page,results,file){
  await page.locator('#rowCount').fill('3');await page.locator('#seedInput').fill('mobile-help-regression');await page.locator('#generateButton').click();
  await page.waitForFunction(()=>!document.querySelector('#saveOutputButton').disabled);
+ await page.waitForFunction(() => {
+   const preview = document.querySelector('#previewSection').getBoundingClientRect();
+   const headerHeight = document.querySelector('.app-header').getBoundingClientRect().height;
+   return preview.top >= headerHeight - 3 && preview.top <= headerHeight + 24;
+ });
  await page.locator('#exportFormat').selectOption('json');await page.locator('#outputNameInput').fill('mobile-help-data');
  const pending=page.waitForEvent('download');await page.locator('#saveOutputButton').click();const download=await pending;assert.equal(download.suggestedFilename(),'mobile-help-data.json');
  const target=path.join(results,file.includes('self-extract')?'synthetic-loader.json':'synthetic-readable.json');await download.saveAs(target);const rows=JSON.parse(fs.readFileSync(target,'utf8'));assert.equal(rows.length,3);assert.ok(Object.keys(rows[0]).length>0);
@@ -164,8 +169,9 @@ async function main() {
             }
 
             await page.locator('#helpButton').click();
-            assert.equal(await page.locator('#heroTitle').innerText(),
-              language === 'ja' ? 'テストデータを作成' : 'Create test data', label + ': practical hero wording');
+            assert.equal(await page.locator('#heroTitle').count(), 0, label + ': redundant hero heading removed');
+            assert.equal(await page.locator('[data-i18n="previewBody"]').count(), 0, label + ': redundant preview description removed');
+            assert.ok((await page.locator('[data-i18n="lead"]').innerText()).length > 10, label + ': useful brief introduction remains');
             assert.ok((await page.locator('[data-i18n="generationSettingsBody"]').textContent()).includes('1,000,000'), label + ': visible row ceiling');
             assert.doesNotMatch(await page.locator('[data-i18n="generationSettingsBody"]').textContent(), new RegExp('v1[.]0[.]0'), label + ': no outdated release prefix');
             assert.equal(await page.locator('[data-i18n="helpReading"]').count(), 0, label + ': no redundant help reading guide');
