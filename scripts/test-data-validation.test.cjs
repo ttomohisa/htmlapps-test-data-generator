@@ -52,6 +52,8 @@ test('the redundant hero heading and preview subtitle are absent in both languag
     const app = createApp(target, { language });
     assert.equal(app.el('heroTitle'), null);
     assert.equal(app.document.querySelector('[data-i18n="previewBody"]'), null);
+    assert.ok(app.el('accessiblePageTitle').classList.contains('sr-only'), 'page retains an accessible, nonvisual H1');
+    assert.equal(app.el('accessiblePageTitle').textContent, language === 'ja' ? 'テストデータ生成' : 'Test Data Generator');
     assert.ok(app.document.querySelector('[data-i18n="lead"]'), 'the concise introduction remains');
     assert.equal(app.el('previewSection').getAttribute('aria-labelledby'), 'previewTitle');
   }
