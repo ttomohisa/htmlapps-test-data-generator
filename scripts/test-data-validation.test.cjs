@@ -56,6 +56,17 @@ test('the redundant hero heading and preview subtitle are absent in both languag
     assert.equal(app.el('previewSection').getAttribute('aria-labelledby'), 'previewTitle');
   }
 });
+test('bilingual file-name Help omits the unnecessary default-name explanation without changing behavior', () => {
+  for (const language of ['ja', 'en']) {
+    const app = createApp(target, { language });
+    const help = app.document.querySelector('[data-i18n="helpStep4"]').textContent;
+    const hint = app.el('outputFilenameHelp').textContent;
+    assert.ok(help.trim().endsWith(language === 'ja' ? '。' : '.'), language + ': Help ends in punctuation');
+    assert.ok(hint.trim().endsWith(language === 'ja' ? '。' : '.'), language + ': hint ends in punctuation');
+    assert.ok(!help.includes('test-data') && !hint.includes('test-data'), 'fallback filename copy is absent');
+    assert.equal(app.el('outputNameInput').value, 'test-data', 'the actual filename default remains unchanged');
+  }
+});
 test('fractional interval with zero decimal places cannot silently generate outside the limits', () => {
   const app = setup();
   configure(app, 'decimal', { min: 0.1, max: 0.2, decimals: 0 });
