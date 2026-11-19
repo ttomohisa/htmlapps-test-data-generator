@@ -56,6 +56,7 @@ function createApp(filename, options = {}) {
     setPointerCapture(id) { this.capture = id; }
     releasePointerCapture(id) { if (this.capture === id) { this.capture = null; this.dispatch('lostpointercapture', { pointerId: id }); } }
     getBoundingClientRect() { return { left: 0, top: 0, right: 600, bottom: 600, height: 60 }; }
+    scrollIntoView(options = {}) { document.lastScrollIntoView = { target: this, options }; }
     select() { this.setSelectionRange(0, this.value.length); } setSelectionRange(start, end, direction) { this.selectionStart = start; this.selectionEnd = end; this.selectionDirection = direction; }
     matches(selector) {
       if (selector.includes(',')) return selector.split(',').some(part => this.matches(part.trim()));
