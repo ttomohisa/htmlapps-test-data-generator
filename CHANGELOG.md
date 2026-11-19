@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Remove the redundant hero title and preview subtitle in Japanese and English while keeping the concise introduction and preview row-count indicator.
+- After successful generation or same-Seed regeneration, move the viewport to the preview, with a sticky-header offset and reduced-motion support. Validation errors, failed workers and cancellations do not navigate.
+
+
 - v1.1.0: Restore the original translucent header and rounded version badge.
 - Add local Parquet export with typed nullable columns and deterministic row-group output (currently uncompressed).
 - Add Shift_JIS / Windows-31J and UTF-16 LE with BOM to CSV and TSV exports; reject unrepresentable Shift_JIS characters rather than silently replacing them. JSON / JSONL remain UTF-8.
