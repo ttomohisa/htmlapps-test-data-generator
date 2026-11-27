@@ -4,7 +4,7 @@
 
 - **Name:** Test Data Generator / テストデータ生成
 - **Repository:** `ttomohisa/htmlapps-test-data-generator`
-- **Current version:** `1.1.0`
+- **Current version:** `1.2.0`
 - **Purpose:** Generate reproducible test data locally in the browser, including normal, missing, boundary, and invalid values.
 - **Release artifacts:** `dist/index.html` and `dist/index.self-extract.html`
 
@@ -103,7 +103,7 @@ v1.0.0 does not introduce a new schema-file field for templates: after a templat
 - Rows are limited to 1,000,000.
 - `rows × columns` is limited to 10,000,000 cells to avoid unsafe schemas such as 1,000,000 rows × 200 columns.
 - Generation runs in a Blob-backed Web Worker allowed by the existing `worker-src 'self' blob:` CSP.
-- The worker traverses every requested row but only posts the first 20 rows and aggregate test-value counts back to the page.
+- The worker traverses every requested row and returns the first 20 rows, aggregate test-value counts and up to five representative cells per test category.
 - The page stores an immutable generation snapshot (row count, Seed, columns, settings, and test rates).
 - Export starts a new Worker and regenerates from that snapshot, preserving deterministic output while avoiding a full in-page row array.
 - CSV / TSV / JSON / JSONL text is posted back in bounded chunks and assembled as a Blob for download.
@@ -120,7 +120,7 @@ v1.0.0 does not introduce a new schema-file field for templates: after a templat
 
 ## 11. Acceptance criteria
 
-- `app.config.json` and visible build information report `1.0.3`.
+- `app.config.json` and visible build information report `1.2.0`.
 - Header language switching shows the target language as `EN` in Japanese and `JA` in English, with localized aria-label/title (`英語に切り替え` / `Switch to Japanese`). The visible `vX.Y.Z` badge matches `app.config.json`; privacy remains `完全ローカル処理` / `Fully local processing`.
 - Seed placeholder remains `42`.
 - All 23 data types generate successfully in one schema.
@@ -211,3 +211,11 @@ The following remain future candidates rather than v1.0.0 requirements:
 - For CSV and TSV allow UTF-8, UTF-8 with BOM, Windows-31J (Shift_JIS), and UTF-16 LE with BOM. The Shift_JIS encoder maps native decoder results and rejects unrepresentable Unicode rather than replacing it. Existing quoting/newline settings remain valid across encodings.
 - JSON and JSONL remain UTF-8. Hide the encoding selector for JSON, JSONL, and Parquet; hide line-ending selector for Parquet. Parquet string values are UTF-8.
 - Test every standalone variant for output bytes, MIME/extension, encoded Japanese characters, BOM, no-data-loss failure, deterministic Parquet files and file-size limits. Independently decode Parquet with a pinned, CI-only hyparquet reader prior to release.
+
+## 19. v1.2.0 testing workflow
+
+- The preview counts are measured in cells across the entire dataset. Selecting a category displays its first five matching cells in row and column order, with 1-based data row numbers, literal column names and JSON-formatted values. Editing settings or regenerating clears the old examples. Copy preview still covers the first 20 data rows.
+- Invalid column settings have localized messages and identify the field that needs attention. When a valid set of individual percentages exceeds 100% in total, show the actual total and excess. Generating with errors focuses the first relevant input.
+- An applied template offers generation next to its selection control, with the template name and current row and column counts. It uses the ordinary validation, cancellation, generation and preview workflow. Choosing another template still requires applying it.
+- Kana columns can select a Japanese name source in any position. Normal name and kana values are projections of the same person. Kana part and script are selectable; explicit missing/invalid modes override individual cells. A source rename or reorder preserves its links. Removing or changing the source to a different type yields independent kana. Undoing a deletion restores the link in the editor unless a different source was chosen.
+- A version-1 settings file may contain a zero-based `settings.sourceColumn` on a kana column. It must point to a Japanese name column. Independent columns omit the property and reproduce the original seeded output. Preview and all five exports use the same relationship.

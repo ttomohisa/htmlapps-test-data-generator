@@ -3,7 +3,7 @@
   "name": "Test Data Generator",
   "nameJa": "テストデータ生成",
   "slug": "test-data-generator",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Generate reproducible test data locally with 23 data types, missing/boundary/invalid values, templates, CSV / TSV / JSON / JSONL / Parquet export, and UTF-8 / Windows-31J / UTF-16 LE text encoding.",
   "descriptionJa": "23種類のデータ、Seedによる再現、欠損・境界・異常値、テンプレート、CSV・TSV・JSON・JSONL・Parquet保存、UTF-8・Shift_JIS・UTF-16 LEの文字コードに対応したブラウザー内のテストデータ生成ツールです。",
   "defaultLanguage": "auto",

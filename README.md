@@ -54,16 +54,16 @@ A local-first browser tool for generating reproducible test data. Along with nor
 - Fully local processing with runtime network connections blocked by CSP.
 - Readable single-HTML build plus optional gzip self-extracting single-HTML build.
 
-In v1.0.0, Japanese fields remain independent: for example, a generated name and email are not linked to the same person. Templates provide column layouts only; they do not create cross-column relationships. See [APP_SPEC.md](APP_SPEC.md).
+To generate matching Japanese names and readings, add a Japanese name column and choose it as the name source in a kana column. You can reorder the two columns and select hiragana or katakana. Other Japanese fields, including email, are generated independently.
 
 ## Usage
 
 1. Enter the number of rows and an optional Seed.
 2. Choose a test mix preset if needed.
-3. Optionally apply a User, Customer, Employee, or other built-in template.
+3. Optionally apply a built-in template. Check its row and column counts, then choose **Generate with these settings** to go straight to the preview.
 4. Adjust column names, data types, and test-value rates, then add, duplicate, delete, or reorder columns as needed.
-5. Select **Generate data**. A blank Seed is created automatically.
-6. Review the first 20 generated rows, test-value badges, and the Seed used. **Copy preview as JSON** copies only these rows, including numbers and missing-value `null`s. Save a JSON file for all rows or previews larger than 1 MiB.
+5. Select **Generate data**. A blank Seed is created automatically. If a setting is invalid, focus moves to the field to correct. For a test mix over 100%, the message shows how many percentage points to remove.
+6. Review the first 20 rows. Select a Missing, Boundary, or Invalid count to inspect up to five examples of that kind from the entire dataset, with row numbers, column names, and values. **Copy preview as JSON** copies only these rows, including numbers and missing-value `null`s. Save a JSON file for all rows or previews larger than 1 MiB.
 7. Choose an output format and filename, then save the generated file.
 8. Use **Save settings file** if you want to keep the row count, Seed, and column schema for later.
 

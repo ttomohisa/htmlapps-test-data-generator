@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### v1.2.0
+
+- Inspect up to five missing, boundary, or invalid cells per category, including examples beyond the first 20 rows.
+- Show column validation messages beside the affected inputs and focus the first field to correct when generation is requested.
+- Generate directly from an applied template, with its current dimensions shown beside the action.
+- Optionally link a kana column to a Japanese name column across previews, exports and saved settings.
+
+### Earlier changes
+
 - Remove unnecessary default filename explanations in the Japanese and English save controls and Help, without changing filename fallback behavior.
 - Keep a visually hidden, localized main heading for assistive technology after simplifying the hero.
 - Add independent Parquet interoperability tests for all 23 types and malformed samples, expanded Shift_JIS/UTF-16 encoding checks, and mobile Firefox/WebKit offline smoke tests.

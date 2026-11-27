@@ -1,0 +1,51 @@
+'use strict';
+const assert = require('node:assert/strict');
+const { createApp } = require('./test-data-harness.cjs');
+
+async function run() {
+  const app = createApp(process.argv[2] || 'src/index.template.html', { language: 'ja' });
+  const action = app.el('templateAction');
+  assert.ok(action, 'An applied template has an adjacent action area');
+  assert.equal(action.hidden, true);
+  const select = app.el('templateSelect');
+  const choose = name => { select.value = name; select.dispatch('change'); };
+  choose('order');
+  app.el('applyTemplateButton').click();
+  app.el('appConfirmCancel').click();
+  await app.settle();
+  assert.equal(action.hidden, true);
+  app.el('applyTemplateButton').click();
+  app.el('appConfirmOk').click();
+  await app.settle();
+  assert.equal(action.hidden, false);
+  assert.equal(app.el('templateSummary').textContent, '注文 · 7列 · 100件');
+  app.input(app.el('rowCount'), '12');
+  app.input(app.el('seedInput'), 'quick-order');
+  assert.equal(app.el('templateSummary').textContent, '注文 · 7列 · 12件');
+  app.el('languageButton').click();
+  assert.equal(app.el('templateSummary').textContent, 'Order · 7 columns · 12 rows');
+  const generate = app.el('templateGenerateButton');
+  generate.click();
+  assert.equal(generate.disabled, true);
+  assert.equal(app.el('templateCancelButton').hidden, false);
+  const worker = app.workers.at(-1);
+  assert.equal(worker.message.snapshot.rowCount, 12);
+  assert.equal(worker.message.snapshot.seed, 'quick-order');
+  assert.equal(worker.message.snapshot.columns[0].name, 'order_id');
+  app.el('templateCancelButton').click();
+  assert.equal(worker.terminated, true);
+  assert.equal(generate.disabled, false);
+  generate.click();
+  app.complete();
+  assert.equal(app.el('previewBodyRows').children.length, 12);
+  assert.equal(app.el('saveOutputButton').disabled, false);
+  choose('customer');
+  assert.equal(action.hidden, true, 'A pending selection cannot generate the previous template');
+  choose('order');
+  assert.equal(action.hidden, false);
+  app.el('addColumnButton').click();
+  assert.equal(action.hidden, true, 'A customized layout no longer presents the original template summary');
+  console.log('PASS template confirmation, localized summary, row edits, generation, cancellation and stale actions.');
+}
+
+run().catch(error => { console.error(error); process.exitCode = 1; });
