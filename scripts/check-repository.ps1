@@ -262,6 +262,10 @@ foreach ($target in @("src/index.template.html", "dist/index.html", "dist/index.
 foreach ($target in @("src/index.template.html", "dist/index.html", "dist/index.self-extract.html", "test-data-generator.html")) {
   & node (Join-Path $Root "scripts/test-data-formats.test.cjs") (Join-Path $Root $target)
   if ($LASTEXITCODE -ne 0) { throw "Parquet and character encoding tests failed: $target" }
+  foreach ($suite in @("examples", "column-errors", "template-action", "linked-kana")) {
+    & node (Join-Path $Root "scripts/test-data-$suite.test.cjs") (Join-Path $Root $target)
+    if ($LASTEXITCODE -ne 0) { throw "Workflow regression failed for $suite in $target" }
+  }
 }
 & node --test (Join-Path $Root "tests/release-workflow.test.cjs")
 if ($LASTEXITCODE -ne 0) { throw "Release workflow and editor copy checks failed." }

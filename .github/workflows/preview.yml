@@ -56,6 +56,8 @@ jobs:
         New-Item -ItemType Directory -Force -Path test-results/mobile-help | Out-Null
         node scripts/mobile-help.browser.cjs 2>&1 | Tee-Object -FilePath test-results/mobile-help/results.log
         if ($LASTEXITCODE -ne 0) { throw "Mobile Help browser regression failed." }
+        node scripts/test-data-workflow.browser.cjs
+        if ($LASTEXITCODE -ne 0) { throw "Test data workflow browser regression failed." }
         node scripts/cross-browser.browser.cjs 2>&1 | Tee-Object -FilePath test-results/mobile-help/cross-browser.log
         if ($LASTEXITCODE -ne 0) { throw "Firefox/WebKit offline and export regression failed." }
     - name: Upload mobile Help browser evidence
